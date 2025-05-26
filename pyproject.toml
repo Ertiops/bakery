@@ -1,0 +1,87 @@
+[tool.poetry]
+name = "bakery_bot"
+version = "0.1.0"
+description = ""
+authors = [
+    "Eljan T <straxisrule@gmail.com>"
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiomisc = {extras = ["aiohttp", "asgiref", "croniter"], version = "^17.5.24"}
+aiomisc-dependency = "^0.1.20"
+aiogram = "^3.15.0"
+httpx = "^0.28.1"
+types-requests = "^2.32.0.20241016"
+dishka = "^1.4.2"
+asyncly = "^0.3.3"
+msgspec = "^0.18.6"
+
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.4.9"
+mypy = "^1.10.0"
+pre-commit = "^3.7.1"
+types-passlib = "^1.7.7.20240327"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+line-length = 88
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+]
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = [
+    "BLE",
+    "C90",
+    "E",
+    "F",
+    "G",
+    "I",
+    "ICN",
+    "ISC",
+    "PLE",
+    "Q",
+    "RUF006",
+    "RUF100",
+    "T10",
+    "T20",
+    "TID",
+    "UP",
+    "W",
+]
+ignore = ["ISC001"]
+fixable = ["ALL"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["challenge_bot"]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = false
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = [
+    "py_expression_eval.*",
+]
+ignore_missing_imports = true

@@ -1,0 +1,1 @@
+This Telegram bot's aim to manage business-processes of home-based bakery
