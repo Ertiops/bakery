@@ -3,14 +3,14 @@ import logging
 from aiomisc import Service, entrypoint
 from aiomisc_log import LogFormat, LogLevel, basic_config
 
-from bakery_bot.common.config import Config
+from bakery_bot.application.config import AppConfig
 from bakery_bot.presenters.bot.service import TelegramBotService
 
 log = logging.getLogger(__name__)
 
 
 def main() -> None:
-    config = Config()
+    config = AppConfig()
 
     basic_config()
 

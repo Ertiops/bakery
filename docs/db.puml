@@ -1,0 +1,67 @@
+@startuml
+' Enable stereotype to show icons
+skinparam stereotypeCBackgroundColor #DDDDDD
+skinparam class {
+    BackgroundColor #F8F8F8
+    BorderColor #333333
+    ArrowColor #333333
+}
+
+class "UserTable" as UserTable {
+    + __tablename__ = "users"
+    --
+    + name: Mapped[str]
+    + tg_id: Mapped[str]
+    + phone: Mapped[str]
+    + role: Mapped[UserRole]
+}
+
+class "BaseTable" as BaseTable {
+    + metadata: MetaData
+}
+
+class "TimestampedMixin" as TimestampedMixin {
+    + created_at: Mapped[datetime]
+    + updated_at: Mapped[datetime]
+    + deleted_at: Mapped[datetime | None]
+}
+
+class "IdentifableMixin" as IdentifiableMixin {
+    + id: Mapped[uuid.UUID]
+}
+
+class "UserRole" as UserRole << (E, #FF7700) Enum >> {
+    + ADMIN = "admin"
+    + USER = "user"
+}
+
+UserTable --|> BaseTable
+UserTable --|> TimestampedMixin
+UserTable --|> IdentifiableMixin
+UserTable --> UserRole : role type
+
+note top of UserTable
+    Columns:
+    - name: String(63), not null
+    - tg_id: Integer, not null, unique
+    - phone: String(16), not null, unique
+    - role: UserRole enum
+end note
+
+note bottom of TimestampedMixin
+    created_at: DateTime(timezone=True)
+    updated_at: DateTime(timezone=True)
+    deleted_at: DateTime(timezone=True), nullable
+end note
+
+note bottom of IdentifiableMixin
+    id: PGUUID(as_uuid=True)
+    primary_key=True
+    default=uuid.uuid4
+end note
+
+note right of UserRole
+    @unique
+    StrEnum
+end note
+@enduml

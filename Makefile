@@ -25,6 +25,22 @@ develop: clean_dev  ## Create project virtual environment
 	$(POETRY) install
 	$(POETRY) run pre-commit install
 
+
+local: ##@Develop Run dev containers for test
+	docker compose -f docker-compose.dev.yaml up --force-recreate --renew-anon-volumes --build
+
+local_down: ##@Develop Stop dev containers with delete volumes
+	docker compose -f docker-compose.dev.yaml down -v
+
+local-create-migrations:
+	.venv/bin/python -m $(PROJECT_NAME).adapters.database revision --autogenerate
+
+local-apply-migrations:
+	.venv/bin/python -m $(PROJECT_NAME).adapters.database upgrade head
+
+local-delete-migrations:
+	find $(PROJECT_NAME)/adapters/database/migrations/versions -type f ! -name '__init__.py' -delete
+
 test: ## Run tests
 	$(POETRY) run $(PYTEST) -vx $(TEST_PATH)
 
@@ -41,7 +57,7 @@ clean_pycache: ## Remove Python cache directories
 	find . -type d -name __pycache__ -exec rm -r {} \+
 
 app: ## Start the bot application
-	.venv/bin/python -m challenge_bot
+	.venv/bin/python -m bakery_bot
 
 
 prod: ## Suild and start production image
