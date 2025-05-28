@@ -1,4 +1,4 @@
-PROJECT_NAME = challenge_bot
+PROJECT_NAME = bakery
 TEST_PATH = ./tests
 
 PIP = .venv/bin/pip
@@ -56,8 +56,8 @@ clean_dev: ## Clean up development environment
 clean_pycache: ## Remove Python cache directories
 	find . -type d -name __pycache__ -exec rm -r {} \+
 
-app: ## Start the bot application
-	.venv/bin/python -m bakery_bot
+app: ## Start the application
+	.venv/bin/python -m bakery
 
 
 prod: ## Suild and start production image

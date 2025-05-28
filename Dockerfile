@@ -14,10 +14,10 @@ COPY poetry.lock poetry.lock
 RUN poetry install --no-interaction --no-ansi --no-root --without dev
 
 COPY .env .env
-COPY ./bakery_bot ./bakery_bot
+COPY ./bakery ./bakery
 
 EXPOSE 8000
 
 ENV APP_WORKERS=1
 
-CMD ["python", "-m", "bakery_bot"]
+CMD ["python", "-m", "bakery"]

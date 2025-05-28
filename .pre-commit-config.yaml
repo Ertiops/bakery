@@ -34,7 +34,7 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: mypy ./bakery_bot --config-file ./pyproject.toml
+        entry: mypy ./bakery --config-file ./pyproject.toml
         language: python
         language_version: python3.12
         require_serial: true
