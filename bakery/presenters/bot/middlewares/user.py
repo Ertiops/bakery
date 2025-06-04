@@ -50,24 +50,3 @@ class UserRoleMiddleware(BaseMiddleware):
         current_user: User | None = data.get("current_user")
         if current_user and current_user.role in self.accessed_roles:
             return await handler(event, data)
-
-
-# class UserAccountStatusMiddleware(BaseMiddleware):
-#     accessed_account_statuses: Sequence[AccountStatus]
-
-#     def __init__(self, accessed_account_statuses: Sequence[AccountStatus]) -> None:
-#         super().__init__()
-#         self.accessed_account_statuses = accessed_account_statuses
-
-#     async def __call__(
-#         self,
-#         handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
-#         event: TelegramObject,
-#         data: dict[str, Any],
-#     ) -> Any:
-#         current_user: User | None = data.get("current_user")
-#         if (
-#             current_user
-#             and current_user.account_status in self.accessed_account_statuses
-#         ):
-#             return await handler(event, data)

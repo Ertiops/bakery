@@ -16,13 +16,6 @@ def main() -> None:
 
     services: list[Service] = [
         TelegramBotService(config=config),
-        # UserQuestionCronService(config=config),
-        # EventReportCronService(config=config),
-        # WorkingOffReportCronService(config=config),
-        # AbsenceReportService(config=config),
-        # CleanReportCronService(config=config),
-        # SendingMessageCronService(config=config),
-        # PracticeFeedbackCronService(config=config),
     ]
 
     with entrypoint(
