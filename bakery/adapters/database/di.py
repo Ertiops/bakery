@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator
 from dishka import AnyOf, BaseScope, Component, Provider, Scope, provide
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
+from bakery.adapters.database.config import DatabaseConfig
 from bakery.adapters.database.storages.user import UserStorage
 from bakery.adapters.database.uow import SqlalchemyUow
 from bakery.adapters.database.utils import create_engine, create_sessionmaker
@@ -13,13 +14,12 @@ from bakery.domains.uow import AbstractUow
 class DatabaseProvider(Provider):
     def __init__(
         self,
-        dsn: str,
-        debug: bool,
+        config: DatabaseConfig,
         scope: BaseScope | None = None,
         component: Component | None = None,
     ) -> None:
-        self.dsn = dsn
-        self.debug = debug
+        self.dsn = config.dsn
+        self.debug = config.debug
         super().__init__(scope=scope, component=component)
 
     @provide(scope=Scope.APP)

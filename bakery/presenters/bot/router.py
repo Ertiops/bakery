@@ -1,9 +1,19 @@
 from aiogram import Router
+from aiogram.filters import Command
 
-from bakery.presenters.bot.handlers import router as bot_router
+from bakery.presenters.bot.commands.utils import (
+    Commands,
+    start_command,
+)
+from bakery.presenters.bot.dialogs import (
+    registration,
+)
 
 
-def register_routers(router: Router) -> None:
-    my_router = Router()
-    my_router.include_routers(bot_router)
-    router.include_router(my_router)
+def register_dialogs(router: Router) -> None:
+    dialog_router = Router()
+    dialog_router.message(Command(Commands.START))(start_command)
+    dialog_router.include_router(
+        registration.user_registration_dialog,
+    )
+    router.include_router(dialog_router)
