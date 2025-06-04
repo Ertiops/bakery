@@ -37,8 +37,10 @@ class UserList:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class CreateUser(ToDictMixin):
-    username: str
-    email: str
+    name: str
+    tg_id: int
+    phone: str
+    role: UserRole
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -47,3 +49,4 @@ class UpdateUser(ToDictMixin):
     name: str | Unset = UNSET
     tg_id: int | Unset = UNSET
     phone: str | Unset = UNSET
+    role: UserRole | Unset = UNSET

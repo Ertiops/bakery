@@ -8,3 +8,9 @@ services:
       - POSTGRES_USER=bakery
       - POSTGRES_PASSWORD=bakery
       - POSTGRES_DB=bakery
+
+  redis:
+      image: redis:latest
+      restart: unless-stopped
+      ports:
+        - 6379:6379

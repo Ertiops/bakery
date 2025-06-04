@@ -42,6 +42,13 @@ class UserStorage(IUserStorage):
         result = await self.__session.scalar(stmt)
         return convert_user_table_to_dto(result=result) if result else None
 
+    async def get_by_tg_id(self, *, input_id: int) -> User | None:
+        stmt = select(UserTable).where(
+            UserTable.tg_id == input_id, UserTable.deleted_at.is_(None)
+        )
+        result = await self.__session.scalar(stmt)
+        return convert_user_table_to_dto(result=result) if result else None
+
     async def get_list(self, *, input_dto: UserListParams) -> Sequence[User]:
         stmt = (
             select(UserTable)
@@ -92,8 +99,8 @@ class UserStorage(IUserStorage):
     def __raise_exception(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
         match constraint:
-            case "uq__users__username":
-                raise EntityAlreadyExistsException("Username already exists") from e
-            case "uq__users__email":
-                raise EntityAlreadyExistsException("Email already exists") from e
+            case "ix__users__tg_id_phone":
+                raise EntityAlreadyExistsException(
+                    "User with such tg_id and phone already exists"
+                )
         raise StorageException(self.__class__.__name__) from e

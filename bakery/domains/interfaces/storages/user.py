@@ -21,6 +21,10 @@ class IUserStorage(Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    async def get_by_tg_id(self, *, input_id: int) -> User | None:
+        raise NotImplementedError
+
+    @abstractmethod
     async def get_list(self, *, input_dto: UserListParams) -> Sequence[User]:
         raise NotImplementedError
 
