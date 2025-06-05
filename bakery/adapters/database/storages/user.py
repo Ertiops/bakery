@@ -99,8 +99,12 @@ class UserStorage(IUserStorage):
     def __raise_exception(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name  # type: ignore[union-attr]
         match constraint:
-            case "ix__users__tg_id_phone":
+            case "ix__users__phone":
                 raise EntityAlreadyExistsException(
-                    "User with such tg_id and phone already exists"
+                    "User with such phone already exists"
+                )
+            case "ix__users__tg_id":
+                raise EntityAlreadyExistsException(
+                    "User with such tg_id already exists"
                 )
         raise StorageException(self.__class__.__name__) from e

@@ -13,6 +13,11 @@ class UserTable(BaseTable, TimestampedMixin, IdentifableMixin):
         Index(
             None,
             "tg_id",
+            unique=True,
+            postgresql_where="deleted_at IS NULL",
+        ),
+        Index(
+            None,
             "phone",
             unique=True,
             postgresql_where="deleted_at IS NULL",
@@ -20,6 +25,6 @@ class UserTable(BaseTable, TimestampedMixin, IdentifableMixin):
     )
 
     name: Mapped[str] = mapped_column(String(63), nullable=False)
-    tg_id: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
-    phone: Mapped[str] = mapped_column(String(16), nullable=False, unique=True)
+    tg_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    phone: Mapped[str] = mapped_column(String(16), nullable=False)
     role: Mapped[UserRole] = mapped_column(make_pg_enum(UserRole, name="user_role"))
