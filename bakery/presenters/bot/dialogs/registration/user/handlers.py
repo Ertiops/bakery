@@ -26,8 +26,8 @@ async def name_input_handler(
 ) -> None:
     if not message.text:
         return
-    if re.match(r"^[A-ZА-ЯЁ][^0-9]*$", message.text):
-        dialog_manager.dialog_data["name"] = message.text
+    if re.match(r"^[А-Яа-яЁё]{2,63}$", message.text):
+        dialog_manager.dialog_data["name"] = message.text.capitalize()
     else:
         await message.answer(user_msg.NAME_INPUT_INVALID)
         return

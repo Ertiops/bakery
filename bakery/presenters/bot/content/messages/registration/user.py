@@ -1,9 +1,7 @@
 from typing import Final
 
 NAME_INPUT: Final = "Введите имя"
-NAME_INPUT_INVALID: Final = (
-    "Имя должно начинаться с заглавной буквы и не содержать цифры"
-)
+NAME_INPUT_INVALID: Final = "Имя должно писаться кириллицей"
 
 PHONE_SHARE: Final = 'Нажмите кнопку "Поделиться номером"'
 PHONE_SHARE_INVALID: Final = "Отсутствует номер телефона"

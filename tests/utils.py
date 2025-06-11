@@ -13,8 +13,8 @@ from sqlalchemy.ext.asyncio import (
     async_engine_from_config,
 )
 
-TABLES_FOR_TRUNCATE: Sequence[str] = ("users",)
-TYPES_FOR_TRUNCATE: Sequence[str] = ()
+TABLES_FOR_TRUNCATE: Sequence[str] = ("users", "products", "orders")
+TYPES_FOR_TRUNCATE: Sequence[str] = ("product_category", "order_status")
 
 
 async def truncate_tables(engine: AsyncEngine) -> None:
