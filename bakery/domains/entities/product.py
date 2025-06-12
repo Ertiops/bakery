@@ -12,7 +12,8 @@ class ProductCategory(StrEnum):
     BREAD = "bread"
     OIL = "oil"
     FLOUR = "flour"
-    SNACK = "snack"
+    DESSERT = "dessert"
+    NOODLE = "noodle"
     OTHER = "other"
 
 

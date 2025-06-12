@@ -7,9 +7,8 @@ from aiogram_dialog import DialogManager
 
 from bakery.domains.entities.user import User, UserRole
 from bakery.presenters.bot.content.messages.utils import ADMIN_GREETING, USER_HELP
-from bakery.presenters.bot.dialogs.states import AdminCatalogue
+from bakery.presenters.bot.dialogs.states import AdminMain
 from bakery.presenters.bot.keyboards.main_menu import (
-    get_admin_main_menu_kb,
     get_user_main_menu_kb,
 )
 
@@ -41,10 +40,8 @@ async def start_command(message: Message, dialog_manager: DialogManager) -> None
     if user is None or user.role == UserRole.USER:
         await message.answer(USER_HELP, reply_markup=get_user_main_menu_kb())
     elif user and user.role == UserRole.ADMIN:
-        await message.answer(
-            ADMIN_GREETING.format(name=user.name),
-            reply_markup=get_admin_main_menu_kb(),
-        )
+        await message.answer(ADMIN_GREETING.format(name=user.name))
+        await dialog_manager.start(AdminMain.menu)
 
 
 async def help_command(message: Message, dialog_manager: DialogManager) -> None:
@@ -53,10 +50,6 @@ async def help_command(message: Message, dialog_manager: DialogManager) -> None:
     user: User | None = dialog_manager.middleware_data["current_user"]
     if user is None or user.role == UserRole.USER:
         pass
-
-
-async def enter_catalog(message: Message, dialog_manager: DialogManager) -> None:
-    await dialog_manager.start(AdminCatalogue.select_category)
 
 
 # async def start_menu(user: User | None, dialog_manager: DialogManager) -> None:

@@ -12,5 +12,5 @@ async def on_category_selected(
 ) -> None:
     await manager.start(
         state=AdminCatalogue.view_products,
-        data={"category": item_id},  # <-- ВАЖНО: передаём category сюда
+        data={"category": item_id},
     )

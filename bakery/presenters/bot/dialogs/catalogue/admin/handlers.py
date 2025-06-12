@@ -124,7 +124,6 @@ async def on_create_product(
 
     await callback.message.answer("✅ Товар успешно добавлен!")
 
-    # Устанавливаем категорию в dialog_data для корректного возврата
     manager.dialog_data["category"] = category.value
     await manager.switch_to(AdminCatalogue.view_products)
 
@@ -140,21 +139,6 @@ async def on_cancel_product_creation(
     await manager.switch_to(AdminCatalogue.view_products)
 
 
-async def go_back_to_list(
-    callback: CallbackQuery, button: Button, manager: DialogManager
-) -> None:
-    category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore
-    if category is None:
-        await callback.answer("Категория не найдена", show_alert=True)
-        return
-
-    await manager.start(
-        state=AdminCatalogue.view_products,
-        data={"category": category},
-        mode=StartMode.NORMAL,  # или STACK, если надо вернуть стек
-    )
-
-
 async def on_view_product_clicked(
     callback: CallbackQuery,
     widget: Any,
@@ -164,7 +148,7 @@ async def on_view_product_clicked(
     category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore
     manager.dialog_data["product_id"] = item_id
     if category:
-        manager.dialog_data["category"] = category  # сохраняем явно
+        manager.dialog_data["category"] = category
 
     await manager.start(
         state=AdminCatalogue.view_single_product,
