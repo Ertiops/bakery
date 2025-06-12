@@ -1,7 +1,7 @@
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 
-from bakery.presenters.bot.content.buttons import admin_main_menu as admin_menu_btn
-from bakery.presenters.bot.content.buttons import user_main_menu as user_menu_btn
+from bakery.presenters.bot.content.buttons.main_menu import admin as admin_menu_btn
+from bakery.presenters.bot.content.buttons.main_menu import user as user_menu_btn
 
 
 def get_user_main_menu_kb() -> ReplyKeyboardMarkup:

@@ -1,6 +1,6 @@
 from typing import Final
 
-from bakery.presenters.bot.content.buttons import user_main_menu as user_menu_btn
+from bakery.presenters.bot.content.buttons.main_menu import user as user_menu_btn
 
 USER_HELP: Final = "\n".join(
     [

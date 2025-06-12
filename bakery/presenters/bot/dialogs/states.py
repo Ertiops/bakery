@@ -8,6 +8,10 @@ class RegistrationMenu(StatesGroup):
     phone_share = State()
 
 
+class AdminMain(StatesGroup):
+    menu = State()
+
+
 class AdminCatalogue(StatesGroup):
     select_category = State()
     view_products = State()
