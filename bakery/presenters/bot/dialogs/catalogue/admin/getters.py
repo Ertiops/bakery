@@ -4,7 +4,7 @@ from uuid import UUID
 
 from aiogram_dialog.api.protocols import DialogManager
 
-from bakery.domains.entities.product import Product, ProductListParams
+from bakery.domains.entities.product import Product, ProductCategory, ProductListParams
 from bakery.domains.services.product import ProductService
 from bakery.domains.uow import AbstractUow
 
@@ -18,11 +18,16 @@ async def get_products_data(
         AbstractUow
     )
     service: ProductService = await container.get(ProductService)
-
-    category = dialog_manager.dialog_data.get("category")
+    category: str = dialog_manager.dialog_data.get(  # type: ignore
+        "category"
+    ) or dialog_manager.start_data.get("category")  # type: ignore[union-attr]
+    if category:
+        dialog_manager.dialog_data["category"] = category
     async with uow:
         product_list = await service.get_list(
-            input_dto=ProductListParams(category=category, limit=50, offset=0)
+            input_dto=ProductListParams(
+                category=ProductCategory(category), limit=50, offset=0
+            )
         )
     return {"products": product_list.items}
 

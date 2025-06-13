@@ -90,42 +90,25 @@ async def on_create_product(
     if callback.message is None:
         return
 
-    category_raw = manager.start_data.get("category") or manager.dialog_data.get(  # type: ignore
+    category: str = manager.start_data.get("category") or manager.dialog_data.get(  # type: ignore
         "category"
     )
-    if not category_raw:
-        await callback.message.answer("⚠️ Категория не указана.")
-        return
-
-    try:
-        category = ProductCategory(category_raw)
-    except ValueError:
-        await callback.message.answer("⚠️ Некорректная категория.")
-        return
-
     container = manager.middleware_data["dishka_container"]
     service: ProductService = await container.get(ProductService)
     uow: AbstractUow = await container.get(AbstractUow)
-
     async with uow:
-        await service.create(
+        product = await service.create(
             input_dto=CreateProduct(
                 name=manager.dialog_data["name"],
                 description=manager.dialog_data["description"],
-                category=category,
+                category=ProductCategory(category),
                 price=manager.dialog_data["price"],
-                weight=0,
-                volume=0,
-                protein=0,
-                fat=0,
-                carbohydrate=0,
             )
         )
-
-    await callback.message.answer("✅ Товар успешно добавлен!")
-
-    manager.dialog_data["category"] = category.value
-    await manager.switch_to(AdminCatalogue.view_products)
+    await manager.start(
+        AdminCatalogue.view_single_product,
+        data=dict(product_id=str(product.id), category=category),
+    )
 
 
 async def on_cancel_product_creation(
@@ -133,7 +116,6 @@ async def on_cancel_product_creation(
 ) -> None:
     if callback.message is None:
         return
-    await callback.message.answer("❌ Создание товара отменено")
     category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore
     manager.dialog_data["category"] = category
     await manager.switch_to(AdminCatalogue.view_products)
