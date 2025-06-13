@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: e6483155a0ee
+Revision ID: f85fcf8eb7f1
 Revises:
-Create Date: 2025-06-11 21:15:13.767274
+Create Date: 2025-06-13 07:36:16.751883
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "e6483155a0ee"
+revision: str = "f85fcf8eb7f1"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -50,20 +50,21 @@ def upgrade() -> None:
     )
     op.create_table(
         "products",
-        sa.Column("name", sa.String(length=256), nullable=False),
+        sa.Column("name", sa.String(length=128), nullable=False),
         sa.Column("description", sa.String(length=1024), nullable=False),
         sa.Column(
             "category",
             postgresql.ENUM(
-                "bread", "oil", "flour", "snack", "other", name="product_category"
+                "bread",
+                "oil",
+                "flour",
+                "dessert",
+                "noodle",
+                "other",
+                name="product_category",
             ),
             nullable=False,
         ),
-        sa.Column("weight", sa.Integer(), nullable=False),
-        sa.Column("volume", sa.Integer(), nullable=False),
-        sa.Column("protein", sa.Integer(), nullable=False),
-        sa.Column("fat", sa.Integer(), nullable=False),
-        sa.Column("carbohydrate", sa.Integer(), nullable=False),
         sa.Column("price", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",

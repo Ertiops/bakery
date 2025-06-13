@@ -22,11 +22,6 @@ class CreateProduct(ToDictMixin):
     name: str
     description: str
     category: ProductCategory
-    weight: int
-    volume: int
-    protein: int
-    fat: int
-    carbohydrate: int
     price: int
 
 
@@ -36,11 +31,6 @@ class Product:
     name: str
     description: str
     category: ProductCategory
-    weight: int
-    volume: int
-    protein: int
-    fat: int
-    carbohydrate: int
     price: int
     created_at: datetime
     updated_at: datetime
@@ -51,13 +41,8 @@ class UpdateProduct(ToDictMixin):
     id: UUID
     name: str
     description: str
-    category: ProductCategory
-    weight: int
-    volume: int
-    protein: int
-    fat: int
-    carbohydrate: int
     price: int
+    category: ProductCategory
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)

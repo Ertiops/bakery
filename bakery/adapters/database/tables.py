@@ -45,17 +45,12 @@ class ProductTable(BaseTable, TimestampedMixin, IdentifableMixin):
         ),
     )
 
-    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
     description: Mapped[str] = mapped_column(String(1024), nullable=False)
     category: Mapped[ProductCategory] = mapped_column(
         make_pg_enum(ProductCategory, name="product_category"),
         nullable=False,
     )
-    weight: Mapped[int] = mapped_column(Integer, nullable=False)
-    volume: Mapped[int] = mapped_column(Integer, nullable=False)
-    protein: Mapped[int] = mapped_column(Integer, nullable=False)
-    fat: Mapped[int] = mapped_column(Integer, nullable=False)
-    carbohydrate: Mapped[int] = mapped_column(Integer, nullable=False)
     price: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
