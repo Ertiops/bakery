@@ -23,12 +23,20 @@ from bakery.presenters.bot.dialogs.catalogue.admin.getters import (
 from bakery.presenters.bot.dialogs.catalogue.admin.handlers import (
     on_add_clicked,
     on_cancel_product_creation,
+    on_cancel_update,
     on_create_product,
     on_delete_clicked,
     on_description_input,
-    on_edit_clicked,
     on_name_input,
     on_price_input,
+    on_skip_description,
+    on_skip_name,
+    on_skip_price,
+    on_update_clicked,
+    on_update_description_input,
+    on_update_name_input,
+    on_update_price_input,
+    on_update_product,
     on_view_product_clicked,
 )
 from bakery.presenters.bot.dialogs.catalogue.admin.redirections import (
@@ -125,10 +133,57 @@ def product_card_window() -> Window:
     return Window(
         Format(admin_catalogue_msg.PRODUCT_CARD),
         Row(
-            Button(Const(common_btn.EDIT), id="edit", on_click=on_edit_clicked),
+            Button(Const(common_btn.EDIT), id="update", on_click=on_update_clicked),
             Button(Const(common_btn.DELETE), id="delete", on_click=on_delete_clicked),
         ),
         Button(Const(common_btn.BACK), id="back", on_click=to_product_list),
         state=AdminCatalogue.view_single_product,
         getter=get_selected_product,
     )
+
+
+def update_product_windows() -> list[Window]:
+    return [
+        Window(
+            Const(admin_catalogue_msg.NAME_INPUT),
+            MessageInput(on_update_name_input),
+            Row(
+                Button(Const(common_btn.SKIP), id="skip_name", on_click=on_skip_name),
+            ),
+            state=AdminCatalogue.update_name,
+            getter=get_selected_product,
+        ),
+        Window(
+            Const(admin_catalogue_msg.DESCRIPTION_INPUT),
+            MessageInput(on_update_description_input),
+            Row(
+                Button(
+                    Const(common_btn.SKIP),
+                    id="skip_description",
+                    on_click=on_skip_description,
+                ),
+            ),
+            state=AdminCatalogue.update_description,
+            getter=get_selected_product,
+        ),
+        Window(
+            Const(admin_catalogue_msg.PRICE_INPUT),
+            MessageInput(on_update_price_input),
+            Row(
+                Button(Const(common_btn.SKIP), id="skip_price", on_click=on_skip_price),
+            ),
+            state=AdminCatalogue.update_price,
+            getter=get_selected_product,
+        ),
+        Window(
+            Format(admin_catalogue_msg.UPDATE_PRODUCT_PREVIEW),
+            Row(
+                Button(Const(common_btn.SAVE), id="save", on_click=on_update_product),
+                Button(
+                    Const(common_btn.CANCEL), id="cancel", on_click=on_cancel_update
+                ),
+            ),
+            state=AdminCatalogue.update_confirm,
+            getter=get_product_preview_data,
+        ),
+    ]

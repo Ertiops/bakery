@@ -58,4 +58,13 @@ async def get_selected_product(
     ) or dialog_manager.dialog_data.get("product_id")
     async with uow:
         product = await service.get_by_id(input_id=UUID(product_id))
+
+    dialog_manager.dialog_data.update(
+        {
+            "product_id": str(product.id),
+            "original_name": product.name,
+            "original_description": product.description,
+            "original_price": product.price,
+        }
+    )
     return dict(product=product)

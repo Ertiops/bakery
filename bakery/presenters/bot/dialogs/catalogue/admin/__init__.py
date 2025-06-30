@@ -5,6 +5,7 @@ from bakery.presenters.bot.dialogs.catalogue.admin.windows import (
     list_products_window,
     product_card_window,
     select_category_window,
+    update_product_windows,
 )
 
 admin_catalogue_dialog = Dialog(
@@ -12,4 +13,5 @@ admin_catalogue_dialog = Dialog(
     list_products_window(),
     *add_product_windows(),
     product_card_window(),
+    *update_product_windows(),
 )
