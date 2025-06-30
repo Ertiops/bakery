@@ -4,6 +4,7 @@ from datetime import datetime
 from enum import StrEnum, unique
 from uuid import UUID
 
+from bakery.application.entities import UNSET, Unset
 from bakery.domains.entities.common import Pagination, ToDictMixin
 
 
@@ -42,7 +43,7 @@ class UpdateProduct(ToDictMixin):
     name: str
     description: str
     price: int
-    category: ProductCategory
+    category: ProductCategory | Unset = UNSET
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)

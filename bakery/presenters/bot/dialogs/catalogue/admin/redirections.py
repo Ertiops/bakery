@@ -19,7 +19,7 @@ async def to_product_list(
     await manager.start(
         state=AdminCatalogue.view_products,
         data={"category": category},
-        mode=StartMode.NORMAL,
+        mode=StartMode.RESET_STACK,
     )
 
 
