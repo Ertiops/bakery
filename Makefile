@@ -60,6 +60,16 @@ app: ## Start the application
 	.venv/bin/python -m bakery
 
 
+test-ci: ## Run tests with pytest and coverage in CI
+	$(COVERAGE) run -m pytest $(TEST_PATH) --junitxml=junit.xml -rs
+	$(COVERAGE) report
+	$(COVERAGE) xml
+
+lint-ci: ## Run all linters in CI
+	@$(MAKE) ruff
+	@$(MAKE) mypy
+
+
 prod: ## Suild and start production image
 	docker-compose up --build -d
 

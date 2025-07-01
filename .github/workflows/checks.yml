@@ -1,0 +1,133 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: make develop
+
+      - name: Run linters
+        run: make lint-ci
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    services:
+      postgres:
+        image: postgres:16
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_USER: mrfixit
+          POSTGRES_PASSWORD: mrfixit
+          POSTGRES_DB: mrfixit
+
+    env:
+      APP_DB_USER: mrfixit
+      APP_DB_PASSWORD: mrfixit
+      APP_DB_NAME: mrfixit
+      APP_DB_HOST: localhost
+      APP_DB_PORT: 5432
+
+      APP_REDIS_PASSWORD: mrfixit
+      APP_REDIS_HOST: localhost
+      APP_REDIS_PORT: 6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: make develop
+
+      - name: Build Redis image with password
+        run: docker build -t redis-auth -f .github/redis/Dockerfile .
+
+      - name: Run Redis container
+        run: |
+          docker run -d --name redis-ci -p 6379:6379 redis-auth
+          for i in {1..10}; do
+            echo "Waiting for Redis to be ready..."
+            docker exec redis-ci redis-cli -a mrfixit ping && break
+            sleep 1
+          done
+
+      - name: Run tests
+        run: make test-ci
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            junit.xml
+
+  build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    environment: mrfixit
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg APP_DB_USER=bakery \
+            --build-arg APP_DB_PASSWORD=bakerypass \
+            --build-arg APP_DB_NAME=bakery \
+            --build-arg APP_DB_HOST=db \
+            --build-arg APP_DB_PORT=5432 \
+            --build-arg APP_DB_POOL_SIZE=10 \
+            --build-arg APP_DB_POOL_TIMEOUT=30 \
+            --build-arg APP_DB_DEBUG=false \
+            --build-arg APP_REDIS_PASSWORD=bakeryredis \
+            --build-arg APP_REDIS_HOST=redis \
+            --build-arg APP_REDIS_PORT=6379 \
+            --build-arg APP_TG_BOT_TOKEN=bot_token \
+            --build-arg APP_TG_ALLOWED_CHAT_ID=123456789 \
+            -t mrfixit .
