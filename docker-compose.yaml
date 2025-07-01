@@ -1,16 +1,44 @@
-version: '3.8'
-
 services:
-  bakery:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  mrfixit:
+    image: ertiops/bakery:latest
     container_name: bakery_app
     env_file:
       - .env
     ports:
-      - "8000:8000"
+      - "8001:8000"
     restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${APP_DB_USER}
+      - POSTGRES_PASSWORD=${APP_DB_PASSWORD}
+      - POSTGRES_DB=${APP_DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   redis:
-      image: redis:latest
+    image: redis:latest
+    container_name: bakery_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: /bin/sh -c "redis-server --requirepass ${APP_REDIS_PASSWORD}"
+    env_file:
+      - .env
+
+  watchtower:
+      image: containrrr/watchtower
+      container_name: watchtower
+      restart: unless-stopped
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+      command: --cleanup --interval 60 --include-restarting --label-enable
+
+volumes:
+  postgres_data:

@@ -10,7 +10,11 @@ services:
       - POSTGRES_DB=bakery
 
   redis:
-      image: redis:latest
-      restart: unless-stopped
-      ports:
-        - 6379:6379
+    image: redis:latest
+    container_name: mrfixit_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: /bin/sh -c "redis-server --requirepass ${APP_REDIS_PASSWORD}"
+    env_file:
+      - .env

@@ -1,5 +1,4 @@
 from collections.abc import AsyncIterator
-from os import environ
 from types import SimpleNamespace
 
 import pytest
@@ -18,12 +17,7 @@ from tests.utils import run_async_migrations, truncate_tables
 
 @pytest.fixture
 def db_config() -> DatabaseConfig:
-    return DatabaseConfig(
-        dsn=environ.get(
-            "APP_DB_DSN",
-            "postgresql+asyncpg://bakery:bakery@127.0.0.1:5432/bakery",
-        ),
-    )
+    return DatabaseConfig()
 
 
 @pytest.fixture
