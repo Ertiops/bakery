@@ -21,3 +21,4 @@ UPDATE_PRODUCT_PREVIEW: Final = (
     "<b>Описание:</b> {description}\n"
     "<b>Цена:</b> {price} ₽"
 )
+CONFIRM_DELETE: Final = "❗ Вы уверены, что хотите удалить этот товар?"

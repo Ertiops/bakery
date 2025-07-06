@@ -17,6 +17,7 @@ class AdminCatalogue(StatesGroup):
     view_products = State()
     view_single_product = State()
     delete_product = State()
+    confirm_delete = State()
     update_product = State()
     add_name = State()
     add_description = State()

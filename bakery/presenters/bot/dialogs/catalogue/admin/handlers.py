@@ -17,23 +17,6 @@ from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import AdminCatalogue
 
 
-async def on_delete_clicked(
-    callback: CallbackQuery, button: Button, manager: DialogManager
-) -> None:
-    product_id = manager.start_data.get("product_id") or manager.dialog_data.get(  # type: ignore
-        "product_id"
-    )
-    if not product_id:
-        await callback.answer("Не удалось определить товар!", show_alert=True)
-        return
-    container = manager.middleware_data["dishka_container"]
-    service: ProductService = await container.get(ProductService)
-    uow: AbstractUow = await container.get(AbstractUow)
-    async with uow:
-        await service.delete_by_id(input_id=UUID(product_id))
-    await manager.switch_to(AdminCatalogue.view_products)
-
-
 async def on_update_clicked(
     callback: CallbackQuery,
     button: Button,
@@ -229,4 +212,49 @@ async def on_view_product_clicked(
     await manager.start(
         state=AdminCatalogue.view_single_product,
         data=dict(product_id=item_id, category=category),
+    )
+
+
+async def on_confirm_delete(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    product_id = manager.start_data.get("product_id") or manager.dialog_data.get(  # type: ignore
+        "product_id"
+    )
+    if not product_id:
+        await callback.answer("Не удалось определить товар!", show_alert=True)
+        return
+    container = manager.middleware_data["dishka_container"]
+    service: ProductService = await container.get(ProductService)
+    uow: AbstractUow = await container.get(AbstractUow)
+    async with uow:
+        await service.delete_by_id(input_id=UUID(product_id))
+    await manager.switch_to(AdminCatalogue.view_products)
+
+
+async def go_to_confirm_delete(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    await manager.start(
+        state=AdminCatalogue.confirm_delete,
+        data=dict(
+            product_id=manager.dialog_data.get("product_id")
+            or manager.start_data.get("product_id"),  # type: ignore[union-attr]
+            category=manager.dialog_data.get("category")
+            or manager.start_data.get("category"),  # type: ignore[union-attr]
+        ),
+    )
+
+
+async def on_cancel_delete(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    product_id = manager.dialog_data.get("product_id") or manager.start_data.get(  # type: ignore[union-attr]
+        "product_id"
+    )
+    category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore[union-attr]
+    await manager.start(
+        state=AdminCatalogue.view_single_product,
+        data=dict(product_id=product_id, category=category),
+        mode=StartMode.RESET_STACK,
     )
