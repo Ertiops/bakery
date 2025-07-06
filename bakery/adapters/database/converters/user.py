@@ -2,7 +2,7 @@ from bakery.adapters.database.tables import UserTable
 from bakery.domains.entities.user import User
 
 
-def convert_user_table_to_dto(
+def convert_user_to_dto(
     *,
     result: UserTable,
 ) -> User:

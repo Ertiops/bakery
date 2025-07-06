@@ -29,7 +29,7 @@ async def get_products_data(
                 category=ProductCategory(category), limit=50, offset=0
             )
         )
-    return {"products": product_list.items}
+    return dict(products=product_list.items)
 
 
 async def get_product_preview_data(

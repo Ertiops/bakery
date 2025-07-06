@@ -1,5 +1,4 @@
 from collections.abc import Callable
-from datetime import datetime
 
 import pytest
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
@@ -7,22 +6,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bakery.adapters.database.tables import UserTable
 from bakery.domains.entities.user import UserRole
-from tests.utils import IterUse, now_utc
+from tests.plugins.factories.utils.iteruse import IterUse
+from tests.plugins.factories.utils.mixins import (
+    IdentifableFactoryMixin,
+    TimestampedFactoryMixin,
+)
 
 
-class UserTableFactory(SQLAlchemyFactory[UserTable]):
+class UserTableFactory(
+    SQLAlchemyFactory[UserTable], IdentifableFactoryMixin, TimestampedFactoryMixin
+):
     name = IterUse[str](lambda count: f"test_name_{count}")
     tg_id = IterUse[int](lambda count: count)
     phone = IterUse[str](lambda count: f"+79999999999{count}")
     role: UserRole = UserRole.USER
-
-    @classmethod
-    def created_at(cls) -> datetime:
-        return now_utc()
-
-    @classmethod
-    def deleted_at(cls) -> None:
-        return None
 
 
 @pytest.fixture

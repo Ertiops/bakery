@@ -11,6 +11,7 @@ from bakery.presenters.bot.dialogs import (
 )
 from bakery.presenters.bot.dialogs.catalogue import admin as admin_catalogue
 from bakery.presenters.bot.dialogs.main_menu import admin as admin_main_menu
+from bakery.presenters.bot.dialogs.pickup_address import admin as admin_pickup_address
 
 
 def register_dialogs(router: Router) -> None:
@@ -23,5 +24,6 @@ def register_dialogs(router: Router) -> None:
     dialog_router.include_routers(
         admin_main_menu.admin_main_menu_dialog,
         admin_catalogue.admin_catalogue_dialog,
+        admin_pickup_address.admin_pickup_address_dialog,
     )
     router.include_router(dialog_router)

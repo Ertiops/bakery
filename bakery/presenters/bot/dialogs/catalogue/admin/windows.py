@@ -40,7 +40,6 @@ from bakery.presenters.bot.dialogs.catalogue.admin.handlers import (
     on_view_product_clicked,
 )
 from bakery.presenters.bot.dialogs.catalogue.admin.redirections import (
-    to_main_menu,
     to_product_categories,
     to_product_list,
 )
@@ -48,6 +47,7 @@ from bakery.presenters.bot.dialogs.catalogue.admin.selections import (
     on_category_selected,
 )
 from bakery.presenters.bot.dialogs.catalogue.windows import CATEGORY_ITEMS
+from bakery.presenters.bot.dialogs.main_menu.admin.redirections import to_main_menu
 from bakery.presenters.bot.dialogs.states import AdminCatalogue
 
 

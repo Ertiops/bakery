@@ -29,10 +29,8 @@ async def on_delete_clicked(
     container = manager.middleware_data["dishka_container"]
     service: ProductService = await container.get(ProductService)
     uow: AbstractUow = await container.get(AbstractUow)
-
     async with uow:
         await service.delete_by_id(input_id=UUID(product_id))
-
     await manager.switch_to(AdminCatalogue.view_products)
 
 
@@ -110,7 +108,6 @@ async def on_update_product(
     uow: AbstractUow = await manager.middleware_data["dishka_container"].get(
         AbstractUow
     )
-
     async with uow:
         product = await service.update_by_id(
             input_dto=UpdateProduct(
@@ -120,7 +117,6 @@ async def on_update_product(
                 price=manager.dialog_data["price"],
             )
         )
-
     await manager.start(
         AdminCatalogue.view_single_product,
         data=dict(product_id=str(product_id), category=product.category),

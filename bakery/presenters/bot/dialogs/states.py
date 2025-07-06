@@ -26,3 +26,15 @@ class AdminCatalogue(StatesGroup):
     update_description = State()
     update_price = State()
     update_confirm = State()
+
+
+class AdminPickupAddress(StatesGroup):
+    view_all = State()
+    view_one = State()
+    add_name = State()
+    add_confirm = State()
+    update_name = State()
+    update_confirm = State()
+    confirm_delete = State()
+    delete = State()
+    update = State()
