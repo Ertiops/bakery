@@ -54,6 +54,7 @@ class PickupAddressStorage(IPickupAddressStorage):
         stmt = (
             select(PickupAddressTable)
             .where(PickupAddressTable.deleted_at.is_(None))
+            .order_by(PickupAddressTable.created_at)
             .limit(input_dto.limit)
             .offset(input_dto.offset)
         )
