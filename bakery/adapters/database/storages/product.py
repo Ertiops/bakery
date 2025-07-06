@@ -7,7 +7,7 @@ from sqlalchemy import exists, func, insert, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bakery.adapters.database.converters.product import convert_product_table_to_dto
+from bakery.adapters.database.converters.product import convert_product_to_dto
 from bakery.adapters.database.tables import ProductTable
 from bakery.application.exceptions import (
     EntityAlreadyExistsException,
@@ -35,14 +35,14 @@ class ProductStorage(IProductStorage):
             result = (await self.__session.scalars(stmt)).one()
         except IntegrityError as e:
             self.__raise_exception(e)
-        return convert_product_table_to_dto(result=result)
+        return convert_product_to_dto(result=result)
 
     async def get_by_id(self, *, input_id: UUID) -> Product | None:
         stmt = select(ProductTable).where(
             ProductTable.id == input_id, ProductTable.deleted_at.is_(None)
         )
         result = await self.__session.scalar(stmt)
-        return convert_product_table_to_dto(result=result) if result else None
+        return convert_product_to_dto(result=result) if result else None
 
     async def get_list(self, *, input_dto: ProductListParams) -> Sequence[Product]:
         stmt = (
@@ -55,7 +55,7 @@ class ProductStorage(IProductStorage):
         if input_dto.category:
             stmt = stmt.where(ProductTable.category == input_dto.category)
         result = await self.__session.scalars(stmt)
-        return [convert_product_table_to_dto(result=r) for r in result]
+        return [convert_product_to_dto(result=r) for r in result]
 
     async def count(self, *, input_dto: ProductListParams) -> int:
         stmt = (
@@ -88,7 +88,7 @@ class ProductStorage(IProductStorage):
             raise EntityNotFoundException(entity=Product, entity_id=input_dto.id) from e
         except IntegrityError as e:
             self.__raise_exception(e)
-        return convert_product_table_to_dto(result=result)
+        return convert_product_to_dto(result=result)
 
     async def delete_by_id(self, *, input_id: UUID) -> None:
         stmt = (

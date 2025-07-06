@@ -21,11 +21,13 @@ from bakery.presenters.bot.dialogs.catalogue.admin.getters import (
     get_selected_product,
 )
 from bakery.presenters.bot.dialogs.catalogue.admin.handlers import (
+    go_to_confirm_delete,
     on_add_clicked,
+    on_cancel_delete,
     on_cancel_product_creation,
     on_cancel_update,
+    on_confirm_delete,
     on_create_product,
-    on_delete_clicked,
     on_description_input,
     on_name_input,
     on_price_input,
@@ -40,7 +42,6 @@ from bakery.presenters.bot.dialogs.catalogue.admin.handlers import (
     on_view_product_clicked,
 )
 from bakery.presenters.bot.dialogs.catalogue.admin.redirections import (
-    to_main_menu,
     to_product_categories,
     to_product_list,
 )
@@ -48,6 +49,7 @@ from bakery.presenters.bot.dialogs.catalogue.admin.selections import (
     on_category_selected,
 )
 from bakery.presenters.bot.dialogs.catalogue.windows import CATEGORY_ITEMS
+from bakery.presenters.bot.dialogs.main_menu.admin.redirections import to_main_menu
 from bakery.presenters.bot.dialogs.states import AdminCatalogue
 
 
@@ -134,7 +136,9 @@ def product_card_window() -> Window:
         Format(admin_catalogue_msg.PRODUCT_CARD),
         Row(
             Button(Const(common_btn.EDIT), id="update", on_click=on_update_clicked),
-            Button(Const(common_btn.DELETE), id="delete", on_click=on_delete_clicked),
+            Button(
+                Const(common_btn.DELETE), id="delete", on_click=go_to_confirm_delete
+            ),
         ),
         Button(Const(common_btn.BACK), id="back", on_click=to_product_list),
         state=AdminCatalogue.view_single_product,
@@ -187,3 +191,14 @@ def update_product_windows() -> list[Window]:
             getter=get_product_preview_data,
         ),
     ]
+
+
+def confirm_delete_product_window() -> Window:
+    return Window(
+        Const(admin_catalogue_msg.CONFIRM_DELETE),
+        Row(
+            Button(Const(common_btn.YES), id="confirm", on_click=on_confirm_delete),
+            Button(Const(common_btn.CANCEL), id="cancel", on_click=on_cancel_delete),
+        ),
+        state=AdminCatalogue.confirm_delete,
+    )

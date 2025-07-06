@@ -1,4 +1,6 @@
-from sqlalchemy import Index, Integer, String
+from uuid import UUID
+
+from sqlalchemy import ForeignKey, Index, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -73,3 +75,25 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
         Integer,
         nullable=False,
     )
+
+
+class PickupAddressTable(BaseTable, TimestampedMixin, IdentifableMixin):
+    __tablename__ = "pickup_addresses"
+
+    __table_args__ = (
+        Index(
+            None,
+            "name",
+            unique=True,
+            postgresql_where="deleted_at IS NULL",
+        ),
+    )
+
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+
+
+class UserAddressTable(BaseTable, TimestampedMixin, IdentifableMixin):
+    __tablename__ = "user_addresses"
+
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String(256), nullable=False)

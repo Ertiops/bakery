@@ -1,4 +1,4 @@
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from datetime import UTC, datetime
 
 from alembic.autogenerate import compare_metadata
@@ -6,14 +6,19 @@ from alembic.config import Config as AlembicConfig
 from alembic.runtime.environment import EnvironmentContext
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from polyfactory import Use
 from sqlalchemy import Connection, MetaData, pool, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     async_engine_from_config,
 )
 
-TABLES_FOR_TRUNCATE: Sequence[str] = ("users", "products", "orders")
+TABLES_FOR_TRUNCATE: Sequence[str] = (
+    "users",
+    "products",
+    "orders",
+    "pickup_addresses",
+    "user_addresses",
+)
 TYPES_FOR_TRUNCATE: Sequence[str] = ("product_category", "order_status")
 
 
@@ -74,17 +79,6 @@ def _do_run_migrations(
 def get_diff_db_metadata(connection: Connection, metadata: MetaData):
     migration_ctx = MigrationContext.configure(connection)
     return compare_metadata(context=migration_ctx, metadata=metadata)
-
-
-class IterUse[T](Use):
-    def __init__(self, func: Callable[[int], T]) -> None:
-        super().__init__(self.next)
-        self.count = 0
-        self.func = func
-
-    def next(self) -> T:
-        self.count += 1
-        return self.func(self.count)
 
 
 def now_utc() -> datetime:

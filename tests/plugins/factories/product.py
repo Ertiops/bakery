@@ -1,22 +1,19 @@
 from collections.abc import Callable
-from datetime import datetime
 
 import pytest
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bakery.adapters.database.tables import ProductTable, UserTable
-from tests.utils import now_utc
+from tests.plugins.factories.utils.mixins import (
+    IdentifableFactoryMixin,
+    TimestampedFactoryMixin,
+)
 
 
-class ProductTableFactory(SQLAlchemyFactory[ProductTable]):
-    @classmethod
-    def created_at(cls) -> datetime:
-        return now_utc()
-
-    @classmethod
-    def deleted_at(cls) -> None:
-        return None
+class ProductTableFactory(
+    SQLAlchemyFactory[ProductTable], IdentifableFactoryMixin, TimestampedFactoryMixin
+): ...
 
 
 @pytest.fixture
