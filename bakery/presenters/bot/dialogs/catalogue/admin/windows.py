@@ -13,7 +13,7 @@ from bakery.presenters.bot.content.messages.catalogue import (
     admin as admin_catalogue_msg,
 )
 from bakery.presenters.bot.content.messages.catalogue import (
-    common as catalogue_common_msg,
+    common as common_catalogue_msg,
 )
 from bakery.presenters.bot.dialogs.catalogue.admin.getters import (
     get_product_preview_data,
@@ -55,7 +55,7 @@ from bakery.presenters.bot.dialogs.states import AdminCatalogue
 
 def select_category_window() -> Window:
     return Window(
-        Const(catalogue_common_msg.CATALOGUE_CATEGORY_SELECTION),
+        Const(common_catalogue_msg.CATALOGUE_CATEGORY_SELECTION),
         Group(
             Select(
                 id="category_select",
@@ -74,7 +74,7 @@ def select_category_window() -> Window:
 
 def list_products_window() -> Window:
     return Window(
-        Const(catalogue_common_msg.CATALOGUE_CATEGORY),
+        Const(common_catalogue_msg.CATALOGUE_CATEGORY),
         Group(
             Select(
                 id="product_select",
@@ -133,7 +133,7 @@ def add_product_windows() -> list[Window]:
 
 def product_card_window() -> Window:
     return Window(
-        Format(admin_catalogue_msg.PRODUCT_CARD),
+        Format(common_catalogue_msg.PRODUCT_CARD),
         Row(
             Button(Const(common_btn.EDIT), id="update", on_click=on_update_clicked),
             Button(

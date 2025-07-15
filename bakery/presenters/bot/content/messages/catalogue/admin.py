@@ -10,11 +10,6 @@ ADD_PRODUCT_PREVIEW: Final = (
     "<b>Описание:</b> {description}\n"
     "<b>Цена:</b> {price} ₽"
 )
-PRODUCT_CARD: Final = (
-    "<b>Название:</b> {product.name}\n"
-    "<b>Описание:</b> {product.description}\n"
-    "<b>Цена:</b> {product.price}₽"
-)
 UPDATE_PRODUCT_PREVIEW: Final = (
     "<b>Подтвердите обновление товара:</b>\n\n"
     "<b>Название:</b> {name}\n"
