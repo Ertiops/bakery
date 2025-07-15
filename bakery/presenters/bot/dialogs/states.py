@@ -12,6 +12,10 @@ class AdminMain(StatesGroup):
     menu = State()
 
 
+class UserMain(StatesGroup):
+    menu = State()
+
+
 class AdminCatalogue(StatesGroup):
     select_category = State()
     view_products = State()
@@ -27,6 +31,12 @@ class AdminCatalogue(StatesGroup):
     update_description = State()
     update_price = State()
     update_confirm = State()
+
+
+class UserCatalogue(StatesGroup):
+    select_category = State()
+    view_products = State()
+    view_single_product = State()
 
 
 class AdminPickupAddress(StatesGroup):

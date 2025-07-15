@@ -11,7 +11,7 @@ services:
 
   redis:
     image: redis:latest
-    container_name: mrfixit_redis
+    container_name: bakery_redis
     restart: unless-stopped
     ports:
       - "6379:6379"

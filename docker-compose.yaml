@@ -1,5 +1,5 @@
 services:
-  mrfixit:
+  bakery:
     image: ertiops/bakery:latest
     container_name: bakery_app
     env_file:
