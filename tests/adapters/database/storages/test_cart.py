@@ -15,6 +15,7 @@ from bakery.domains.entities.cart import (
     CartListParams,
     CartWProduct,
     CreateCart,
+    GetCartByUserProductIds,
 )
 from bakery.domains.entities.product import Product
 from tests.utils import now_utc
@@ -84,6 +85,59 @@ async def test__create__entity_not_found_exception__product_id(
     )
     with pytest.raises(ForeignKeyViolationException):
         await cart_storage.create_or_update(input_dto=create_data)
+
+
+async def test__get_w_product_by_user_product_ids(
+    cart_storage: CartStorage,
+    create_cart: Callable,
+) -> None:
+    db_cart: CartTable = await create_cart()
+    cart = await cart_storage.get_w_product_by_user_product_ids(
+        input_dto=GetCartByUserProductIds(
+            user_id=db_cart.user_id,
+            product_id=db_cart.product_id,
+        )
+    )
+    assert cart == CartWProduct(
+        user_id=db_cart.user_id,
+        quantity=db_cart.quantity,
+        product=IsInstance(Product),
+        created_at=IsDatetime,
+        updated_at=IsDatetime,
+    )
+
+
+async def test__get_w_product_by_user_product_ids__none(
+    cart_storage: CartStorage,
+) -> None:
+    cart = await cart_storage.get_w_product_by_user_product_ids(
+        input_dto=GetCartByUserProductIds(
+            user_id=uuid4(),
+            product_id=uuid4(),
+        )
+    )
+    assert cart is None
+
+
+async def test__get_w_product_by_user_product_ids__none__validate_deleted_product(
+    cart_storage: CartStorage,
+    create_cart: Callable,
+    create_product: Callable,
+    create_user: Callable,
+) -> None:
+    db_user: UserTable = await create_user()
+    db_product: ProductTable = await create_product(deleted_at=now_utc())
+    db_cart: CartTable = await create_cart(
+        user_id=db_user.id,
+        product_id=db_product.id,
+    )
+    cart = await cart_storage.get_w_product_by_user_product_ids(
+        input_dto=GetCartByUserProductIds(
+            user_id=db_cart.user_id,
+            product_id=db_cart.product_id,
+        )
+    )
+    assert cart is None
 
 
 async def test__get_list(

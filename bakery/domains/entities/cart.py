@@ -35,3 +35,9 @@ class CartWProduct(ToDictMixin):
 class CartListParams:
     user_id: UUID | None
     has_non_zero_quantity: bool
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class GetCartByUserProductIds:
+    user_id: UUID
+    product_id: UUID

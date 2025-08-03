@@ -4,7 +4,11 @@ from uuid import UUID
 
 from aiogram_dialog.api.protocols import DialogManager
 
+from bakery.application.exceptions import EntityNotFoundException
+from bakery.domains.entities.cart import GetCartByUserProductIds
 from bakery.domains.entities.product import Product, ProductCategory, ProductListParams
+from bakery.domains.entities.user import User
+from bakery.domains.services.cart import CartService
 from bakery.domains.services.product import ProductService
 from bakery.domains.uow import AbstractUow
 
@@ -32,39 +36,37 @@ async def get_products_data(
     return dict(products=product_list.items)
 
 
-async def get_product_preview_data(
-    dialog_manager: DialogManager,
-    **kwargs: Any,
-) -> dict[str, str]:
-    return dict(
-        name=dialog_manager.dialog_data.get("name", "<нет>"),
-        description=dialog_manager.dialog_data.get("description", "<нет>"),
-        price=dialog_manager.dialog_data.get("price", "?"),
-    )
-
-
 async def get_selected_product(
     dialog_manager: DialogManager,
     **kwargs: Any,
-) -> dict[str, Product]:
-    uow: AbstractUow = await dialog_manager.middleware_data["dishka_container"].get(
-        AbstractUow
-    )
-    service: ProductService = await dialog_manager.middleware_data[
-        "dishka_container"
-    ].get(ProductService)
-    product_id = dialog_manager.start_data.get(  # type: ignore
+) -> dict[str, Any]:
+    container = dialog_manager.middleware_data["dishka_container"]
+    uow: AbstractUow = await container.get(AbstractUow)
+    product_service: ProductService = await container.get(ProductService)
+    cart_service: CartService = await container.get(CartService)
+    user: User = dialog_manager.middleware_data["current_user"]
+    product_id: UUID = dialog_manager.start_data.get(  # type: ignore
         "product_id"
     ) or dialog_manager.dialog_data.get("product_id")
     async with uow:
-        product = await service.get_by_id(input_id=UUID(product_id))
-
+        product = await product_service.get_by_id(input_id=UUID(product_id))  # type: ignore[arg-type]
+        try:
+            cart = await cart_service.get_w_product_by_user_product_ids(
+                input_dto=GetCartByUserProductIds(
+                    user_id=user.id,
+                    product_id=product_id,
+                )
+            )
+            quantity = cart.quantity
+        except EntityNotFoundException:
+            quantity = 0
     dialog_manager.dialog_data.update(
         dict(
             product_id=str(product.id),
             original_name=product.name,
             original_description=product.description,
             original_price=product.price,
+            quantity=quantity,
         )
     )
-    return dict(product=product)
+    return dict(product=product, quantity=quantity)

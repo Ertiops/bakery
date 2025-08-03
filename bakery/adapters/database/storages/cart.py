@@ -17,7 +17,13 @@ from bakery.application.exceptions import (
     ForeignKeyViolationException,
     StorageException,
 )
-from bakery.domains.entities.cart import Cart, CartListParams, CartWProduct, CreateCart
+from bakery.domains.entities.cart import (
+    Cart,
+    CartListParams,
+    CartWProduct,
+    CreateCart,
+    GetCartByUserProductIds,
+)
 from bakery.domains.interfaces.storages.cart import ICartStorage
 
 
@@ -44,6 +50,24 @@ class CartStorage(ICartStorage):
         except IntegrityError as e:
             self.__raise_exception(e)
         return convert_cart_to_dto(result=result)
+
+    async def get_w_product_by_user_product_ids(
+        self, *, input_dto: GetCartByUserProductIds
+    ) -> CartWProduct | None:
+        stmt = (
+            select(CartTable, ProductTable)
+            .join(ProductTable, CartTable.product_id == ProductTable.id)
+            .where(
+                CartTable.user_id == input_dto.user_id,
+                CartTable.product_id == input_dto.product_id,
+                CartTable.deleted_at.is_(None),
+                ProductTable.deleted_at.is_(None),
+            )
+        )
+        result = (await self.__session.execute(stmt)).first()
+        if result is None:
+            return None
+        return convert_cart_w_product_to_dto(result=result._tuple())
 
     async def get_list(self, *, input_dto: CartListParams) -> Sequence[CartWProduct]:
         stmt = (
