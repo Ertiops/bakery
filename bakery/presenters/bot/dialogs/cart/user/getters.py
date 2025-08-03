@@ -12,7 +12,7 @@ from bakery.presenters.bot.content.messages.cart import user as user_cart_msg
 async def get_cart_data(
     dialog_manager: DialogManager,
     **kwargs: Any,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     container = dialog_manager.middleware_data["dishka_container"]
     cart_service: CartService = await container.get(CartService)
     uow: AbstractUow = await container.get(AbstractUow)
@@ -36,5 +36,6 @@ async def get_cart_data(
     return dict(
         cart_text="\n".join(lines)
         + "\n\n"
-        + user_cart_msg.CART_TOTAL.format(total=total)
+        + user_cart_msg.CART_TOTAL.format(total=total),
+        carts=carts,
     )
