@@ -1,6 +1,4 @@
 from enum import StrEnum, unique
-from typing import TypedDict
-from uuid import UUID
 
 
 @unique
@@ -9,8 +7,3 @@ class OrderStatus(StrEnum):
     IN_PROGRESS = "in_progress"
     DELIVERED = "delivered"
     PAID = "paid"
-
-
-class OrderProduct(TypedDict):
-    product_id: UUID
-    quantity: int

@@ -39,6 +39,11 @@ class UserCatalogue(StatesGroup):
     view_single_product = State()
 
 
+class UserCart(StatesGroup):
+    view = State()
+    create_or_update = State()
+
+
 class AdminPickupAddress(StatesGroup):
     view_all = State()
     view_one = State()

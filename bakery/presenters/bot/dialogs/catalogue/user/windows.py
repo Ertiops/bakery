@@ -16,6 +16,8 @@ from bakery.presenters.bot.dialogs.catalogue.user.getters import (
     get_selected_product,
 )
 from bakery.presenters.bot.dialogs.catalogue.user.handlers import (
+    on_decrement_quantity,
+    on_increment_quantity,
     on_view_product_clicked,
 )
 from bakery.presenters.bot.dialogs.catalogue.user.redirections import (
@@ -75,9 +77,11 @@ def product_list_window() -> Window:
 def product_card_window() -> Window:
     return Window(
         Format(common_catalogue_msg.PRODUCT_CARD),
-        # Row(
-        #     Button(Const(common_btn.EDIT), id="update", on_click=...),
-        # ),
+        Row(
+            Button(Const("➖"), id="dec", on_click=on_decrement_quantity),
+            Button(Format("{quantity}"), id="noop", on_click=None),
+            Button(Const("➕"), id="inc", on_click=on_increment_quantity),
+        ),
         Button(Const(common_btn.BACK), id="back", on_click=to_product_list),
         state=UserCatalogue.view_single_product,
         getter=get_selected_product,

@@ -9,6 +9,7 @@ from bakery.presenters.bot.commands.utils import (
 from bakery.presenters.bot.dialogs import (
     registration,
 )
+from bakery.presenters.bot.dialogs.cart import user as user_cart
 from bakery.presenters.bot.dialogs.catalogue import admin as admin_catalogue
 from bakery.presenters.bot.dialogs.catalogue import user as user_catalogue
 from bakery.presenters.bot.dialogs.main_menu import admin as admin_main_menu
@@ -31,8 +32,6 @@ def register_dialogs(router: Router) -> None:
     )
     dialog_router.include_routers(
         user_main_menu.user_main_menu_dialog,
-        # admin_catalogue.admin_catalogue_dialog,
-        # user_catalogue.user_catalogue_dialog,
-        # admin_pickup_address.admin_pickup_address_dialog,
+        user_cart.user_cart_dialog,
     )
     router.include_router(dialog_router)
