@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, Index, Integer, String
@@ -6,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from bakery.adapters.database.base import BaseTable, IdentifableMixin, TimestampedMixin
 from bakery.adapters.database.utils import make_pg_enum
-from bakery.domains.entities.order import OrderProduct, OrderStatus
+from bakery.domains.entities.order import OrderStatus
 from bakery.domains.entities.product import ProductCategory
 from bakery.domains.entities.user import UserRole
 
@@ -67,7 +70,7 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
         make_pg_enum(OrderStatus, name="order_status"),
         nullable=False,
     )
-    products: Mapped[list[OrderProduct]] = mapped_column(
+    products: Mapped[Sequence[Mapping]] = mapped_column(
         JSONB,
         nullable=False,
     )
@@ -92,8 +95,18 @@ class PickupAddressTable(BaseTable, TimestampedMixin, IdentifableMixin):
     name: Mapped[str] = mapped_column(String(256), nullable=False)
 
 
-class UserAddressTable(BaseTable, TimestampedMixin, IdentifableMixin):
-    __tablename__ = "user_addresses"
+class CartTable(BaseTable, TimestampedMixin, IdentifableMixin):
+    __tablename__ = "carts"
 
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
-    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    __table_args__ = (
+        Index(
+            None,
+            "user_id",
+            "product_id",
+            unique=True,
+            postgresql_where="deleted_at IS NULL",
+        ),
+    )
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    product_id: Mapped[UUID] = mapped_column(ForeignKey("products.id"))
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)

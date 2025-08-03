@@ -4,6 +4,7 @@ from aiogram_dialog.widgets.text import Const
 
 from bakery.presenters.bot.content.buttons.main_menu import user as user_main_menu_msg
 from bakery.presenters.bot.dialogs.main_menu.user.handlers import (
+    enter_cart,
     enter_catalog,
 )
 from bakery.presenters.bot.dialogs.states import UserMain
@@ -18,11 +19,11 @@ def user_main_menu_window() -> Window:
                 id="catalog",
                 on_click=enter_catalog,
             ),
-            # Button(
-            #     Const(admin_main_menu_msg.ADDRESSES),
-            #     id="pickup_address_menu",
-            #     on_click=enter_pickup_address_menu,
-            # ),
+            Button(
+                Const(user_main_menu_msg.CART),
+                id="cart",
+                on_click=enter_cart,
+            ),
             width=1,
         ),
         state=UserMain.menu,

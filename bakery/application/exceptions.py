@@ -18,6 +18,9 @@ class EmptyPayloadException(BakeryException): ...
 class EntityAlreadyExistsException(BakeryException): ...
 
 
+class ForeignKeyViolationException(BakeryException): ...
+
+
 class StorageException(BakeryException):
     def __init__(self, storage_name: str) -> None:
         super().__init__(f"{storage_name} has failed to execute query")
