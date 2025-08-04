@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -7,7 +8,10 @@ from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button
 
-from bakery.application.exceptions import EntityNotFoundException
+from bakery.application.exceptions import (
+    EntityAlreadyExistsException,
+    EntityNotFoundException,
+)
 from bakery.domains.entities.pickup_address import (
     CreatePickupAddress,
     UpdatePickupAddress,
@@ -15,6 +19,8 @@ from bakery.domains.entities.pickup_address import (
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import AdminPickupAddress
+
+log = logging.getLogger(__name__)
 
 
 async def on_view_pickup_address_clicked(
@@ -51,16 +57,23 @@ async def on_create_pickup_address(
     container = manager.middleware_data["dishka_container"]
     service: PickupAddressService = await container.get(PickupAddressService)
     uow: AbstractUow = await container.get(AbstractUow)
-    async with uow:
-        pickup_address = await service.create(
-            input_dto=CreatePickupAddress(
-                name=manager.dialog_data["name"] or manager.start_data["name"],  # type: ignore
+    log.info("Creating pickup address")
+    try:
+        async with uow:
+            pickup_address = await service.create(
+                input_dto=CreatePickupAddress(
+                    name=manager.dialog_data["name"] or manager.start_data["name"],  # type: ignore
+                )
             )
+        await manager.start(
+            state=AdminPickupAddress.view_one,
+            data=dict(pickup_address_id=str(pickup_address.id)),
         )
-    await manager.start(
-        state=AdminPickupAddress.view_one,
-        data=dict(pickup_address_id=str(pickup_address.id)),
-    )
+    except EntityAlreadyExistsException:
+        await callback.answer(
+            text="Такой адрес уже есть! Выберите другой.",
+        )
+        await manager.switch_to(AdminPickupAddress.update_name)
 
 
 async def on_update_clicked(
@@ -97,18 +110,25 @@ async def on_update_pickup_address(
     uow: AbstractUow = await manager.middleware_data["dishka_container"].get(
         AbstractUow
     )
-    async with uow:
-        await service.update_by_id(
-            input_dto=UpdatePickupAddress(
-                id=pickup_address_id,
-                name=manager.dialog_data["name"],
+    log.info("Updating pickup address with ID: %s", pickup_address_id)
+    try:
+        async with uow:
+            await service.update_by_id(
+                input_dto=UpdatePickupAddress(
+                    id=pickup_address_id,
+                    name=manager.dialog_data["name"],
+                )
             )
+        await manager.start(
+            AdminPickupAddress.view_one,
+            data=dict(pickup_address_id=str(pickup_address_id)),
+            mode=StartMode.RESET_STACK,
         )
-    await manager.start(
-        AdminPickupAddress.view_one,
-        data=dict(pickup_address_id=str(pickup_address_id)),
-        mode=StartMode.RESET_STACK,
-    )
+    except EntityAlreadyExistsException:
+        await callback.answer(
+            text="Такой адрес уже есть! Выберите другой.",
+        )
+        await manager.switch_to(AdminPickupAddress.update_name)
 
 
 async def go_to_confirm_delete(
@@ -124,6 +144,7 @@ async def on_confirm_delete(
     service: PickupAddressService = await container.get(PickupAddressService)
     uow: AbstractUow = await container.get(AbstractUow)
     address_id = UUID(manager.dialog_data["pickup_address_id"])
+    log.info("Deleting pickup address with ID: %s", address_id)
     try:
         async with uow:
             await service.delete_by_id(input_id=address_id)

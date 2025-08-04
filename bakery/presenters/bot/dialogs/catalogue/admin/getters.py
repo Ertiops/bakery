@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
@@ -7,6 +8,8 @@ from aiogram_dialog.api.protocols import DialogManager
 from bakery.domains.entities.product import Product, ProductCategory, ProductListParams
 from bakery.domains.services.product import ProductService
 from bakery.domains.uow import AbstractUow
+
+log = logging.getLogger(__name__)
 
 
 async def get_products_data(
@@ -23,6 +26,7 @@ async def get_products_data(
     ) or dialog_manager.start_data.get("category")  # type: ignore[union-attr]
     if category:
         dialog_manager.dialog_data["category"] = category
+    log.info("Fetching products for category: %s", category)
     async with uow:
         product_list = await service.get_list(
             input_dto=ProductListParams(
@@ -56,6 +60,7 @@ async def get_selected_product(
     product_id = dialog_manager.start_data.get(  # type: ignore
         "product_id"
     ) or dialog_manager.dialog_data.get("product_id")
+    log.info("Fetching product with ID: %s", product_id)
     async with uow:
         product = await service.get_by_id(input_id=UUID(product_id))
 

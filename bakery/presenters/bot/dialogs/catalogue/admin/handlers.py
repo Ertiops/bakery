@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -7,6 +8,7 @@ from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button
 
+from bakery.application.exceptions import EntityAlreadyExistsException
 from bakery.domains.entities.product import (
     CreateProduct,
     ProductCategory,
@@ -15,6 +17,8 @@ from bakery.domains.entities.product import (
 from bakery.domains.services.product import ProductService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import AdminCatalogue
+
+log = logging.getLogger(__name__)
 
 
 async def on_update_clicked(
@@ -91,20 +95,27 @@ async def on_update_product(
     uow: AbstractUow = await manager.middleware_data["dishka_container"].get(
         AbstractUow
     )
-    async with uow:
-        product = await service.update_by_id(
-            input_dto=UpdateProduct(
-                id=product_id,
-                name=manager.dialog_data["name"],
-                description=manager.dialog_data["description"],
-                price=manager.dialog_data["price"],
+    log.info("Updating product with ID: %s", product_id)
+    try:
+        async with uow:
+            product = await service.update_by_id(
+                input_dto=UpdateProduct(
+                    id=product_id,
+                    name=manager.dialog_data["name"],
+                    description=manager.dialog_data["description"],
+                    price=manager.dialog_data["price"],
+                )
             )
+        await manager.start(
+            AdminCatalogue.view_single_product,
+            data=dict(product_id=str(product_id), category=product.category),
+            mode=StartMode.RESET_STACK,
         )
-    await manager.start(
-        AdminCatalogue.view_single_product,
-        data=dict(product_id=str(product_id), category=product.category),
-        mode=StartMode.RESET_STACK,
-    )
+    except EntityAlreadyExistsException:
+        await callback.answer(
+            text="Товар с таким названием уже есть! Выберите другое название.",
+        )
+        await manager.switch_to(AdminCatalogue.update_name)
 
 
 async def on_cancel_update(
@@ -173,19 +184,26 @@ async def on_create_product(
     container = manager.middleware_data["dishka_container"]
     service: ProductService = await container.get(ProductService)
     uow: AbstractUow = await container.get(AbstractUow)
-    async with uow:
-        product = await service.create(
-            input_dto=CreateProduct(
-                name=manager.dialog_data["name"],
-                description=manager.dialog_data["description"],
-                category=ProductCategory(category),
-                price=manager.dialog_data["price"],
+    log.info("Creating product in category: %s", category)
+    try:
+        async with uow:
+            product = await service.create(
+                input_dto=CreateProduct(
+                    name=manager.dialog_data["name"],
+                    description=manager.dialog_data["description"],
+                    category=ProductCategory(category),
+                    price=manager.dialog_data["price"],
+                )
             )
+        await manager.start(
+            AdminCatalogue.view_single_product,
+            data=dict(product_id=str(product.id), category=category),
         )
-    await manager.start(
-        AdminCatalogue.view_single_product,
-        data=dict(product_id=str(product.id), category=category),
-    )
+    except EntityAlreadyExistsException:
+        await callback.answer(
+            text="Товар с таким названием уже есть! Выберите другое название.",
+        )
+        await manager.switch_to(AdminCatalogue.add_name)
 
 
 async def on_cancel_product_creation(
@@ -227,6 +245,7 @@ async def on_confirm_delete(
     container = manager.middleware_data["dishka_container"]
     service: ProductService = await container.get(ProductService)
     uow: AbstractUow = await container.get(AbstractUow)
+    log.info("Deleting product with ID: %s", product_id)
     async with uow:
         await service.delete_by_id(input_id=UUID(product_id))
     await manager.switch_to(AdminCatalogue.view_products)
