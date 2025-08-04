@@ -48,8 +48,3 @@ async def help_command(message: Message, dialog_manager: DialogManager) -> None:
     user: User | None = dialog_manager.middleware_data["current_user"]
     if user is None or user.role == UserRole.USER:
         pass
-
-
-# async def start_menu(user: User | None, dialog_manager: DialogManager) -> None:
-#     if user.role == UserRole.ADMIN:
-#         await start_menu_admin(dialog_manager=dialog_manager)

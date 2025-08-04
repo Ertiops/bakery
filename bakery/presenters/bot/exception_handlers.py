@@ -5,7 +5,6 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import ErrorEvent
 from aiogram_dialog import DialogManager
 
-from bakery.presenters.bot.content.messages import exceptions
 from bakery.presenters.bot.dialogs.redirections import start_new_dialog
 
 log = logging.getLogger(__name__)
@@ -41,11 +40,3 @@ async def on_unknown_user(event: ErrorEvent, *args: Any, **kwargs: Any) -> None:
 async def on_unknown_state(event: ErrorEvent, dialog_manager: DialogManager) -> None:
     log.error("Restarting dialog: %s", event.exception)
     await start_new_dialog(dialog_manager)
-
-
-async def on_not_exist_font(event: ErrorEvent, *args: Any, **kwargs: Any) -> None:
-    log.error("Not exist font: %s", event.exception)
-    if event.update.callback_query:
-        await event.update.callback_query.answer(
-            f"{exceptions.FONT_ERROR}", show_alert=True
-        )

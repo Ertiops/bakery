@@ -7,6 +7,7 @@ from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button
 
+from bakery.application.exceptions import EntityAlreadyExistsException
 from bakery.domains.entities.product import (
     CreateProduct,
     ProductCategory,
@@ -91,20 +92,26 @@ async def on_update_product(
     uow: AbstractUow = await manager.middleware_data["dishka_container"].get(
         AbstractUow
     )
-    async with uow:
-        product = await service.update_by_id(
-            input_dto=UpdateProduct(
-                id=product_id,
-                name=manager.dialog_data["name"],
-                description=manager.dialog_data["description"],
-                price=manager.dialog_data["price"],
+    try:
+        async with uow:
+            product = await service.update_by_id(
+                input_dto=UpdateProduct(
+                    id=product_id,
+                    name=manager.dialog_data["name"],
+                    description=manager.dialog_data["description"],
+                    price=manager.dialog_data["price"],
+                )
             )
+        await manager.start(
+            AdminCatalogue.view_single_product,
+            data=dict(product_id=str(product_id), category=product.category),
+            mode=StartMode.RESET_STACK,
         )
-    await manager.start(
-        AdminCatalogue.view_single_product,
-        data=dict(product_id=str(product_id), category=product.category),
-        mode=StartMode.RESET_STACK,
-    )
+    except EntityAlreadyExistsException:
+        await callback.answer(
+            text="Товар с таким названием уже есть! Выберите другое название.",
+        )
+        await manager.switch_to(AdminCatalogue.update_name)
 
 
 async def on_cancel_update(
@@ -173,19 +180,25 @@ async def on_create_product(
     container = manager.middleware_data["dishka_container"]
     service: ProductService = await container.get(ProductService)
     uow: AbstractUow = await container.get(AbstractUow)
-    async with uow:
-        product = await service.create(
-            input_dto=CreateProduct(
-                name=manager.dialog_data["name"],
-                description=manager.dialog_data["description"],
-                category=ProductCategory(category),
-                price=manager.dialog_data["price"],
+    try:
+        async with uow:
+            product = await service.create(
+                input_dto=CreateProduct(
+                    name=manager.dialog_data["name"],
+                    description=manager.dialog_data["description"],
+                    category=ProductCategory(category),
+                    price=manager.dialog_data["price"],
+                )
             )
+        await manager.start(
+            AdminCatalogue.view_single_product,
+            data=dict(product_id=str(product.id), category=category),
         )
-    await manager.start(
-        AdminCatalogue.view_single_product,
-        data=dict(product_id=str(product.id), category=category),
-    )
+    except EntityAlreadyExistsException:
+        await callback.answer(
+            text="Товар с таким названием уже есть! Выберите другое название.",
+        )
+        await manager.switch_to(AdminCatalogue.add_name)
 
 
 async def on_cancel_product_creation(
