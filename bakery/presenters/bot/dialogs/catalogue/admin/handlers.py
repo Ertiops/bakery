@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -16,6 +17,8 @@ from bakery.domains.entities.product import (
 from bakery.domains.services.product import ProductService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import AdminCatalogue
+
+log = logging.getLogger(__name__)
 
 
 async def on_update_clicked(
@@ -92,6 +95,7 @@ async def on_update_product(
     uow: AbstractUow = await manager.middleware_data["dishka_container"].get(
         AbstractUow
     )
+    log.info("Updating product with ID: %s", product_id)
     try:
         async with uow:
             product = await service.update_by_id(
@@ -180,6 +184,7 @@ async def on_create_product(
     container = manager.middleware_data["dishka_container"]
     service: ProductService = await container.get(ProductService)
     uow: AbstractUow = await container.get(AbstractUow)
+    log.info("Creating product in category: %s", category)
     try:
         async with uow:
             product = await service.create(
@@ -240,6 +245,7 @@ async def on_confirm_delete(
     container = manager.middleware_data["dishka_container"]
     service: ProductService = await container.get(ProductService)
     uow: AbstractUow = await container.get(AbstractUow)
+    log.info("Deleting product with ID: %s", product_id)
     async with uow:
         await service.delete_by_id(input_id=UUID(product_id))
     await manager.switch_to(AdminCatalogue.view_products)

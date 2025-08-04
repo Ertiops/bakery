@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -10,6 +11,8 @@ from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import UserCatalogue
+
+log = logging.getLogger(__name__)
 
 
 async def on_view_product_clicked(
@@ -38,6 +41,7 @@ async def update_quantity(manager: DialogManager, delta: int) -> None:
     product_id = UUID(manager.dialog_data["product_id"])
     quantity = max(0, manager.dialog_data.get("quantity", 0) + delta)
     manager.dialog_data["quantity"] = quantity
+    log.info("Updating quantity for product ID: %s to %d", product_id, quantity)
     async with uow:
         await service.create_or_update(
             input_dto=CreateCart(

@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from uuid import UUID
 
@@ -18,6 +19,8 @@ from bakery.domains.entities.pickup_address import (
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import AdminPickupAddress
+
+log = logging.getLogger(__name__)
 
 
 async def on_view_pickup_address_clicked(
@@ -54,6 +57,7 @@ async def on_create_pickup_address(
     container = manager.middleware_data["dishka_container"]
     service: PickupAddressService = await container.get(PickupAddressService)
     uow: AbstractUow = await container.get(AbstractUow)
+    log.info("Creating pickup address")
     try:
         async with uow:
             pickup_address = await service.create(
@@ -106,6 +110,7 @@ async def on_update_pickup_address(
     uow: AbstractUow = await manager.middleware_data["dishka_container"].get(
         AbstractUow
     )
+    log.info("Updating pickup address with ID: %s", pickup_address_id)
     try:
         async with uow:
             await service.update_by_id(
@@ -139,6 +144,7 @@ async def on_confirm_delete(
     service: PickupAddressService = await container.get(PickupAddressService)
     uow: AbstractUow = await container.get(AbstractUow)
     address_id = UUID(manager.dialog_data["pickup_address_id"])
+    log.info("Deleting pickup address with ID: %s", address_id)
     try:
         async with uow:
             await service.delete_by_id(input_id=address_id)

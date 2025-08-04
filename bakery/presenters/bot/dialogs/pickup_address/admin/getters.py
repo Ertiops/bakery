@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
@@ -11,6 +12,8 @@ from bakery.domains.entities.pickup_address import (
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
 
+log = logging.getLogger(__name__)
+
 
 async def get_pickup_address_list_data(
     dialog_manager: DialogManager,
@@ -21,6 +24,7 @@ async def get_pickup_address_list_data(
         AbstractUow
     )
     service: PickupAddressService = await container.get(PickupAddressService)
+    log.info("Fetching pickup addresses")
     async with uow:
         pickup_address_list = await service.get_list(
             input_dto=PickupAddressListParams(limit=100, offset=0)
@@ -49,6 +53,7 @@ async def get_selected_pickup_address(
     pickup_address_id = dialog_manager.start_data.get(  # type: ignore[union-attr]
         "pickup_address_id"
     ) or dialog_manager.dialog_data.get("pickup_address_id")  # type: ignore[union-attr]
+    log.info("Fetching pickup address with ID: %s", pickup_address_id)
     async with uow:
         pickup_address = await service.get_by_id(input_id=UUID(pickup_address_id))
     dialog_manager.dialog_data.update(

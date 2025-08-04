@@ -1,3 +1,4 @@
+import logging
 import re
 
 from aiogram.types import (
@@ -19,6 +20,8 @@ from bakery.presenters.bot.dialogs.registration.user.keyboards import get_share_
 from bakery.presenters.bot.dialogs.states import (
     RegistrationMenu,
 )
+
+log = logging.getLogger(__name__)
 
 
 async def name_input_handler(
@@ -49,6 +52,7 @@ async def on_phone_input(
     uow: AbstractUow = await dialog_manager.middleware_data["dishka_container"].get(
         AbstractUow
     )
+    log.info("Creating user with phone: %s", message.contact.phone_number)
     async with uow:
         await service.create(
             input_dto=CreateUser(
