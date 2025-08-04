@@ -2,7 +2,7 @@ from collections.abc import Callable
 from uuid import uuid4
 
 import pytest
-from dirty_equals import IsDatetime, IsInstance
+from dirty_equals import IsDatetime, IsInstance, IsList
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bakery.adapters.database.storages.cart import CartStorage
@@ -155,16 +155,20 @@ async def test__get_list(
             has_non_zero_quantity=False,
         )
     )
-    assert carts == [
-        CartWProduct(
-            user_id=db_cart.user_id,
-            quantity=db_cart.quantity,
-            product=IsInstance(Product),
-            created_at=IsDatetime,
-            updated_at=IsDatetime,
-        )
-        for db_cart in db_carts
-    ]
+    assert carts == IsList(
+        *[
+            CartWProduct(
+                user_id=db_cart.user_id,
+                quantity=db_cart.quantity,
+                product=IsInstance(Product),
+                created_at=IsDatetime,
+                updated_at=IsDatetime,
+            )
+            for db_cart in db_carts
+        ],
+        check_order=False,
+        length=len(db_carts),
+    )
 
 
 async def test__get_list__validate_filter__user_id(
