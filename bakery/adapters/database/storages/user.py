@@ -19,6 +19,7 @@ from bakery.domains.entities.user import (
     UpdateUser,
     User,
     UserListParams,
+    UserRole,
 )
 from bakery.domains.interfaces.storages.user import IUserStorage
 
@@ -45,6 +46,18 @@ class UserStorage(IUserStorage):
     async def get_by_tg_id(self, *, input_id: int) -> User | None:
         stmt = select(UserTable).where(
             UserTable.tg_id == input_id, UserTable.deleted_at.is_(None)
+        )
+        result = await self.__session.scalar(stmt)
+        return convert_user_to_dto(result=result) if result else None
+
+    async def get_admin(self) -> User | None:
+        stmt = (
+            select(UserTable)
+            .where(
+                UserTable.role == UserRole.ADMIN,
+                UserTable.deleted_at.is_(None),
+            )
+            .limit(1)
         )
         result = await self.__session.scalar(stmt)
         return convert_user_to_dto(result=result) if result else None
