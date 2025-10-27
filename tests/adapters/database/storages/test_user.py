@@ -123,6 +123,39 @@ async def test__get_by_tg_id__deleted(
     assert await user_storage.get_by_tg_id(input_id=db_user.tg_id) is None
 
 
+async def test__get_admin(
+    user_storage: UserStorage,
+    create_user: Callable,
+) -> None:
+    db_user: UserTable = await create_user(role=UserRole.ADMIN)
+    user = await user_storage.get_admin()
+    assert user == User(
+        id=db_user.id,
+        name=db_user.name,
+        tg_id=db_user.tg_id,
+        phone=db_user.phone,
+        role=db_user.role,
+        created_at=db_user.created_at,
+        updated_at=db_user.updated_at,
+    )
+
+
+async def test__get_admin__none(
+    user_storage: UserStorage,
+) -> None:
+    user = await user_storage.get_admin()
+    assert user is None
+
+
+async def test__get_admin__deleted(
+    user_storage: UserStorage,
+    create_user: Callable,
+) -> None:
+    await create_user(role=UserRole.ADMIN, deleted_at=now_utc())
+    user = await user_storage.get_admin()
+    assert user is None
+
+
 async def test__get_list(
     user_storage: UserStorage,
     create_user: Callable,
