@@ -1,10 +1,12 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bakery.adapters.database.storages.admin_contact import AdminContactStorage
 from bakery.adapters.database.storages.cart import CartStorage
 from bakery.adapters.database.storages.pickup_address import PickupAddressStorage
 from bakery.adapters.database.storages.product import ProductStorage
 from bakery.adapters.database.storages.user import UserStorage
+from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorage
 from bakery.domains.interfaces.storages.cart import ICartStorage
 from bakery.domains.interfaces.storages.pickup_address import IPickupAddressStorage
 from bakery.domains.interfaces.storages.product import IProductStorage
@@ -29,3 +31,8 @@ def pickup_address_storage(session: AsyncSession) -> IPickupAddressStorage:
 @pytest.fixture
 def cart_storage(session: AsyncSession) -> ICartStorage:
     return CartStorage(session=session)
+
+
+@pytest.fixture
+def admin_contact_storage(session: AsyncSession) -> IAdminContactStorage:
+    return AdminContactStorage(session=session)

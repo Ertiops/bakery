@@ -2,7 +2,7 @@ from bakery.adapters.database.tables import ProductTable
 from bakery.domains.entities.product import Product
 
 
-def convert_product_to_dto(
+def convert_product(
     *,
     result: ProductTable,
 ) -> Product:

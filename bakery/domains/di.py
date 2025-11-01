@@ -1,9 +1,11 @@
 from dishka import Provider, Scope, provide
 
+from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorage
 from bakery.domains.interfaces.storages.cart import ICartStorage
 from bakery.domains.interfaces.storages.pickup_address import IPickupAddressStorage
 from bakery.domains.interfaces.storages.product import IProductStorage
 from bakery.domains.interfaces.storages.user import IUserStorage
+from bakery.domains.services.admin_contact import AdminContactService
 from bakery.domains.services.cart import CartService
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.services.product import ProductService
@@ -28,3 +30,9 @@ class DomainProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def cart_service(self, cart_storage: ICartStorage) -> CartService:
         return CartService(cart_storage=cart_storage)
+
+    @provide(scope=Scope.REQUEST)
+    def admin_contact_service(
+        self, admin_contact_storage: IAdminContactStorage
+    ) -> AdminContactService:
+        return AdminContactService(admin_contact_storage=admin_contact_storage)
