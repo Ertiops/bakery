@@ -1,5 +1,6 @@
 from typing import Final
 
+from bakery.presenters.bot.content.buttons.main_menu import admin as admin_menu_btn
 from bakery.presenters.bot.content.buttons.main_menu import user as user_menu_btn
 
 USER_HELP: Final = "\n".join(
@@ -11,5 +12,11 @@ USER_HELP: Final = "\n".join(
     ]
 )
 
-
-ADMIN_GREETING: Final = "Здравствуйте, {name}!"
+ADMIN_HELP: Final = "\n".join(
+    [
+        f"<b>{admin_menu_btn.CATALOGUE}</b> — редактирование ассортимента",
+        f"<b>{admin_menu_btn.ORDERS}</b> — управление заказами",
+        f"<b>{admin_menu_btn.ADDRESSES}</b> — ведение адресами доставки",
+        f"<b>{admin_menu_btn.CONTACTS}</b> — контакты администратора",
+    ]
+)

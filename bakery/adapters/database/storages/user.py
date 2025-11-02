@@ -7,7 +7,7 @@ from sqlalchemy import exists, func, insert, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bakery.adapters.database.converters.user import convert_user_to_dto
+from bakery.adapters.database.converters.user import convert_user
 from bakery.adapters.database.tables import UserTable
 from bakery.application.exceptions import (
     EntityAlreadyExistsException,
@@ -34,21 +34,21 @@ class UserStorage(IUserStorage):
             result = (await self.__session.scalars(stmt)).one()
         except IntegrityError as e:
             self.__raise_exception(e)
-        return convert_user_to_dto(result=result)
+        return convert_user(result=result)
 
     async def get_by_id(self, *, input_id: UUID) -> User | None:
         stmt = select(UserTable).where(
             UserTable.id == input_id, UserTable.deleted_at.is_(None)
         )
         result = await self.__session.scalar(stmt)
-        return convert_user_to_dto(result=result) if result else None
+        return convert_user(result=result) if result else None
 
     async def get_by_tg_id(self, *, input_id: int) -> User | None:
         stmt = select(UserTable).where(
             UserTable.tg_id == input_id, UserTable.deleted_at.is_(None)
         )
         result = await self.__session.scalar(stmt)
-        return convert_user_to_dto(result=result) if result else None
+        return convert_user(result=result) if result else None
 
     async def get_admin(self) -> User | None:
         stmt = (
@@ -60,7 +60,7 @@ class UserStorage(IUserStorage):
             .limit(1)
         )
         result = await self.__session.scalar(stmt)
-        return convert_user_to_dto(result=result) if result else None
+        return convert_user(result=result) if result else None
 
     async def get_list(self, *, input_dto: UserListParams) -> Sequence[User]:
         stmt = (
@@ -70,7 +70,7 @@ class UserStorage(IUserStorage):
             .offset(input_dto.offset)
         )
         result = await self.__session.scalars(stmt)
-        return [convert_user_to_dto(result=r) for r in result]
+        return [convert_user(result=r) for r in result]
 
     async def count(self, *, input_dto: UserListParams) -> int:
         stmt = (
@@ -99,7 +99,7 @@ class UserStorage(IUserStorage):
             raise EntityNotFoundException(entity=User, entity_id=input_dto.id) from e
         except IntegrityError as e:
             self.__raise_exception(e)
-        return convert_user_to_dto(result=result)
+        return convert_user(result=result)
 
     async def delete_by_id(self, *, input_id: UUID) -> None:
         stmt = (

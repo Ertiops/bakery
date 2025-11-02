@@ -1,5 +1,5 @@
 from bakery.adapters.database.converters.pickup_address import (
-    convert_pickup_address_to_dto,
+    convert_pickup_address,
 )
 from bakery.adapters.database.tables import OrderTable
 from bakery.domains.entities.order import Order
@@ -18,7 +18,7 @@ def convert_order_to_dto(
         delivered_at=result.delivered_at,
         price=result.price,
         address=result.address,
-        pickup_address=convert_pickup_address_to_dto(result=result.pickup_address)
+        pickup_address=convert_pickup_address(result=result.pickup_address)
         if result.pickup_address
         else None,
         created_at=result.created_at,

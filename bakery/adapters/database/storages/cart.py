@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bakery.adapters.database.base import now_with_tz
 from bakery.adapters.database.converters.cart import (
-    convert_cart_to_dto,
-    convert_cart_w_product_to_dto,
+    convert_cart,
+    convert_cart_w_product,
 )
 from bakery.adapters.database.tables import CartTable, ProductTable
 from bakery.application.exceptions import (
@@ -49,7 +49,7 @@ class CartStorage(ICartStorage):
             result = (await self.__session.scalars(stmt)).one()
         except IntegrityError as e:
             self.__raise_exception(e)
-        return convert_cart_to_dto(result=result)
+        return convert_cart(result=result)
 
     async def get_w_product_by_user_product_ids(
         self, *, input_dto: GetCartByUserProductIds
@@ -67,7 +67,7 @@ class CartStorage(ICartStorage):
         result = (await self.__session.execute(stmt)).first()
         if result is None:
             return None
-        return convert_cart_w_product_to_dto(result=result._tuple())
+        return convert_cart_w_product(result=result._tuple())
 
     async def get_list(self, *, input_dto: CartListParams) -> Sequence[CartWProduct]:
         stmt = (
@@ -83,7 +83,7 @@ class CartStorage(ICartStorage):
         if input_dto.has_non_zero_quantity:
             stmt = stmt.where(CartTable.quantity > 0)
         result = (await self.__session.execute(stmt)).all()
-        return [convert_cart_w_product_to_dto(result=r._tuple()) for r in result]
+        return [convert_cart_w_product(result=r._tuple()) for r in result]
 
     def __raise_exception(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name  # type: ignore[union-attr]

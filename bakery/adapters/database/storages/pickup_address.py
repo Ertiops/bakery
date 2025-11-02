@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bakery.adapters.database.base import now_with_tz
 from bakery.adapters.database.converters.pickup_address import (
-    convert_pickup_address_to_dto,
+    convert_pickup_address,
 )
 from bakery.adapters.database.tables import PickupAddressTable
 from bakery.application.exceptions import (
@@ -39,14 +39,14 @@ class PickupAddressStorage(IPickupAddressStorage):
             result = (await self.__session.scalars(stmt)).one()
         except IntegrityError as e:
             self.__raise_exception(e)
-        return convert_pickup_address_to_dto(result=result)
+        return convert_pickup_address(result=result)
 
     async def get_by_id(self, *, input_id: UUID) -> PickupAddress | None:
         stmt = select(PickupAddressTable).where(
             PickupAddressTable.id == input_id, PickupAddressTable.deleted_at.is_(None)
         )
         result = await self.__session.scalar(stmt)
-        return convert_pickup_address_to_dto(result=result) if result else None
+        return convert_pickup_address(result=result) if result else None
 
     async def get_list(
         self, *, input_dto: PickupAddressListParams
@@ -59,7 +59,7 @@ class PickupAddressStorage(IPickupAddressStorage):
             .offset(input_dto.offset)
         )
         result = await self.__session.scalars(stmt)
-        return [convert_pickup_address_to_dto(result=r) for r in result]
+        return [convert_pickup_address(result=r) for r in result]
 
     async def count(self, *, input_dto: PickupAddressListParams) -> int:
         stmt = (
@@ -93,7 +93,7 @@ class PickupAddressStorage(IPickupAddressStorage):
             ) from e
         except IntegrityError as e:
             self.__raise_exception(e)
-        return convert_pickup_address_to_dto(result=result)
+        return convert_pickup_address(result=result)
 
     async def delete_by_id(self, *, input_id: UUID) -> None:
         stmt = (

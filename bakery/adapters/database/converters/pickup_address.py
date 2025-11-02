@@ -2,7 +2,7 @@ from bakery.adapters.database.tables import PickupAddressTable
 from bakery.domains.entities.pickup_address import PickupAddress
 
 
-def convert_pickup_address_to_dto(
+def convert_pickup_address(
     *,
     result: PickupAddressTable,
 ) -> PickupAddress:

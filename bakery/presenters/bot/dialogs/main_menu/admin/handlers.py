@@ -2,7 +2,10 @@ from aiogram.types import CallbackQuery
 from aiogram_dialog import DialogManager, StartMode
 from aiogram_dialog.widgets.kbd import Button
 
-from bakery.presenters.bot.dialogs.states import AdminCatalogue, AdminPickupAddress
+from bakery.presenters.bot.dialogs.states import (
+    AdminCatalogue,
+    AdminPickupAddress,
+)
 
 
 async def enter_catalog(
