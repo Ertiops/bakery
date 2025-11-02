@@ -9,7 +9,6 @@ def convert_admin_contact(
     return AdminContact(
         id=result.id,
         name=result.name,
-        phone=result.phone,
         tg_username=result.tg_username,
         created_at=result.created_at,
         updated_at=result.updated_at,

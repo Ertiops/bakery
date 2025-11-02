@@ -42,7 +42,6 @@ class AdminContactTable(BaseTable, TimestampedMixin, IdentifableMixin):
     __tablename__ = "admin_contacts"
 
     name: Mapped[str] = mapped_column(String(63), nullable=False)
-    phone: Mapped[str] = mapped_column(String(16), nullable=False)
     tg_username: Mapped[str] = mapped_column(String(63), nullable=False)
 
 

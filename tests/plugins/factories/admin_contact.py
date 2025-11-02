@@ -18,7 +18,6 @@ class AdminContactTableFactory(
     TimestampedFactoryMixin,
 ):
     name = IterUse[str](lambda count: f"test_name_{count}")
-    phone = IterUse[str](lambda count: f"+79999999999{count}")
     tg_username = IterUse[str](lambda count: f"test_tg_username_{count}")
 
 

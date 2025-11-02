@@ -3,12 +3,14 @@ from aiogram.filters import Command
 
 from bakery.presenters.bot.commands.utils import (
     Commands,
+    contact_command,
     help_command,
     start_command,
 )
 from bakery.presenters.bot.dialogs import (
     registration,
 )
+from bakery.presenters.bot.dialogs.admin_contact import admin as admin_contact
 from bakery.presenters.bot.dialogs.cart import user as user_cart
 from bakery.presenters.bot.dialogs.catalogue import admin as admin_catalogue
 from bakery.presenters.bot.dialogs.catalogue import user as user_catalogue
@@ -21,6 +23,7 @@ def register_dialogs(router: Router) -> None:
     dialog_router = Router()
     dialog_router.message(Command(Commands.START))(start_command)
     dialog_router.message(Command(Commands.HELP))(help_command)
+    dialog_router.message(Command(Commands.CONTACT))(contact_command)
     dialog_router.include_routers(
         registration.user_registration_dialog,
     )
@@ -33,5 +36,8 @@ def register_dialogs(router: Router) -> None:
     dialog_router.include_routers(
         user_main_menu.user_main_menu_dialog,
         user_cart.user_cart_dialog,
+    )
+    dialog_router.include_routers(
+        admin_contact.admin_contact_dialog,
     )
     router.include_router(dialog_router)

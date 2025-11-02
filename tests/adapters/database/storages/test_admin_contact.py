@@ -23,14 +23,12 @@ async def test__create(
 ) -> None:
     create_data = CreateAdminContact(
         name="test_name",
-        phone="+79999999999",
         tg_username="test_username",
     )
     admin_contact = await admin_contact_storage.create(input_dto=create_data)
     assert admin_contact == AdminContact(
         id=IsUUID,
         name=create_data.name,
-        phone=create_data.phone,
         tg_username=create_data.tg_username,
         created_at=IsDatetime,
         updated_at=IsDatetime,
@@ -49,7 +47,6 @@ async def test__get_last(
     assert admin_contact == AdminContact(
         id=db_admin_contact.id,
         name=db_admin_contact.name,
-        phone=db_admin_contact.phone,
         tg_username=db_admin_contact.tg_username,
         created_at=db_admin_contact.created_at,
         updated_at=db_admin_contact.updated_at,
@@ -70,14 +67,12 @@ async def test__update_by_id(
     update_data = UpdateAdminContact(
         id=db_admin_contact.id,
         name="test_name",
-        phone="+79999999999",
         tg_username="test_username",
     )
     admin_contact = await admin_contact_storage.update_by_id(input_dto=update_data)
     assert admin_contact == AdminContact(
         id=db_admin_contact.id,
         name=update_data.name,
-        phone=update_data.phone,
         tg_username=update_data.tg_username,
         created_at=db_admin_contact.created_at,
         updated_at=IsDatetime,

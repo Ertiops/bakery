@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 4610db984aaf
+Revision ID: 49197ab89704
 Revises:
-Create Date: 2025-11-01 10:54:13.465980
+Create Date: 2025-11-02 13:46:24.593409
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "4610db984aaf"
+revision: str = "49197ab89704"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -23,7 +23,6 @@ def upgrade() -> None:
     op.create_table(
         "admin_contacts",
         sa.Column("name", sa.String(length=63), nullable=False),
-        sa.Column("phone", sa.String(length=16), nullable=False),
         sa.Column("tg_username", sa.String(length=63), nullable=False),
         sa.Column(
             "created_at",

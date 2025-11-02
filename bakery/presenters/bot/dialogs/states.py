@@ -54,3 +54,14 @@ class AdminPickupAddress(StatesGroup):
     confirm_delete = State()
     delete = State()
     update = State()
+
+
+class AdminContact(StatesGroup):
+    view_one = State()
+    add_choice = State()
+    add_name = State()
+    add_tg_username = State()
+    add_confirm = State()
+    update_name = State()
+    update_tg_username = State()
+    update_confirm = State()
