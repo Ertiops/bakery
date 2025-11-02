@@ -6,5 +6,7 @@ pytest_plugins = (
     "tests.plugins.factories.product",
     "tests.plugins.factories.pickup_address",
     "tests.plugins.factories.cart",
+    "tests.plugins.factories.order",
+    "tests.plugins.factories.order_schedule",
     "tests.plugins.factories.admin_contact",
 )

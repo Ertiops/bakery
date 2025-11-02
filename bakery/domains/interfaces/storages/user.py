@@ -25,6 +25,10 @@ class IUserStorage(Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    async def get_admin(self) -> User | None:
+        raise NotImplementedError
+
+    @abstractmethod
     async def get_list(self, *, input_dto: UserListParams) -> Sequence[User]:
         raise NotImplementedError
 

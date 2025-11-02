@@ -130,6 +130,39 @@ async def test__get_by_tg_id__deleted(
         await user_service.get_by_tg_id(input_id=db_user.tg_id)
 
 
+async def test__get_admin(
+    user_service: UserService,
+    create_user: Callable,
+) -> None:
+    db_user: UserTable = await create_user(role=UserRole.ADMIN)
+    user = await user_service.get_admin()
+    assert user == User(
+        id=db_user.id,
+        name=db_user.name,
+        tg_id=db_user.tg_id,
+        phone=db_user.phone,
+        role=db_user.role,
+        created_at=db_user.created_at,
+        updated_at=db_user.updated_at,
+    )
+
+
+async def test__get_admin__none(
+    user_service: UserService,
+) -> None:
+    with pytest.raises(EntityNotFoundException):
+        await user_service.get_admin()
+
+
+async def test__get_admin__deleted(
+    user_service: UserService,
+    create_user: Callable,
+) -> None:
+    await create_user(role=UserRole.ADMIN, deleted_at=now_utc())
+    with pytest.raises(EntityNotFoundException):
+        await user_service.get_admin()
+
+
 async def test__get_list(
     user_service: UserService,
     create_user: Callable,

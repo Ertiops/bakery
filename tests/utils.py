@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config as AlembicConfig
@@ -18,6 +18,7 @@ TABLES_FOR_TRUNCATE: Sequence[str] = (
     "orders",
     "pickup_addresses",
     "carts",
+    "order_schedules",
     "admin_contacts",
 )
 TYPES_FOR_TRUNCATE: Sequence[str] = ("product_category", "order_status")
@@ -82,5 +83,5 @@ def get_diff_db_metadata(connection: Connection, metadata: MetaData):
     return compare_metadata(context=migration_ctx, metadata=metadata)
 
 
-def now_utc() -> datetime:
-    return datetime.now(tz=UTC)
+def now_utc(*, days: int = 0) -> datetime:
+    return datetime.now(tz=UTC) + timedelta(days=days)

@@ -32,6 +32,12 @@ class UserService:
             raise EntityNotFoundException(entity=User, entity_id=input_id)
         return user
 
+    async def get_admin(self) -> User:
+        user = await self.__user_storage.get_admin()
+        if user is None:
+            raise EntityNotFoundException(entity=User, entity_id=None)
+        return user
+
     async def get_list(self, *, input_dto: UserListParams) -> UserList:
         total = await self.__user_storage.count(input_dto=input_dto)
         items = await self.__user_storage.get_list(input_dto=input_dto)
