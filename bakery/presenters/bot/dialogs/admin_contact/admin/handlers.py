@@ -13,7 +13,7 @@ from bakery.application.exceptions import (
 from bakery.domains.entities.admin_contact import CreateAdminContact, UpdateAdminContact
 from bakery.domains.services.admin_contact import AdminContactService
 from bakery.domains.uow import AbstractUow
-from bakery.presenters.bot.dialogs.states import AdminContact
+from bakery.presenters.bot.dialogs.states import AdminAdminContact
 
 log = logging.getLogger(__name__)
 
@@ -32,12 +32,12 @@ async def open_admin_contact(
             admin_contact = await service.get_last()
         except EntityNotFoundException:
             await dialog_manager.start(
-                state=AdminContact.add_choice,
+                state=AdminAdminContact.add_choice,
                 mode=StartMode.RESET_STACK,
             )
             return
     await dialog_manager.start(
-        state=AdminContact.view_one,
+        state=AdminAdminContact.view_one,
         mode=StartMode.RESET_STACK,
         data=dict(
             contact_id=str(admin_contact.id),
@@ -53,7 +53,7 @@ async def on_create_name_input(
     manager: DialogManager,
 ) -> None:
     manager.dialog_data["name"] = message.text.strip()  # type: ignore[union-attr]
-    await manager.switch_to(AdminContact.add_tg_username)
+    await manager.switch_to(AdminAdminContact.add_tg_username)
 
 
 async def on_create_tg_username_input(
@@ -65,7 +65,7 @@ async def on_create_tg_username_input(
     if not text.startswith("@"):
         return
     manager.dialog_data["tg_username"] = message.text.strip()  # type: ignore[union-attr]
-    await manager.switch_to(AdminContact.add_confirm)
+    await manager.switch_to(AdminAdminContact.add_confirm)
 
 
 async def on_update_name_input(
@@ -74,7 +74,7 @@ async def on_update_name_input(
     manager: DialogManager,
 ) -> None:
     manager.dialog_data["name"] = message.text.strip()  # type: ignore[union-attr]
-    await manager.switch_to(AdminContact.update_tg_username)
+    await manager.switch_to(AdminAdminContact.update_tg_username)
 
 
 async def on_update_tg_username_input(
@@ -86,7 +86,7 @@ async def on_update_tg_username_input(
     if not text.startswith("@"):
         return
     manager.dialog_data["tg_username"] = message.text.strip()  # type: ignore[union-attr]
-    await manager.switch_to(AdminContact.update_confirm)
+    await manager.switch_to(AdminAdminContact.update_confirm)
 
 
 async def on_create(
@@ -106,7 +106,7 @@ async def on_create(
             )
         )
     await manager.start(
-        state=AdminContact.view_one,
+        state=AdminAdminContact.view_one,
         mode=StartMode.RESET_STACK,
         data=dict(
             contact_id=str(admin_contact.id),
@@ -122,7 +122,7 @@ async def on_cancel_creation(
     if callback.message is None:
         return
     await manager.start(
-        state=AdminContact.add_choice,
+        state=AdminAdminContact.add_choice,
         mode=StartMode.RESET_STACK,
     )
 
@@ -133,7 +133,7 @@ async def on_cancel_update(
     if callback.message is None:
         return
     await manager.start(
-        state=AdminContact.view_one,
+        state=AdminAdminContact.view_one,
         mode=StartMode.RESET_STACK,
         data=manager.start_data,
     )
@@ -157,7 +157,7 @@ async def on_update(
             )
         )
     await manager.start(
-        state=AdminContact.view_one,
+        state=AdminAdminContact.view_one,
         mode=StartMode.RESET_STACK,
         data=dict(
             contact_id=str(admin_contact.id),

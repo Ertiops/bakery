@@ -9,7 +9,11 @@ ADD_PREVIEW: Final = (
     "<b>Имя:</b> {name}\n"
     "<b>Телеграм:</b> {tg_username}\n"
 )
-CONTACT: Final = "<b>Контакт:</b>\n<b>Имя:</b> {name}\n<b>Телеграм:</b> {tg_username}\n"
+CONTACT: Final = (
+    "<b>Контакт Администратора:</b>\n\n"
+    "<b>Имя:</b> {name}\n"
+    "<b>Телеграм:</b> {tg_username}\n"
+)
 UPDATE_PREVIEW: Final = (
     "<b>Подтвердите изменение контакта:</b>\n\n"
     "<b>Имя:</b> {name}\n"

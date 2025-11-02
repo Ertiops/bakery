@@ -27,7 +27,7 @@ from bakery.presenters.bot.dialogs.admin_contact.admin.redirections import (
     to_update,
 )
 from bakery.presenters.bot.dialogs.main_menu.admin.redirections import to_main_menu
-from bakery.presenters.bot.dialogs.states import AdminContact
+from bakery.presenters.bot.dialogs.states import AdminAdminContact
 
 
 def admin_contact_window() -> Window:
@@ -47,7 +47,7 @@ def admin_contact_window() -> Window:
                 on_click=to_main_menu,
             ),
         ),
-        state=AdminContact.view_one,
+        state=AdminAdminContact.view_one,
         getter=get_admin_contact_data,
     )
 
@@ -67,7 +67,7 @@ def add_admin_contact_choice_window() -> Window:
                 on_click=to_main_menu,
             ),
         ),
-        state=AdminContact.add_choice,
+        state=AdminAdminContact.add_choice,
     )
 
 
@@ -76,7 +76,7 @@ def add_admin_contact_windows() -> list[Window]:
         Window(
             Const(admin_contact_msg.NAME_INPUT),
             MessageInput(on_create_name_input, content_types=[ContentType.TEXT]),
-            state=AdminContact.add_name,
+            state=AdminAdminContact.add_name,
         ),
         Window(
             Const(admin_contact_msg.TG_USERNAME_INPUT),
@@ -84,7 +84,7 @@ def add_admin_contact_windows() -> list[Window]:
                 on_create_tg_username_input,
                 content_types=[ContentType.TEXT],
             ),
-            state=AdminContact.add_tg_username,
+            state=AdminAdminContact.add_tg_username,
         ),
         Window(
             Format(admin_contact_msg.ADD_PREVIEW),
@@ -96,7 +96,7 @@ def add_admin_contact_windows() -> list[Window]:
                     on_click=on_cancel_creation,
                 ),
             ),
-            state=AdminContact.add_confirm,
+            state=AdminAdminContact.add_confirm,
             getter=get_admin_contact_preview_data,
         ),
     ]
@@ -107,7 +107,7 @@ def update_admin_contact_windows() -> list[Window]:
         Window(
             Const(admin_contact_msg.NAME_INPUT),
             MessageInput(on_update_name_input, content_types=[ContentType.TEXT]),
-            state=AdminContact.update_name,
+            state=AdminAdminContact.update_name,
         ),
         Window(
             Const(admin_contact_msg.TG_USERNAME_INPUT),
@@ -115,7 +115,7 @@ def update_admin_contact_windows() -> list[Window]:
                 on_update_tg_username_input,
                 content_types=[ContentType.TEXT],
             ),
-            state=AdminContact.update_tg_username,
+            state=AdminAdminContact.update_tg_username,
         ),
         Window(
             Format(admin_contact_msg.UPDATE_PREVIEW),
@@ -127,7 +127,7 @@ def update_admin_contact_windows() -> list[Window]:
                     on_click=on_cancel_update,
                 ),
             ),
-            state=AdminContact.update_confirm,
+            state=AdminAdminContact.update_confirm,
             getter=get_admin_contact_preview_data,
         ),
     ]

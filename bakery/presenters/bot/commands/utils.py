@@ -11,7 +11,12 @@ from bakery.domains.entities.user import User, UserRole
 from bakery.domains.services.admin_contact import AdminContactService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.content.messages.utils import ADMIN_HELP, USER_HELP
-from bakery.presenters.bot.dialogs.states import AdminContact, AdminMain, UserMain
+from bakery.presenters.bot.dialogs.states import (
+    AdminAdminContact,
+    AdminMain,
+    UserAdminContact,
+    UserMain,
+)
 from bakery.presenters.bot.utils.delete_after import delete_after
 
 log = logging.getLogger(__name__)
@@ -81,10 +86,18 @@ async def contact_command(message: Message, dialog_manager: DialogManager) -> No
         return
     match user.role:
         case UserRole.USER:
-            pass
+            await dialog_manager.start(
+                state=UserAdminContact.view_one,
+                mode=StartMode.RESET_STACK,
+                data=dict(
+                    contact_id=str(admin_contact.id),
+                    name=admin_contact.name,
+                    tg_username=admin_contact.tg_username,
+                ),
+            )
         case UserRole.ADMIN:
             await dialog_manager.start(
-                state=AdminContact.view_one,
+                state=AdminAdminContact.view_one,
                 mode=StartMode.RESET_STACK,
                 data=dict(
                     contact_id=str(admin_contact.id),

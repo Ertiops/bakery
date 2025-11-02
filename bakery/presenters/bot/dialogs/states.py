@@ -56,7 +56,7 @@ class AdminPickupAddress(StatesGroup):
     update = State()
 
 
-class AdminContact(StatesGroup):
+class AdminAdminContact(StatesGroup):
     view_one = State()
     add_choice = State()
     add_name = State()
@@ -65,3 +65,7 @@ class AdminContact(StatesGroup):
     update_name = State()
     update_tg_username = State()
     update_confirm = State()
+
+
+class UserAdminContact(StatesGroup):
+    view_one = State()

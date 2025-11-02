@@ -7,7 +7,7 @@ from bakery.presenters.bot.dialogs.admin_contact.admin.windows import (
     update_admin_contact_windows,
 )
 
-admin_contact_dialog = Dialog(
+admin_admin_contact_dialog = Dialog(
     admin_contact_window(),
     add_admin_contact_choice_window(),
     *add_admin_contact_windows(),
