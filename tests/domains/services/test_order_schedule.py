@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from datetime import date
 from uuid import uuid4
 
 import pytest
@@ -13,7 +14,7 @@ from bakery.domains.entities.order_schedule import (
     OrderSchedule,
     UpdateOrderSchedule,
 )
-from bakery.domains.services.order_chedule import OrderScheduleService
+from bakery.domains.services.order_schedule import OrderScheduleService
 from tests.utils import now_utc
 
 
@@ -99,6 +100,26 @@ async def test__get_last__deleted(
     await create_order_schedule(deleted_at=now_utc())
     with pytest.raises(EntityNotFoundException):
         await order_schedule_service.get_last()
+
+
+async def test__get_available_order_dates(
+    order_schedule_service: OrderScheduleService,
+    create_order_schedule: Callable,
+) -> None:
+    await create_order_schedule(
+        weekdays=(1, 2, 3, 4, 5, 6, 7),
+        min_days_before=2,
+        max_days_in_advance=1,
+    )
+    available_dates = await order_schedule_service.get_available_order_dates()
+    assert isinstance(available_dates[0], date)
+
+
+async def test__get_available_order_dates__entity_not_found_exception(
+    order_schedule_service: OrderScheduleService,
+) -> None:
+    with pytest.raises(EntityNotFoundException):
+        await order_schedule_service.get_available_order_dates()
 
 
 async def test__update_by_id(

@@ -52,12 +52,12 @@ class OrderStorage(IOrderStorage):
         )
         if input_dto.user_id is not None:
             stmt = stmt.where(OrderTable.user_id == input_dto.user_id)
-        if input_dto.pickup_address_id is not None:
+        if input_dto.pickup_address_name is not None:
             stmt = stmt.where(
-                OrderTable.pickup_address_id == input_dto.pickup_address_id
+                OrderTable.pickup_address_name == input_dto.pickup_address_name
             )
-        if input_dto.status is not None:
-            stmt = stmt.where(OrderTable.status == input_dto.status)
+        if input_dto.statuses is not None:
+            stmt = stmt.where(OrderTable.status.in_(input_dto.statuses))
         if input_dto.delivered_at is not None:
             stmt = stmt.where(OrderTable.delivered_at == input_dto.delivered_at)
 
@@ -72,12 +72,12 @@ class OrderStorage(IOrderStorage):
         )
         if input_dto.user_id is not None:
             stmt = stmt.where(OrderTable.user_id == input_dto.user_id)
-        if input_dto.pickup_address_id is not None:
+        if input_dto.pickup_address_name is not None:
             stmt = stmt.where(
-                OrderTable.pickup_address_id == input_dto.pickup_address_id
+                OrderTable.pickup_address_name == input_dto.pickup_address_name
             )
-        if input_dto.status is not None:
-            stmt = stmt.where(OrderTable.status == input_dto.status)
+        if input_dto.statuses is not None:
+            stmt = stmt.where(OrderTable.status.in_(input_dto.statuses))
         if input_dto.delivered_at is not None:
             stmt = stmt.where(OrderTable.delivered_at == input_dto.delivered_at)
 

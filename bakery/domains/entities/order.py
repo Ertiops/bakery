@@ -7,14 +7,14 @@ from uuid import UUID
 
 from bakery.application.entities import UNSET, Unset
 from bakery.domains.entities.common import Pagination, ToDictMixin
-from bakery.domains.entities.pickup_address import PickupAddress
 
 
 @unique
 class OrderStatus(StrEnum):
-    ON_ACCEPT = "on_accept"
-    IN_PROGRESS = "in_progress"
+    CREATED = "created"
+    CHANGED = "changed"
     DELIVERED = "delivered"
+    TO_CANCEL = "to_cancel"
     CANCELLED = "cancelled"
     PAID = "paid"
 
@@ -25,12 +25,20 @@ class OrderProduct(TypedDict):
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class CreateOrderAsUser(ToDictMixin):
+    user_id: UUID
+    pickup_address_name: str
+    status: OrderStatus
+    delivered_at: date
+    has_delivery: bool
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class CreateOrder(ToDictMixin):
     user_id: UUID
-    pickup_address_id: UUID | None
+    pickup_address_name: str
     status: OrderStatus
     products: Sequence[OrderProduct]
-    address: str | None
     delivered_at: date
     price: int
 
@@ -39,13 +47,11 @@ class CreateOrder(ToDictMixin):
 class Order:
     id: UUID
     user_id: UUID
-    pickup_address_id: UUID
+    pickup_address_name: str
     status: OrderStatus
     products: Sequence[Mapping]
-    address: str | None
     delivered_at: date
     price: int
-    pickup_address: PickupAddress | None
     created_at: datetime
     updated_at: datetime
 
@@ -53,8 +59,8 @@ class Order:
 @dataclass(frozen=True, kw_only=True, slots=True)
 class OrderListParams(Pagination):
     user_id: UUID | None = None
-    pickup_address_id: UUID | None = None
-    status: OrderStatus | None = None
+    pickup_address_name: str | None = None
+    statuses: Sequence[OrderStatus] | None = None
     delivered_at: date | None = None
 
 
@@ -68,9 +74,8 @@ class OrderList:
 class UpdateOrder(ToDictMixin):
     id: UUID
     user_id: UUID | Unset = UNSET
-    pickup_address_id: UUID | Unset = UNSET
+    pickup_address_name: str | Unset = UNSET
     status: OrderStatus | Unset = UNSET
-    products: Sequence[Mapping] | Unset = UNSET
-    address: str | Unset = UNSET
+    products: Sequence[OrderProduct] | Unset = UNSET
     delivered_at: date | Unset = UNSET
     price: int | Unset = UNSET

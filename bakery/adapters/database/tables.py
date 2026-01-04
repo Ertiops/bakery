@@ -6,7 +6,7 @@ from uuid import UUID
 
 from sqlalchemy import Date, ForeignKey, Index, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from bakery.adapters.database.base import BaseTable, IdentifableMixin, TimestampedMixin
 from bakery.adapters.database.utils import make_pg_enum
@@ -79,7 +79,7 @@ class PickupAddressTable(BaseTable, TimestampedMixin, IdentifableMixin):
         ),
     )
 
-    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    name: Mapped[str] = mapped_column(String(512), nullable=False)
 
 
 class CartTable(BaseTable, TimestampedMixin, IdentifableMixin):
@@ -103,9 +103,7 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
     __tablename__ = "orders"
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    pickup_address_id: Mapped[UUID] = mapped_column(
-        ForeignKey("pickup_addresses.id"), nullable=True
-    )
+    pickup_address_name: Mapped[str] = mapped_column(String(512), nullable=False)
     status: Mapped[OrderStatus] = mapped_column(
         make_pg_enum(OrderStatus, name="order_status"),
         nullable=False,
@@ -114,7 +112,6 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
         JSONB,
         nullable=False,
     )
-    address: Mapped[str] = mapped_column(String(256), nullable=True)
     delivered_at: Mapped[date] = mapped_column(
         Date,
         nullable=False,
@@ -122,14 +119,6 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
     price: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
-    )
-
-    pickup_address: Mapped[PickupAddressTable] = relationship(
-        "PickupAddressTable",
-        lazy="joined",
-        innerjoin=False,
-        backref="orders",
-        foreign_keys=[pickup_address_id],
     )
 
 
