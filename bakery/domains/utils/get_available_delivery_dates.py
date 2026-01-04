@@ -22,7 +22,7 @@ def get_available_delivery_dates(
 
     allowed_weekdays: set[int] = set()
     for wd in order_schedule.weekdays:
-        wd0 = wd - 1 if weekdays_base == 1 else wd  # -> 0..6
+        wd0 = wd - 1 if weekdays_base == 1 else wd
         if not 0 <= wd0 <= 6:
             return []
         allowed_weekdays.add(wd0)
