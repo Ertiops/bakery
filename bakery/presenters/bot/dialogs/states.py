@@ -44,6 +44,14 @@ class UserCart(StatesGroup):
     create_or_update = State()
 
 
+class UserOrder(StatesGroup):
+    add_address = State()
+    add_manual_address = State()
+    add_date = State()
+    confirm = State()
+    finish = State()
+
+
 class AdminPickupAddress(StatesGroup):
     view_all = State()
     view_one = State()

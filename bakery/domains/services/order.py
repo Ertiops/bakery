@@ -8,16 +8,31 @@ from bakery.domains.entities.order import (
     OrderListParams,
     UpdateOrder,
 )
+from bakery.domains.entities.order_schedule import OrderSchedule
 from bakery.domains.interfaces.storages.order import IOrderStorage
+from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
 
 
 class OrderService:
     __order_storage: IOrderStorage
+    __order_schedule_storage: IOrderScheduleStorage
 
-    def __init__(self, order_storage: IOrderStorage) -> None:
+    def __init__(
+        self,
+        order_storage: IOrderStorage,
+        order_schedule_storage: IOrderScheduleStorage,
+    ) -> None:
         self.__order_storage = order_storage
+        self.__order_schedule_storage = order_schedule_storage
 
     async def create(self, *, input_dto: CreateOrder) -> Order:
+        # TODO: реальная логика создания заказа
+        order_schedule = await self.__order_schedule_storage.get_last()
+        if order_schedule is None:
+            raise EntityNotFoundException(
+                entity=OrderSchedule,
+                entity_id=None,
+            )
         return await self.__order_storage.create(input_dto=input_dto)
 
     async def get_by_id(self, *, input_id: UUID) -> Order:

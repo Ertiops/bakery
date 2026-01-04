@@ -3,7 +3,7 @@ from aiogram_dialog.api.entities import StartMode
 from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.kbd import Button
 
-from bakery.presenters.bot.dialogs.states import UserCatalogue
+from bakery.presenters.bot.dialogs.states import UserCatalogue, UserOrder
 
 
 async def to_product_categories(
@@ -19,5 +19,14 @@ async def to_product_list(
     await manager.start(
         state=UserCatalogue.view_products,
         data=dict(category=category),
+        mode=StartMode.RESET_STACK,
+    )
+
+
+async def to_order_create(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    await manager.start(
+        state=UserOrder.add_address,
         mode=StartMode.RESET_STACK,
     )

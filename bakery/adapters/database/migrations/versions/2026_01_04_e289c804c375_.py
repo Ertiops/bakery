@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 5047926d9a77
+Revision ID: e289c804c375
 Revises:
-Create Date: 2025-11-02 22:54:57.135719
+Create Date: 2026-01-04 14:06:07.236253
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "5047926d9a77"
+revision: str = "e289c804c375"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -63,7 +63,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "pickup_addresses",
-        sa.Column("name", sa.String(length=256), nullable=False),
+        sa.Column("name", sa.String(length=512), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -205,13 +205,14 @@ def upgrade() -> None:
     op.create_table(
         "orders",
         sa.Column("user_id", sa.UUID(), nullable=False),
-        sa.Column("pickup_address_id", sa.UUID(), nullable=True),
+        sa.Column("pickup_address_name", sa.String(length=512), nullable=False),
         sa.Column(
             "status",
             postgresql.ENUM(
-                "on_accept",
-                "in_progress",
+                "created",
+                "changed",
                 "delivered",
+                "to_cancel",
                 "cancelled",
                 "paid",
                 name="order_status",
@@ -219,7 +220,6 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("products", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-        sa.Column("address", sa.String(length=256), nullable=True),
         sa.Column("delivered_at", sa.Date(), nullable=False),
         sa.Column("price", sa.Integer(), nullable=False),
         sa.Column(
@@ -236,11 +236,6 @@ def upgrade() -> None:
         ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("id", sa.UUID(), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["pickup_address_id"],
-            ["pickup_addresses.id"],
-            name=op.f("fk__orders__pickup_address_id__pickup_addresses"),
-        ),
         sa.ForeignKeyConstraint(
             ["user_id"], ["users.id"], name=op.f("fk__orders__user_id__users")
         ),

@@ -10,7 +10,7 @@ from bakery.domains.interfaces.storages.user import IUserStorage
 from bakery.domains.services.admin_contact import AdminContactService
 from bakery.domains.services.cart import CartService
 from bakery.domains.services.order import OrderService
-from bakery.domains.services.order_chedule import OrderScheduleService
+from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.services.product import ProductService
 from bakery.domains.services.user import UserService
@@ -39,8 +39,14 @@ def cart_service(cart_storage: ICartStorage) -> CartService:
 
 
 @pytest.fixture
-def order_service(order_storage: IOrderStorage) -> OrderService:
-    return OrderService(order_storage=order_storage)
+def order_service(
+    order_storage: IOrderStorage,
+    order_schedule_storage: IOrderScheduleStorage,
+) -> OrderService:
+    return OrderService(
+        order_storage=order_storage,
+        order_schedule_storage=order_schedule_storage,
+    )
 
 
 @pytest.fixture
