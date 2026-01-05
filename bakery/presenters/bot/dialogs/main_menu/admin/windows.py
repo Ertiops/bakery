@@ -8,6 +8,7 @@ from bakery.presenters.bot.dialogs.admin_contact.admin.handlers import (
 )
 from bakery.presenters.bot.dialogs.main_menu.admin.handlers import (
     enter_catalog,
+    enter_delivery_cost,
     enter_pickup_address_menu,
 )
 from bakery.presenters.bot.dialogs.states import AdminMain
@@ -31,6 +32,11 @@ def admin_main_menu_window() -> Window:
                 Const(admin_main_menu_msg.CONTACTS),
                 id="contacts",
                 on_click=open_admin_contact,
+            ),
+            Button(
+                Const(admin_main_menu_msg.DELIVERY_COST),
+                id="delivery_cost",
+                on_click=enter_delivery_cost,
             ),
             width=1,
         ),

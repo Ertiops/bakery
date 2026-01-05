@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from bakery.adapters.database.config import DatabaseConfig
 from bakery.adapters.database.storages.admin_contact import AdminContactStorage
 from bakery.adapters.database.storages.cart import CartStorage
+from bakery.adapters.database.storages.delivery_cost import DeliveryCostStorage
 from bakery.adapters.database.storages.order import OrderStorage
 from bakery.adapters.database.storages.order_schedule import OrderScheduleStorage
 from bakery.adapters.database.storages.pickup_address import PickupAddressStorage
@@ -15,6 +16,7 @@ from bakery.adapters.database.uow import SqlalchemyUow
 from bakery.adapters.database.utils import create_engine, create_sessionmaker
 from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorage
 from bakery.domains.interfaces.storages.cart import ICartStorage
+from bakery.domains.interfaces.storages.delivery_cost import IDeliveryCostStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
 from bakery.domains.interfaces.storages.pickup_address import IPickupAddressStorage
@@ -76,3 +78,7 @@ class DatabaseProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def admin_contact_storage(self, uow: SqlalchemyUow) -> IAdminContactStorage:
         return AdminContactStorage(session=uow.session)
+
+    @provide(scope=Scope.REQUEST)
+    def delivery_cost_storage(self, uow: SqlalchemyUow) -> IDeliveryCostStorage:
+        return DeliveryCostStorage(session=uow.session)
