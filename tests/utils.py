@@ -20,6 +20,7 @@ TABLES_FOR_TRUNCATE: Sequence[str] = (
     "carts",
     "order_schedules",
     "admin_contacts",
+    "delivery_costs",
 )
 TYPES_FOR_TRUNCATE: Sequence[str] = ("product_category", "order_status")
 

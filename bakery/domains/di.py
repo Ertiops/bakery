@@ -2,6 +2,7 @@ from dishka import Provider, Scope, provide
 
 from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorage
 from bakery.domains.interfaces.storages.cart import ICartStorage
+from bakery.domains.interfaces.storages.delivery_cost import IDeliveryCostStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
 from bakery.domains.interfaces.storages.pickup_address import IPickupAddressStorage
@@ -9,6 +10,7 @@ from bakery.domains.interfaces.storages.product import IProductStorage
 from bakery.domains.interfaces.storages.user import IUserStorage
 from bakery.domains.services.admin_contact import AdminContactService
 from bakery.domains.services.cart import CartService
+from bakery.domains.services.delivery_cost import DeliveryCostService
 from bakery.domains.services.order import OrderService
 from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.services.pickup_address import PickupAddressService
@@ -57,3 +59,9 @@ class DomainProvider(Provider):
         self, admin_contact_storage: IAdminContactStorage
     ) -> AdminContactService:
         return AdminContactService(admin_contact_storage=admin_contact_storage)
+
+    @provide(scope=Scope.REQUEST)
+    def delivery_cost_service(
+        self, delivery_cost_storage: IDeliveryCostStorage
+    ) -> DeliveryCostService:
+        return DeliveryCostService(delivery_cost_storage=delivery_cost_storage)

@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from bakery.adapters.database.storages.admin_contact import AdminContactStorage
 from bakery.adapters.database.storages.cart import CartStorage
+from bakery.adapters.database.storages.delivery_cost import DeliveryCostStorage
 from bakery.adapters.database.storages.order import OrderStorage
 from bakery.adapters.database.storages.order_schedule import OrderScheduleStorage
 from bakery.adapters.database.storages.pickup_address import PickupAddressStorage
@@ -10,6 +11,7 @@ from bakery.adapters.database.storages.product import ProductStorage
 from bakery.adapters.database.storages.user import UserStorage
 from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorage
 from bakery.domains.interfaces.storages.cart import ICartStorage
+from bakery.domains.interfaces.storages.delivery_cost import IDeliveryCostStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
 from bakery.domains.interfaces.storages.pickup_address import IPickupAddressStorage
@@ -50,3 +52,8 @@ def order_schedule_storage(session: AsyncSession) -> IOrderScheduleStorage:
 @pytest.fixture
 def admin_contact_storage(session: AsyncSession) -> IAdminContactStorage:
     return AdminContactStorage(session=session)
+
+
+@pytest.fixture
+def delivery_cost_storage(session: AsyncSession) -> IDeliveryCostStorage:
+    return DeliveryCostStorage(session=session)

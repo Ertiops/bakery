@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: e289c804c375
+Revision ID: a63c274afc35
 Revises:
-Create Date: 2026-01-04 14:06:07.236253
+Create Date: 2026-01-05 14:25:07.431732
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "e289c804c375"
+revision: str = "a63c274afc35"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -39,6 +39,25 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("id", sa.UUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__admin_contacts")),
+    )
+    op.create_table(
+        "delivery_costs",
+        sa.Column("price", sa.Integer(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("TIMEZONE('utc', now())"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("TIMEZONE('utc', now())"),
+            nullable=False,
+        ),
+        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("id", sa.UUID(), nullable=False),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk__delivery_costs")),
     )
     op.create_table(
         "order_schedules",
@@ -277,5 +296,6 @@ def downgrade() -> None:
     )
     op.drop_table("pickup_addresses")
     op.drop_table("order_schedules")
+    op.drop_table("delivery_costs")
     op.drop_table("admin_contacts")
     # ### end Alembic commands ###

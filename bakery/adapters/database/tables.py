@@ -46,6 +46,12 @@ class AdminContactTable(BaseTable, TimestampedMixin, IdentifableMixin):
     tg_username: Mapped[str] = mapped_column(String(63), nullable=False)
 
 
+class DeliveryCostTable(BaseTable, TimestampedMixin, IdentifableMixin):
+    __tablename__ = "delivery_costs"
+
+    price: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
 class ProductTable(BaseTable, TimestampedMixin, IdentifableMixin):
     __tablename__ = "products"
 

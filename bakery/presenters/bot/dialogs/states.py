@@ -33,6 +33,12 @@ class AdminCatalogue(StatesGroup):
     update_confirm = State()
 
 
+class AdminDeliveryPrice(StatesGroup):
+    view = State()
+    create = State()
+    update = State()
+
+
 class UserCatalogue(StatesGroup):
     select_category = State()
     view_products = State()

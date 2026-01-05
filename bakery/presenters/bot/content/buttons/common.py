@@ -1,7 +1,7 @@
 from typing import Final
 
 NEXT: Final = "Продолжить ➡️"
-BACK: Final = "🔙 Назад"
+BACK: Final = "⬅️ Назад"
 ADD: Final = "➕ Добавить"
 SHARE: Final = "📤 Поделиться"
 CREATE: Final = "✅ Создать"
