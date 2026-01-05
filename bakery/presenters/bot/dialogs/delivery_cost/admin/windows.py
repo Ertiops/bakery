@@ -3,6 +3,7 @@ from aiogram_dialog.widgets.input import TextInput
 from aiogram_dialog.widgets.kbd import Button, Row
 from aiogram_dialog.widgets.text import Const, Format, Multi
 
+from bakery.presenters.bot.content.buttons import common as common_btn
 from bakery.presenters.bot.dialogs.delivery_cost.admin.getters import (
     get_delivery_cost_data,
 )
@@ -29,20 +30,20 @@ def admin_delivery_cost_windows() -> list[Window]:
             ),
             Row(
                 Button(
-                    Const("➕ Создать"),
+                    Const(common_btn.CREATE),
                     id="create",
                     on_click=to_create_delivery_cost,
                     when=lambda d, *_: not d.get("has_cost"),
                 ),
                 Button(
-                    Const("✏️ Изменить"),
+                    Const(common_btn.UPDATE),
                     id="update",
                     on_click=to_update_delivery_cost,
                     when=lambda d, *_: d.get("has_cost"),
                 ),
             ),
             Row(
-                Button(Const("⬅️ Назад"), id="back", on_click=to_admin_main_menu),
+                Button(Const(common_btn.BACK), id="back", on_click=to_admin_main_menu),
             ),
             state=AdminDeliveryPrice.view,
             getter=get_delivery_cost_data,
@@ -56,7 +57,7 @@ def admin_delivery_cost_windows() -> list[Window]:
             ),
             Row(
                 Button(
-                    Const("⬅️ Назад"),
+                    Const(common_btn.BACK),
                     id="back",
                     on_click=lambda c, b, m: m.switch_to(AdminDeliveryPrice.view),
                 ),
@@ -72,7 +73,7 @@ def admin_delivery_cost_windows() -> list[Window]:
             ),
             Row(
                 Button(
-                    Const("⬅️ Назад"),
+                    Const(common_btn.BACK),
                     id="back",
                     on_click=lambda c, b, m: m.switch_to(AdminDeliveryPrice.view),
                 ),
