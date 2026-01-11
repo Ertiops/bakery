@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: a63c274afc35
+Revision ID: 21e32fd79906
 Revises:
-Create Date: 2026-01-05 14:25:07.431732
+Create Date: 2026-01-11 14:49:10.377862
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "a63c274afc35"
+revision: str = "21e32fd79906"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -240,7 +240,8 @@ def upgrade() -> None:
         ),
         sa.Column("products", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column("delivered_at", sa.Date(), nullable=False),
-        sa.Column("price", sa.Integer(), nullable=False),
+        sa.Column("total_price", sa.Integer(), nullable=False),
+        sa.Column("delivery_price", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

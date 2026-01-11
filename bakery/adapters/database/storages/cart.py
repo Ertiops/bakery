@@ -1,7 +1,8 @@
 from collections.abc import Sequence
 from typing import NoReturn
+from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -84,6 +85,10 @@ class CartStorage(ICartStorage):
             stmt = stmt.where(CartTable.quantity > 0)
         result = (await self.__session.execute(stmt)).all()
         return [convert_cart_w_product(result=r._tuple()) for r in result]
+
+    async def delete_hard_by_user_id(self, *, input_id: UUID) -> None:
+        stmt = delete(CartTable).where(CartTable.user_id == input_id)
+        await self.__session.execute(stmt)
 
     def __raise_exception(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name  # type: ignore[union-attr]

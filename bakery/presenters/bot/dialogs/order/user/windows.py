@@ -27,7 +27,7 @@ from bakery.presenters.bot.dialogs.states import UserOrder
 def create_order_windows() -> list[Window]:
     return [
         Window(
-            Const(user_msg.CREATE_ORDER),
+            Format(user_msg.CREATE_ORDER),
             ScrollingGroup(
                 Select(
                     Format("{item[name]}"),
@@ -123,6 +123,10 @@ def create_order_windows() -> list[Window]:
                 ),
                 items="cart_items",
                 when=lambda d, *_: d.get("has_cart_items"),
+            ),
+            Format(
+                "\n\n🚚 Доставка по городу: {delivery_cost} руб.",
+                when=lambda d, *_: d.get("is_city_delivery"),
             ),
             Format("\n\n💰 Итого: {total}", when=lambda d, *_: d.get("has_cart_items")),
             Row(

@@ -13,7 +13,8 @@ def convert_order_to_dto(
         status=result.status,
         products=result.products,
         delivered_at=result.delivered_at,
-        price=result.price,
+        total_price=result.total_price,
+        delivery_price=result.delivery_price,
         created_at=result.created_at,
         updated_at=result.updated_at,
     )

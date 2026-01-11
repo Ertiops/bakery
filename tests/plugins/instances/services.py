@@ -44,10 +44,12 @@ def cart_service(cart_storage: ICartStorage) -> CartService:
 def order_service(
     order_storage: IOrderStorage,
     order_schedule_storage: IOrderScheduleStorage,
+    cart_storage: ICartStorage,
 ) -> OrderService:
     return OrderService(
         order_storage=order_storage,
         order_schedule_storage=order_schedule_storage,
+        cart_storage=cart_storage,
     )
 
 

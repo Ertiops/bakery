@@ -10,6 +10,7 @@ from bakery.domains.entities.cart import CartListParams
 from bakery.domains.entities.pickup_address import PickupAddressListParams
 from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
+from bakery.domains.services.delivery_cost import DeliveryCostService
 from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
@@ -23,6 +24,9 @@ async def get_pickup_address_data(
     pickup_address_service: PickupAddressService = await container.get(
         PickupAddressService
     )
+    delivery_cost_service: DeliveryCostService = await container.get(
+        DeliveryCostService
+    )
     uow = await container.get(AbstractUow)
     async with uow:
         pickup_addresses = await pickup_address_service.get_list(
@@ -31,12 +35,19 @@ async def get_pickup_address_data(
                 offset=0,
             )
         )
+        try:
+            cost = await delivery_cost_service.get_last()
+            delivery_cost = cost.price
+        except EntityNotFoundException:
+            delivery_cost = 0
+
     return dict(
         addresses=[
             dict(id=str(pickup_address.id), name=pickup_address.name)
             for pickup_address in pickup_addresses.items
         ],
         has_addresses=bool(pickup_addresses.items),
+        delivery_cost=delivery_cost,
     )
 
 
@@ -50,13 +61,18 @@ async def get_order_confirm_data(
     pickup_address_service: PickupAddressService = await container.get(
         PickupAddressService
     )
+    delivery_cost_service: DeliveryCostService = await container.get(
+        DeliveryCostService
+    )
 
     user: User = dialog_manager.middleware_data["current_user"]
     pickup_address_id: str | None = dialog_manager.dialog_data.get("pickup_address_id")
 
     cart_items: list[dict[str, Any]] = []
     total = 0
-    pickup_address_name: str | None = None
+    pickup_address_name: str | None = dialog_manager.dialog_data.get(
+        "pickup_address_name"
+    )
 
     async with uow:
         carts = await cart_service.get_list(
@@ -81,6 +97,17 @@ async def get_order_confirm_data(
                     subtotal=subtotal,
                 )
             )
+        try:
+            cost = await delivery_cost_service.get_last()
+            delivery_cost = cost.price
+        except EntityNotFoundException:
+            delivery_cost = 0
+
+    is_city_delivery = dialog_manager.dialog_data.get(
+        "pickup_address_id"
+    ) is None and bool(pickup_address_name)
+
+    total = total + (delivery_cost if is_city_delivery else 0)
 
     if pickup_address_id:
         async with uow:
@@ -103,6 +130,8 @@ async def get_order_confirm_data(
         order_date_label=order_date_label,
         has_order_date=bool(order_date_label),
         total=total,
+        delivery_cost=delivery_cost,
+        is_city_delivery=is_city_delivery,
     )
 
 

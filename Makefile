@@ -41,6 +41,11 @@ local-apply-migrations:
 local-delete-migrations:
 	find $(PROJECT_NAME)/adapters/database/migrations/versions -type f ! -name '__init__.py' -delete
 
+local-recreate-migrations: ## Recreate alembic migrations
+	find $(PROJECT_NAME)/adapters/database/migrations/versions -type f ! -name '__init__.py' -delete
+	.venv/bin/python -m $(PROJECT_NAME).adapters.database revision --autogenerate
+	.venv/bin/python -m $(PROJECT_NAME).adapters.database upgrade head
+
 test: ## Run tests
 	$(POETRY) run $(PYTEST) -vx $(TEST_PATH)
 

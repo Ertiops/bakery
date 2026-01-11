@@ -122,7 +122,11 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
         Date,
         nullable=False,
     )
-    price: Mapped[int] = mapped_column(
+    total_price: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+    delivery_price: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
     )

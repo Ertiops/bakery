@@ -1,4 +1,4 @@
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import StrEnum, unique
@@ -21,16 +21,8 @@ class OrderStatus(StrEnum):
 
 class OrderProduct(TypedDict):
     name: str
+    price: int
     quantity: int
-
-
-@dataclass(frozen=True, kw_only=True, slots=True)
-class CreateOrderAsUser(ToDictMixin):
-    user_id: UUID
-    pickup_address_name: str
-    status: OrderStatus
-    delivered_at: date
-    has_delivery: bool
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -40,7 +32,8 @@ class CreateOrder(ToDictMixin):
     status: OrderStatus
     products: Sequence[OrderProduct]
     delivered_at: date
-    price: int
+    total_price: int
+    delivery_price: int
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -49,9 +42,10 @@ class Order:
     user_id: UUID
     pickup_address_name: str
     status: OrderStatus
-    products: Sequence[Mapping]
+    products: Sequence[OrderProduct]
     delivered_at: date
-    price: int
+    total_price: int
+    delivery_price: int
     created_at: datetime
     updated_at: datetime
 
@@ -78,4 +72,5 @@ class UpdateOrder(ToDictMixin):
     status: OrderStatus | Unset = UNSET
     products: Sequence[OrderProduct] | Unset = UNSET
     delivered_at: date | Unset = UNSET
-    price: int | Unset = UNSET
+    total_price: int | Unset = UNSET
+    delivery_price: int | Unset = UNSET

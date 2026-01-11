@@ -9,6 +9,7 @@ from bakery.domains.entities.order import (
     UpdateOrder,
 )
 from bakery.domains.entities.order_schedule import OrderSchedule
+from bakery.domains.interfaces.storages.cart import ICartStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
 
@@ -16,23 +17,26 @@ from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStor
 class OrderService:
     __order_storage: IOrderStorage
     __order_schedule_storage: IOrderScheduleStorage
+    __cart_storage: ICartStorage
 
     def __init__(
         self,
         order_storage: IOrderStorage,
         order_schedule_storage: IOrderScheduleStorage,
+        cart_storage: ICartStorage,
     ) -> None:
         self.__order_storage = order_storage
         self.__order_schedule_storage = order_schedule_storage
+        self.__cart_storage = cart_storage
 
     async def create(self, *, input_dto: CreateOrder) -> Order:
-        # TODO: реальная логика создания заказа
         order_schedule = await self.__order_schedule_storage.get_last()
         if order_schedule is None:
             raise EntityNotFoundException(
                 entity=OrderSchedule,
                 entity_id=None,
             )
+        await self.__cart_storage.delete_hard_by_user_id(input_id=input_dto.user_id)
         return await self.__order_storage.create(input_dto=input_dto)
 
     async def get_by_id(self, *, input_id: UUID) -> Order:
