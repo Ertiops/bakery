@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from collections.abc import Sequence
 from typing import Protocol
+from uuid import UUID
 
 from bakery.domains.entities.cart import (
     Cart,
@@ -24,4 +25,8 @@ class ICartStorage(Protocol):
 
     @abstractmethod
     async def get_list(self, *, input_dto: CartListParams) -> Sequence[CartWProduct]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete_hard_by_user_id(self, *, input_id: UUID) -> None:
         raise NotImplementedError

@@ -42,10 +42,12 @@ class DomainProvider(Provider):
         self,
         order_storage: IOrderStorage,
         order_schedule_storage: IOrderScheduleStorage,
+        cart_storage: ICartStorage,
     ) -> OrderService:
         return OrderService(
             order_storage=order_storage,
             order_schedule_storage=order_schedule_storage,
+            cart_storage=cart_storage,
         )
 
     @provide(scope=Scope.REQUEST)

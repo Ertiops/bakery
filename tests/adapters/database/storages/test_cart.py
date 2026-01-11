@@ -3,6 +3,7 @@ from uuid import uuid4
 
 import pytest
 from dirty_equals import IsDatetime, IsInstance, IsList
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bakery.adapters.database.storages.cart import CartStorage
@@ -293,3 +294,15 @@ async def test__get_list_by_user_id__validate_deleted_cart(
             for db_cart in db_carts
         ][:1]
     )
+
+
+async def test__delete_hard_by_user_id(
+    cart_storage: CartStorage,
+    create_cart: Callable,
+    session: AsyncSession,
+) -> None:
+    db_cart: CartTable = await create_cart()
+    await cart_storage.delete_hard_by_user_id(input_id=db_cart.user_id)
+    stmt = select(CartTable).where(CartTable.user_id == db_cart.user_id)
+    result = await session.execute(stmt)
+    result is None

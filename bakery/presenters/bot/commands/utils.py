@@ -5,7 +5,7 @@ from aiogram import Bot
 from aiogram.types import BotCommand, BotCommandScopeDefault, Message
 from aiogram_dialog import DialogManager, StartMode
 
-from bakery.application.constants.admin_contact import ABSENCE_MESSAGE_TTL
+from bakery.application.constants.common import ABSENCE_MESSAGE_TTL
 from bakery.application.exceptions import EntityNotFoundException
 from bakery.domains.entities.user import User, UserRole
 from bakery.domains.services.admin_contact import AdminContactService
@@ -81,8 +81,9 @@ async def contact_command(message: Message, dialog_manager: DialogManager) -> No
         async with uow:
             admin_contact = await service.get_last()
     except EntityNotFoundException:
-        message = await message.answer("Пока нет контактов администратора")
-        await delete_after(message=message, ttl=ABSENCE_MESSAGE_TTL)
+        message_answer = await message.answer("Пока нет контактов администратора")
+        await delete_after(message=message_answer, ttl=ABSENCE_MESSAGE_TTL)
+        await message.delete()
         return
     match user.role:
         case UserRole.USER:
@@ -105,3 +106,4 @@ async def contact_command(message: Message, dialog_manager: DialogManager) -> No
                     tg_username=admin_contact.tg_username,
                 ),
             )
+    await message.delete()
