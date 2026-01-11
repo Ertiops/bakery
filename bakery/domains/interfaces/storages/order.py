@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from collections.abc import Sequence
+from datetime import date
 from typing import Protocol
 from uuid import UUID
 
@@ -26,6 +27,10 @@ class IOrderStorage(Protocol):
 
     @abstractmethod
     async def count(self, *, input_dto: OrderListParams) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def count_by_delivered_at(self, *, input_dto: date) -> int:
         raise NotImplementedError
 
     @abstractmethod

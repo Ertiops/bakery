@@ -3,9 +3,11 @@ from uuid import UUID
 from bakery.application.exceptions import EntityNotFoundException
 from bakery.domains.entities.order import (
     CreateOrder,
+    CreateOrderAsUser,
     Order,
     OrderList,
     OrderListParams,
+    OrderStatus,
     UpdateOrder,
 )
 from bakery.domains.entities.order_schedule import OrderSchedule
@@ -29,7 +31,7 @@ class OrderService:
         self.__order_schedule_storage = order_schedule_storage
         self.__cart_storage = cart_storage
 
-    async def create(self, *, input_dto: CreateOrder) -> Order:
+    async def create(self, *, input_dto: CreateOrderAsUser) -> Order:
         order_schedule = await self.__order_schedule_storage.get_last()
         if order_schedule is None:
             raise EntityNotFoundException(
@@ -37,7 +39,21 @@ class OrderService:
                 entity_id=None,
             )
         await self.__cart_storage.delete_hard_by_user_id(input_id=input_dto.user_id)
-        return await self.__order_storage.create(input_dto=input_dto)
+        count_by_delivered_at = await self.__order_storage.count_by_delivered_at(
+            input_dto=input_dto.delivered_at
+        )
+        return await self.__order_storage.create(
+            input_dto=CreateOrder(
+                user_id=input_dto.user_id,
+                pickup_address_name=input_dto.pickup_address_name,
+                status=OrderStatus.CREATED,
+                products=input_dto.products,
+                delivered_at=input_dto.delivered_at,
+                total_price=input_dto.total_price,
+                delivery_price=input_dto.delivery_price,
+                delivered_at_id=count_by_delivered_at + 1,
+            )
+        )
 
     async def get_by_id(self, *, input_id: UUID) -> Order:
         order = await self.__order_storage.get_by_id(input_id=input_id)
