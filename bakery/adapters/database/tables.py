@@ -130,6 +130,7 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
         Integer,
         nullable=False,
     )
+    delivered_at_id: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class OrderScheduleTable(BaseTable, TimestampedMixin, IdentifableMixin):

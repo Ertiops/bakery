@@ -36,6 +36,7 @@ async def test__create(
         delivered_at=now_utc().date(),
         total_price=1000,
         delivery_price=200,
+        delivered_at_id=1,
     )
     order = await order_storage.create(input_dto=create_data)
     assert order == Order(
@@ -47,6 +48,7 @@ async def test__create(
         delivered_at=create_data.delivered_at,
         total_price=create_data.total_price,
         delivery_price=create_data.delivery_price,
+        delivered_at_id=create_data.delivered_at_id,
         created_at=IsDatetime,
         updated_at=IsDatetime,
     )
@@ -67,6 +69,7 @@ async def test__create__foreign_key_violation_exception__user_id(
         delivered_at=now_utc().date(),
         total_price=1000,
         delivery_price=200,
+        delivered_at_id=1,
     )
     with pytest.raises(ForeignKeyViolationException):
         await order_storage.create(input_dto=create_data)
@@ -87,6 +90,7 @@ async def test__get_by_id(
         delivered_at=db_order.delivered_at,
         total_price=db_order.total_price,
         delivery_price=db_order.delivery_price,
+        delivered_at_id=db_order.delivered_at_id,
         created_at=db_order.created_at,
         updated_at=db_order.updated_at,
     )
@@ -124,6 +128,7 @@ async def test__get_list(
             delivered_at=db_order.delivered_at,
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
+            delivered_at_id=db_order.delivered_at_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -153,6 +158,7 @@ async def test__get_list__validate_limit(
                 delivered_at=db_order.delivered_at,
                 total_price=db_order.total_price,
                 delivery_price=db_order.delivery_price,
+                delivered_at_id=db_order.delivered_at_id,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -183,6 +189,7 @@ async def test__get_list__validate_offset(
                 delivered_at=db_order.delivered_at,
                 total_price=db_order.total_price,
                 delivery_price=db_order.delivery_price,
+                delivered_at_id=db_order.delivered_at_id,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -216,6 +223,7 @@ async def test__get_list__validate_order(
                 delivered_at=db_order.delivered_at,
                 total_price=db_order.total_price,
                 delivery_price=db_order.delivery_price,
+                delivered_at_id=db_order.delivered_at_id,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -252,6 +260,7 @@ async def test__get_list__validate_filter__delivered_at(
             delivered_at=db_order.delivered_at,
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
+            delivered_at_id=db_order.delivered_at_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -286,6 +295,7 @@ async def test__get_list__validate_filter__statuses(
             delivered_at=db_order.delivered_at,
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
+            delivered_at_id=db_order.delivered_at_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -319,6 +329,7 @@ async def test__get_list__validate_filter__pickup_address_id(
             delivered_at=db_order.delivered_at,
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
+            delivered_at_id=db_order.delivered_at_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -350,6 +361,7 @@ async def test__get_list__validate_filter__user_id(
             delivered_at=db_order.delivered_at,
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
+            delivered_at_id=db_order.delivered_at_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -448,6 +460,22 @@ async def test__count__zero(
     assert await order_storage.count(input_dto=OrderListParams(limit=10, offset=0)) == 0
 
 
+async def test__count_by_delivered_at(
+    order_storage: OrderStorage,
+    create_order: Callable,
+) -> None:
+    db_order: OrderTable = await create_order(delivered_at=now_utc().date())
+    assert (
+        await order_storage.count_by_delivered_at(input_dto=db_order.delivered_at) == 1
+    )
+
+
+async def test__count_by_delivered_at__zero(
+    order_storage: OrderStorage,
+) -> None:
+    assert await order_storage.count_by_delivered_at(input_dto=now_utc().date()) == 0
+
+
 async def test__exists_by_id(
     order_storage: OrderStorage, create_order: Callable
 ) -> None:
@@ -496,6 +524,7 @@ async def test__update_by_id(
         delivered_at=update_data.delivered_at,
         total_price=update_data.total_price,
         delivery_price=update_data.delivery_price,
+        delivered_at_id=db_order.delivered_at_id,
         created_at=db_order.created_at,
         updated_at=db_order.updated_at,
     )

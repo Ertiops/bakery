@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import NoReturn
 from uuid import UUID
 
@@ -81,6 +81,16 @@ class OrderStorage(IOrderStorage):
         if input_dto.delivered_at is not None:
             stmt = stmt.where(OrderTable.delivered_at == input_dto.delivered_at)
 
+        return await self.__session.scalar(stmt) or 0
+
+    async def count_by_delivered_at(self, *, input_dto: date) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(OrderTable)
+            .where(
+                OrderTable.delivered_at == input_dto,
+            )
+        )
         return await self.__session.scalar(stmt) or 0
 
     async def exists_by_id(self, *, input_id: UUID) -> bool:

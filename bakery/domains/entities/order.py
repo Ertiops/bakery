@@ -26,6 +26,16 @@ class OrderProduct(TypedDict):
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class CreateOrderAsUser:
+    user_id: UUID
+    pickup_address_name: str
+    products: Sequence[OrderProduct]
+    delivered_at: date
+    total_price: int
+    delivery_price: int
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class CreateOrder(ToDictMixin):
     user_id: UUID
     pickup_address_name: str
@@ -34,6 +44,7 @@ class CreateOrder(ToDictMixin):
     delivered_at: date
     total_price: int
     delivery_price: int
+    delivered_at_id: int
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -46,6 +57,7 @@ class Order:
     delivered_at: date
     total_price: int
     delivery_price: int
+    delivered_at_id: int
     created_at: datetime
     updated_at: datetime
 
