@@ -12,7 +12,6 @@ async def select_orders_cat_created(
     manager: DialogManager,
 ) -> None:
     manager.dialog_data["user_order_status"] = UserOrderStatus.CREATED.value
-    manager.dialog_data["orders_page"] = 0
     await manager.switch_to(UserOrder.view_many)
 
 
@@ -22,7 +21,6 @@ async def select_orders_cat_delivered(
     manager: DialogManager,
 ) -> None:
     manager.dialog_data["user_order_status"] = UserOrderStatus.DELIVERED.value
-    manager.dialog_data["orders_page"] = 0
     await manager.switch_to(UserOrder.view_many)
 
 
@@ -32,5 +30,4 @@ async def select_orders_cat_paid(
     manager: DialogManager,
 ) -> None:
     manager.dialog_data["user_order_status"] = UserOrderStatus.PAID.value
-    manager.dialog_data["orders_page"] = 0
     await manager.switch_to(UserOrder.view_many)
