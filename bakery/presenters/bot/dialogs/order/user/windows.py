@@ -22,9 +22,11 @@ from bakery.presenters.bot.dialogs.order.user.handlers import (
 )
 from bakery.presenters.bot.dialogs.order.user.redirections import (
     to_cart,
+    to_created_order,
     to_main_menu_from_order,
     to_manual_address,
     to_order_categories,
+    to_payment_stub,
 )
 from bakery.presenters.bot.dialogs.order.user.selections import (
     select_orders_cat_created,
@@ -162,7 +164,7 @@ def create_order_windows() -> list[Window]:
                     id="to_main_menu",
                     on_click=to_main_menu_from_order,
                 ),
-                # Button(Const("📦 К заказу"), id="my_orders", on_click=...),
+                Button(Const("📦 К заказу"), id="my_orders", on_click=to_created_order),
             ),
             state=UserOrder.finish,
         ),
@@ -220,7 +222,7 @@ def create_order_windows() -> list[Window]:
                 ),
                 id="user_orders_scroll",
                 width=1,
-                height=2,
+                height=5,
                 when=lambda d, *_: d.get("has_orders"),
             ),
             Row(
@@ -262,7 +264,7 @@ def create_order_windows() -> list[Window]:
             ),
             Row(
                 Button(
-                    Const(common_btn.BACK),
+                    Const("⬅️ К заказам"),
                     id="back_to_orders",
                     on_click=back_to_orders_list,
                 ),
@@ -271,6 +273,12 @@ def create_order_windows() -> list[Window]:
                     id="to_main_menu",
                     on_click=to_main_menu_from_order,
                 ),
+            ),
+            Button(
+                Const("💳 Оплатить"),
+                id="pay_stub",
+                on_click=to_payment_stub,
+                when="is_delivered",
             ),
             state=UserOrder.view_one,
             getter=get_user_order_data,

@@ -127,7 +127,7 @@ async def on_confirm_order(
     total_price = cart_total + delivery_price
 
     async with uow:
-        await order_service.create(
+        order = await order_service.create(
             input_dto=CreateOrderAsUser(
                 user_id=user.id,
                 pickup_address_name=pickup_address_name or "",
@@ -137,7 +137,7 @@ async def on_confirm_order(
                 delivery_price=delivery_price,
             )
         )
-
+    manager.dialog_data["selected_order_id"] = str(order.id)
     await manager.switch_to(UserOrder.finish)
 
 
@@ -156,24 +156,4 @@ async def back_to_orders_list(
     button: Button,
     manager: DialogManager,
 ) -> None:
-    await manager.switch_to(UserOrder.view_many)
-
-
-async def user_orders_prev_page(
-    callback: CallbackQuery,
-    button: Button,
-    manager: DialogManager,
-) -> None:
-    page = int(manager.dialog_data.get("orders_page") or 0)
-    manager.dialog_data["orders_page"] = max(0, page - 1)
-    await manager.switch_to(UserOrder.view_many)
-
-
-async def user_orders_next_page(
-    callback: CallbackQuery,
-    button: Button,
-    manager: DialogManager,
-) -> None:
-    page = int(manager.dialog_data.get("orders_page") or 0)
-    manager.dialog_data["orders_page"] = page + 1
     await manager.switch_to(UserOrder.view_many)

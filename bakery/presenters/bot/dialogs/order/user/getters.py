@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from datetime import date
 from typing import Any
 from uuid import UUID
@@ -14,7 +13,7 @@ from bakery.domains.entities.cart import CartListParams
 from bakery.domains.entities.order import (
     USER_ORDER_STATUS_MAP,
     OrderListParams,
-    OrderProduct,
+    OrderStatus,
     UserOrderStatus,
 )
 from bakery.domains.entities.pickup_address import PickupAddressListParams
@@ -25,7 +24,10 @@ from bakery.domains.services.order import OrderService
 from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
-from bakery.presenters.bot.dialogs.utils.order import combine_order_number
+from bakery.presenters.bot.dialogs.utils.order import (
+    combine_order_number,
+    format_order_products,
+)
 
 
 async def get_pickup_address_data(
@@ -245,15 +247,6 @@ async def get_user_order_data(
         except EntityNotFoundException:
             return dict(has_order=False)
 
-    products: Sequence[OrderProduct] = order.products or []
-    product_lines: list[str] = []
-
-    for p in products:
-        name = p.get("name", "") or "—"
-        price = int(p.get("price", 0) or 0)
-        qty = int(p.get("quantity", 0) or 0)
-        product_lines.append(f"• {name} — {qty} × {price}₽")
-
     delivered_at = order.delivered_at
     delivered_at_label = delivered_at.strftime("%d.%m.%Y") if delivered_at else ""
 
@@ -269,7 +262,8 @@ async def get_user_order_data(
         number=number,
         delivered_at=delivered_at_label,
         pickup_address_name=order.pickup_address_name,
-        products_text="\n".join(product_lines) if product_lines else "—",
+        products_text=format_order_products(order.products),
         delivery_price=order.delivery_price,
         total_price=order.total_price,
+        is_delivered=True if order.status == OrderStatus.DELIVERED else False,
     )
