@@ -9,17 +9,27 @@ from bakery.presenters.bot.dialogs.order.user.getters import (
     get_available_order_dates,
     get_order_confirm_data,
     get_pickup_address_data,
+    get_user_order_data,
+    get_user_orders_data,
 )
 from bakery.presenters.bot.dialogs.order.user.handlers import (
+    back_to_orders_list,
     on_address_selected,
     on_confirm_order,
     on_manual_address_entered,
     on_order_date_selected,
+    on_user_order_selected,
 )
 from bakery.presenters.bot.dialogs.order.user.redirections import (
     to_cart,
     to_main_menu_from_order,
     to_manual_address,
+    to_order_categories,
+)
+from bakery.presenters.bot.dialogs.order.user.selections import (
+    select_orders_cat_created,
+    select_orders_cat_delivered,
+    select_orders_cat_paid,
 )
 from bakery.presenters.bot.dialogs.states import UserOrder
 
@@ -152,8 +162,117 @@ def create_order_windows() -> list[Window]:
                     id="to_main_menu",
                     on_click=to_main_menu_from_order,
                 ),
-                # Button(Const("📦 Мои заказы"), id="my_orders", on_click=...),
+                # Button(Const("📦 К заказу"), id="my_orders", on_click=...),
             ),
             state=UserOrder.finish,
+        ),
+        Window(
+            Multi(
+                Const("📦 Мои заказы\n\n"),
+                Const("Выберите категорию:"),
+            ),
+            Row(
+                Button(
+                    Const("🆕 Готовятся"),
+                    id="cat_created",
+                    on_click=select_orders_cat_created,
+                ),
+            ),
+            Row(
+                Button(
+                    Const("📬 Доставлены"),
+                    id="cat_delivered",
+                    on_click=select_orders_cat_delivered,
+                ),
+            ),
+            Row(
+                Button(
+                    Const("💳 Оплачены"),
+                    id="cat_paid",
+                    on_click=select_orders_cat_paid,
+                ),
+            ),
+            Row(
+                Button(
+                    Const(common_btn.MAIN_MENU),
+                    id="to_main_menu",
+                    on_click=to_main_menu_from_order,
+                ),
+            ),
+            state=UserOrder.view_categories,
+        ),
+        Window(
+            Multi(
+                Format("📦 {category_title}\n\n"),
+                Const("Выберите заказ:"),
+                Const(
+                    "\n\nПока заказов нет 😔",
+                    when=lambda d, *_: not d.get("has_orders"),
+                ),
+            ),
+            ScrollingGroup(
+                Select(
+                    Format("🧾 {item[number]} • {item[delivered_at]} • {item[total]}₽"),
+                    id="user_orders",
+                    item_id_getter=lambda item: item["id"],
+                    items="orders",
+                    on_click=on_user_order_selected,
+                ),
+                id="user_orders_scroll",
+                width=1,
+                height=2,
+                when=lambda d, *_: d.get("has_orders"),
+            ),
+            Row(
+                Button(
+                    Const("⬅️ К категориям"),
+                    id="to_categories",
+                    on_click=to_order_categories,
+                ),
+                Button(
+                    Const(common_btn.MAIN_MENU),
+                    id="to_main_menu",
+                    on_click=to_main_menu_from_order,
+                ),
+            ),
+            state=UserOrder.view_many,
+            getter=get_user_orders_data,
+        ),
+        Window(
+            Multi(
+                Format("📦 Заказ {number}\n\n", when=lambda d, *_: d.get("has_order")),
+                Format(
+                    "📅 Доставка: {delivered_at}\n",
+                    when=lambda d, *_: d.get("has_order"),
+                ),
+                Format(
+                    "📍 Адрес: {pickup_address_name}\n",
+                    when=lambda d, *_: d.get("has_order"),
+                ),
+                Const("🧺 Состав заказа:\n", when=lambda d, *_: d.get("has_order")),
+                Format("{products_text}\n\n", when=lambda d, *_: d.get("has_order")),
+                Format(
+                    "🚚 Доставка: {delivery_price}₽\n",
+                    when=lambda d, *_: d.get("has_order"),
+                ),
+                Format(
+                    "💰 Итого: {total_price}₽", when=lambda d, *_: d.get("has_order")
+                ),
+                Const("Заказ не найден 😔", when=lambda d, *_: not d.get("has_order")),
+            ),
+            Row(
+                Button(
+                    Const(common_btn.BACK),
+                    id="back_to_orders",
+                    on_click=back_to_orders_list,
+                ),
+                Button(
+                    Const(common_btn.MAIN_MENU),
+                    id="to_main_menu",
+                    on_click=to_main_menu_from_order,
+                ),
+            ),
+            state=UserOrder.view_one,
+            getter=get_user_order_data,
         ),
     ]

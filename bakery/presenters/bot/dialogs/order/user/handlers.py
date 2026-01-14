@@ -22,6 +22,8 @@ from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import UserOrder
 
+USER_ORDERS_PAGE_SIZE = 5
+
 
 async def on_address_selected(
     callback: CallbackQuery,
@@ -137,3 +139,41 @@ async def on_confirm_order(
         )
 
     await manager.switch_to(UserOrder.finish)
+
+
+async def on_user_order_selected(
+    callback: CallbackQuery,
+    widget: Select,
+    manager: DialogManager,
+    item_id: str,
+) -> None:
+    manager.dialog_data["selected_order_id"] = item_id
+    await manager.switch_to(UserOrder.view_one)
+
+
+async def back_to_orders_list(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    await manager.switch_to(UserOrder.view_many)
+
+
+async def user_orders_prev_page(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    page = int(manager.dialog_data.get("orders_page") or 0)
+    manager.dialog_data["orders_page"] = max(0, page - 1)
+    await manager.switch_to(UserOrder.view_many)
+
+
+async def user_orders_next_page(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    page = int(manager.dialog_data.get("orders_page") or 0)
+    manager.dialog_data["orders_page"] = page + 1
+    await manager.switch_to(UserOrder.view_many)

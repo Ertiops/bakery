@@ -6,6 +6,7 @@ from bakery.presenters.bot.content.buttons.main_menu import user as user_main_me
 from bakery.presenters.bot.dialogs.main_menu.user.handlers import (
     enter_cart,
     enter_catalog,
+    enter_order_categories,
 )
 from bakery.presenters.bot.dialogs.states import UserMain
 
@@ -23,6 +24,11 @@ def user_main_menu_window() -> Window:
                 Const(user_main_menu_msg.CART),
                 id="cart",
                 on_click=enter_cart,
+            ),
+            Button(
+                Const(user_main_menu_msg.MY_ORDERS),
+                id="my_orders",
+                on_click=enter_order_categories,
             ),
             width=1,
         ),

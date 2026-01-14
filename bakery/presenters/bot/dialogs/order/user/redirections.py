@@ -29,3 +29,11 @@ async def to_main_menu_from_order(
     manager: DialogManager,
 ) -> None:
     await manager.start(UserMain.menu, mode=StartMode.RESET_STACK)
+
+
+async def to_order_categories(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    await manager.switch_to(UserOrder.view_categories)

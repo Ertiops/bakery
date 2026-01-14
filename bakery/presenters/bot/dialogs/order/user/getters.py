@@ -1,19 +1,31 @@
+from collections.abc import Sequence
 from datetime import date
 from typing import Any
 from uuid import UUID
 
 from aiogram_dialog.api.protocols import DialogManager
 
-from bakery.application.constants.common import PAGINATION_LIMIT_BREAKER
+from bakery.application.constants.common import (
+    PAGINATION_LIMIT_BREAKER,
+    USER_ORDERS_LIMIT_BREAKER,
+)
 from bakery.application.exceptions import EntityNotFoundException
 from bakery.domains.entities.cart import CartListParams
+from bakery.domains.entities.order import (
+    USER_ORDER_STATUS_MAP,
+    OrderListParams,
+    OrderProduct,
+    UserOrderStatus,
+)
 from bakery.domains.entities.pickup_address import PickupAddressListParams
 from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
 from bakery.domains.services.delivery_cost import DeliveryCostService
+from bakery.domains.services.order import OrderService
 from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
+from bakery.presenters.bot.dialogs.utils.order import combine_order_number
 
 
 async def get_pickup_address_data(
@@ -155,4 +167,109 @@ async def get_available_order_dates(
     return dict(
         order_dates=items,
         has_order_dates=bool(items),
+    )
+
+
+async def get_user_orders_data(
+    dialog_manager: DialogManager,
+    **_kwargs: Any,
+) -> dict[str, Any]:
+    container = dialog_manager.middleware_data["dishka_container"]
+    order_service: OrderService = await container.get(OrderService)
+    uow: AbstractUow = await container.get(AbstractUow)
+    user: User = dialog_manager.middleware_data["current_user"]
+
+    raw_cat = (
+        dialog_manager.dialog_data.get("user_order_status")
+        or UserOrderStatus.CREATED.value
+    )
+    try:
+        user_cat = UserOrderStatus(raw_cat)
+    except ValueError:
+        user_cat = UserOrderStatus.CREATED
+
+    statuses = USER_ORDER_STATUS_MAP[user_cat]
+
+    async with uow:
+        result = await order_service.get_list(
+            input_dto=OrderListParams(
+                limit=USER_ORDERS_LIMIT_BREAKER,
+                offset=0,
+                user_id=user.id,
+                statuses=statuses,
+            )
+        )
+
+    orders = [
+        dict(
+            id=str(o.id),
+            number=combine_order_number(o.delivered_at, o.delivered_at_id),
+            delivered_at=o.delivered_at.strftime("%d.%m.%Y"),
+            total=o.total_price,
+        )
+        for o in result.items
+    ]
+    title_map = {
+        UserOrderStatus.CREATED: "🆕 Созданы + изменены",
+        UserOrderStatus.DELIVERED: "📬 Доставлены",
+        UserOrderStatus.PAID: "💳 Оплачены",
+    }
+
+    return dict(
+        category_title=title_map.get(user_cat, "📦 Мои заказы"),
+        orders=orders,
+        has_orders=bool(orders),
+    )
+
+
+async def get_user_order_data(
+    dialog_manager: DialogManager,
+    **_kwargs: Any,
+) -> dict[str, Any]:
+    container = dialog_manager.middleware_data["dishka_container"]
+    order_service: OrderService = await container.get(OrderService)
+    uow: AbstractUow = await container.get(AbstractUow)
+
+    order_id_raw: str | None = dialog_manager.dialog_data.get("selected_order_id")
+    if not order_id_raw:
+        return dict(has_order=False)
+
+    try:
+        order_uuid = UUID(order_id_raw)
+    except ValueError:
+        return dict(has_order=False)
+
+    async with uow:
+        try:
+            order = await order_service.get_by_id(input_id=order_uuid)
+        except EntityNotFoundException:
+            return dict(has_order=False)
+
+    products: Sequence[OrderProduct] = order.products or []
+    product_lines: list[str] = []
+
+    for p in products:
+        name = p.get("name", "") or "—"
+        price = int(p.get("price", 0) or 0)
+        qty = int(p.get("quantity", 0) or 0)
+        product_lines.append(f"• {name} — {qty} × {price}₽")
+
+    delivered_at = order.delivered_at
+    delivered_at_label = delivered_at.strftime("%d.%m.%Y") if delivered_at else ""
+
+    number = (
+        combine_order_number(delivered_at, order.delivered_at_id)
+        if delivered_at
+        else ""
+    )
+
+    return dict(
+        has_order=True,
+        order_id=str(order.id),
+        number=number,
+        delivered_at=delivered_at_label,
+        pickup_address_name=order.pickup_address_name,
+        products_text="\n".join(product_lines) if product_lines else "—",
+        delivery_price=order.delivery_price,
+        total_price=order.total_price,
     )
