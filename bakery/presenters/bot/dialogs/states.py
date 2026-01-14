@@ -56,6 +56,9 @@ class UserOrder(StatesGroup):
     add_date = State()
     confirm = State()
     finish = State()
+    view_categories = State()
+    view_many = State()
+    view_one = State()
 
 
 class AdminPickupAddress(StatesGroup):

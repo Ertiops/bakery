@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 878b93e29c3e
+Revision ID: 594d6b5b24f5
 Revises:
-Create Date: 2026-01-11 20:13:24.378911
+Create Date: 2026-01-12 12:19:09.079848
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "878b93e29c3e"
+revision: str = "594d6b5b24f5"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -231,7 +231,6 @@ def upgrade() -> None:
                 "created",
                 "changed",
                 "delivered",
-                "to_cancel",
                 "cancelled",
                 "paid",
                 name="order_status",

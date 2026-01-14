@@ -116,7 +116,7 @@ async def test__get_list(
     db_pickup_address: PickupAddressTable = await create_pickup_address()
     db_orders: list[OrderTable] = [
         await create_order(pickup_address_name=db_pickup_address.name) for _ in range(2)
-    ]
+    ][::-1]
     orders = await order_storage.get_list(input_dto=OrderListParams(limit=10, offset=0))
     assert orders == [
         Order(
@@ -144,7 +144,7 @@ async def test__get_list__validate_limit(
     db_pickup_address: PickupAddressTable = await create_pickup_address()
     db_orders: list[OrderTable] = [
         await create_order(pickup_address_name=db_pickup_address.name) for _ in range(2)
-    ]
+    ][::-1]
     orders = await order_storage.get_list(input_dto=OrderListParams(limit=1, offset=0))
     assert (
         orders
@@ -175,7 +175,7 @@ async def test__get_list__validate_offset(
     db_pickup_address: PickupAddressTable = await create_pickup_address()
     db_orders: list[OrderTable] = [
         await create_order(pickup_address_name=db_pickup_address.name) for _ in range(2)
-    ]
+    ][::-1]
     orders = await order_storage.get_list(input_dto=OrderListParams(limit=2, offset=1))
     assert (
         orders
@@ -209,7 +209,7 @@ async def test__get_list__validate_order(
             pickup_address_name=db_pickup_address.name, created_at=now_utc(days=-i)
         )
         for i in range(2)
-    ]
+    ][::-1]
     orders = await order_storage.get_list(input_dto=OrderListParams(limit=10, offset=0))
     assert (
         orders

@@ -5,6 +5,7 @@ from aiogram_dialog.widgets.kbd import Button
 from bakery.presenters.bot.dialogs.states import (
     UserCart,
     UserCatalogue,
+    UserOrder,
 )
 
 
@@ -28,3 +29,9 @@ async def enter_cart(
         state=UserCart.view,
         mode=StartMode.RESET_STACK,
     )
+
+
+async def enter_order_categories(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    await manager.start(UserOrder.view_categories, mode=StartMode.RESET_STACK)

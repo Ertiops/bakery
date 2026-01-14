@@ -151,7 +151,7 @@ async def test__get_list(
     order_service: OrderService,
     create_order: Callable,
 ) -> None:
-    db_orders: list[OrderTable] = [await create_order() for _ in range(2)]
+    db_orders: list[OrderTable] = [await create_order() for _ in range(2)][::-1]
     orders = await order_service.get_list(input_dto=OrderListParams(limit=10, offset=0))
     assert orders == OrderList(
         total=2,
@@ -178,7 +178,7 @@ async def test__get_list__validate_limit(
     order_service: OrderService,
     create_order: Callable,
 ) -> None:
-    db_orders: list[OrderTable] = [await create_order() for _ in range(2)]
+    db_orders: list[OrderTable] = [await create_order() for _ in range(2)][::-1]
     orders = await order_service.get_list(input_dto=OrderListParams(limit=1, offset=0))
     assert orders == OrderList(
         total=2,
@@ -205,7 +205,7 @@ async def test__get_list__validate_offset(
     order_service: OrderService,
     create_order: Callable,
 ) -> None:
-    db_orders: list[OrderTable] = [await create_order() for _ in range(2)]
+    db_orders: list[OrderTable] = [await create_order() for _ in range(2)][::-1]
     orders = await order_service.get_list(input_dto=OrderListParams(limit=2, offset=1))
     assert orders == OrderList(
         total=2,
@@ -234,7 +234,7 @@ async def test__get_list__validate_order(
 ) -> None:
     db_orders: list[OrderTable] = [
         await create_order(created_at=now_utc(days=-i)) for i in range(2)
-    ]
+    ][::-1]
     orders = await order_service.get_list(input_dto=OrderListParams(limit=10, offset=0))
     assert orders == OrderList(
         total=2,

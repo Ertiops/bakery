@@ -46,7 +46,7 @@ class OrderStorage(IOrderStorage):
         stmt = (
             select(OrderTable)
             .where(OrderTable.deleted_at.is_(None))
-            .order_by(OrderTable.created_at)
+            .order_by(OrderTable.created_at.desc())
             .limit(input_dto.limit)
             .offset(input_dto.offset)
         )
@@ -60,6 +60,11 @@ class OrderStorage(IOrderStorage):
             stmt = stmt.where(OrderTable.status.in_(input_dto.statuses))
         if input_dto.delivered_at is not None:
             stmt = stmt.where(OrderTable.delivered_at == input_dto.delivered_at)
+        if input_dto.created_at_period is not None:
+            stmt = stmt.where(
+                OrderTable.created_at >= input_dto.created_at_period[0],
+                OrderTable.created_at < input_dto.created_at_period[1],
+            )
 
         result = await self.__session.scalars(stmt)
         return [convert_order_to_dto(result=r) for r in result]
@@ -80,6 +85,11 @@ class OrderStorage(IOrderStorage):
             stmt = stmt.where(OrderTable.status.in_(input_dto.statuses))
         if input_dto.delivered_at is not None:
             stmt = stmt.where(OrderTable.delivered_at == input_dto.delivered_at)
+        if input_dto.created_at_period is not None:
+            stmt = stmt.where(
+                OrderTable.created_at >= input_dto.created_at_period[0],
+                OrderTable.created_at < input_dto.created_at_period[1],
+            )
 
         return await self.__session.scalar(stmt) or 0
 
