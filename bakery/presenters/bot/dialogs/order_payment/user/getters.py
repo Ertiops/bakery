@@ -1,0 +1,96 @@
+from typing import Any
+from uuid import UUID
+
+from aiogram.types import ContentType
+from aiogram_dialog.api.entities import MediaAttachment, MediaId
+from aiogram_dialog.api.protocols import DialogManager
+
+from bakery.application.exceptions import EntityNotFoundException
+from bakery.domains.entities.order import OrderStatus
+from bakery.domains.services.order import OrderService
+from bakery.domains.services.order_payment import OrderPaymentService
+from bakery.domains.uow import AbstractUow
+from bakery.presenters.bot.dialogs.utils.order import combine_order_number
+
+
+def _get_order_id_from_start_or_dialog(manager: DialogManager) -> str | None:
+    start_data = getattr(manager, "start_data", None) or {}
+    order_id = start_data.get("selected_order_id") or manager.dialog_data.get(
+        "selected_order_id"
+    )
+    if order_id:
+        manager.dialog_data["selected_order_id"] = order_id
+    return order_id
+
+
+async def get_order_payment_data(
+    dialog_manager: DialogManager,
+    **_kwargs: Any,
+) -> dict[str, Any]:
+    container = dialog_manager.middleware_data["dishka_container"]
+    uow: AbstractUow = await container.get(AbstractUow)
+    order_service: OrderService = await container.get(OrderService)
+    order_payment_service: OrderPaymentService = await container.get(
+        OrderPaymentService
+    )
+
+    order_id_raw = _get_order_id_from_start_or_dialog(dialog_manager)
+    dialog_manager.dialog_data["order_id"] = order_id_raw
+    if not order_id_raw:
+        return {"has_order": False, "has_requisites": False, "has_payment_file": False}
+
+    try:
+        order_uuid = UUID(order_id_raw)
+    except ValueError:
+        return {"has_order": False, "has_requisites": False, "has_payment_file": False}
+
+    async with uow:
+        try:
+            order = await order_service.get_by_id(input_id=order_uuid)
+        except EntityNotFoundException:
+            return {
+                "has_order": False,
+                "has_requisites": False,
+                "has_payment_file": False,
+            }
+
+        try:
+            requisites = await order_payment_service.get_last()
+            has_requisites = True
+        except EntityNotFoundException:
+            requisites = None
+            has_requisites = False
+
+    delivered_at = order.delivered_at
+    number = (
+        combine_order_number(delivered_at, order.delivered_at_id)
+        if delivered_at
+        else ""
+    )
+
+    file_id = dialog_manager.dialog_data.get("payment_file_id")
+    file_name = dialog_manager.dialog_data.get("payment_file_name")
+    payment_file_attachment = (
+        MediaAttachment(
+            type=ContentType.PHOTO if file_name == "Фото" else ContentType.DOCUMENT,
+            file_id=MediaId(file_id),
+        )
+        if file_id
+        else None
+    )
+
+    return dict(
+        has_order=True,
+        order_id=str(order.id),
+        number=number,
+        total_price=order.total_price,
+        is_delivered=(order.status == OrderStatus.DELIVERED),
+        has_requisites=has_requisites,
+        phone=(requisites.phone if requisites else ""),
+        bank=(requisites.bank if requisites else ""),
+        addressee=(requisites.addressee if requisites else ""),
+        payment_file_id=file_id,
+        payment_file_name=file_name or "Файл",
+        has_payment_file=bool(file_id),
+        payment_file_attachment=payment_file_attachment,
+    )

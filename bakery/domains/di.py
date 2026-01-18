@@ -4,6 +4,7 @@ from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorag
 from bakery.domains.interfaces.storages.cart import ICartStorage
 from bakery.domains.interfaces.storages.delivery_cost import IDeliveryCostStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
+from bakery.domains.interfaces.storages.order_payment import IOrderPaymentStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
 from bakery.domains.interfaces.storages.pickup_address import IPickupAddressStorage
 from bakery.domains.interfaces.storages.product import IProductStorage
@@ -12,6 +13,7 @@ from bakery.domains.services.admin_contact import AdminContactService
 from bakery.domains.services.cart import CartService
 from bakery.domains.services.delivery_cost import DeliveryCostService
 from bakery.domains.services.order import OrderService
+from bakery.domains.services.order_payment import OrderPaymentService
 from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.services.product import ProductService
@@ -67,3 +69,9 @@ class DomainProvider(Provider):
         self, delivery_cost_storage: IDeliveryCostStorage
     ) -> DeliveryCostService:
         return DeliveryCostService(delivery_cost_storage=delivery_cost_storage)
+
+    @provide(scope=Scope.REQUEST)
+    def order_payment_service(
+        self, order_payment_storage: IOrderPaymentStorage
+    ) -> OrderPaymentService:
+        return OrderPaymentService(order_payment_storage=order_payment_storage)

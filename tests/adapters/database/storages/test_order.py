@@ -3,7 +3,7 @@ from typing import Any
 from uuid import uuid4
 
 import pytest
-from dirty_equals import IsDatetime, IsUUID
+from dirty_equals import IsDatetime, IsStr, IsUUID
 
 from bakery.adapters.database.storages.order import OrderStorage
 from bakery.adapters.database.tables import OrderTable, PickupAddressTable, UserTable
@@ -37,6 +37,7 @@ async def test__create(
         total_price=1000,
         delivery_price=200,
         delivered_at_id=1,
+        payment_file_id="payment_file_id",
     )
     order = await order_storage.create(input_dto=create_data)
     assert order == Order(
@@ -49,6 +50,7 @@ async def test__create(
         total_price=create_data.total_price,
         delivery_price=create_data.delivery_price,
         delivered_at_id=create_data.delivered_at_id,
+        payment_file_id=IsStr,
         created_at=IsDatetime,
         updated_at=IsDatetime,
     )
@@ -70,6 +72,7 @@ async def test__create__foreign_key_violation_exception__user_id(
         total_price=1000,
         delivery_price=200,
         delivered_at_id=1,
+        payment_file_id="payment_file_id",
     )
     with pytest.raises(ForeignKeyViolationException):
         await order_storage.create(input_dto=create_data)
@@ -91,6 +94,7 @@ async def test__get_by_id(
         total_price=db_order.total_price,
         delivery_price=db_order.delivery_price,
         delivered_at_id=db_order.delivered_at_id,
+        payment_file_id=db_order.payment_file_id,
         created_at=db_order.created_at,
         updated_at=db_order.updated_at,
     )
@@ -129,6 +133,7 @@ async def test__get_list(
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
+            payment_file_id=db_order.payment_file_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -159,6 +164,7 @@ async def test__get_list__validate_limit(
                 total_price=db_order.total_price,
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
+                payment_file_id=db_order.payment_file_id,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -190,6 +196,7 @@ async def test__get_list__validate_offset(
                 total_price=db_order.total_price,
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
+                payment_file_id=db_order.payment_file_id,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -224,6 +231,7 @@ async def test__get_list__validate_order(
                 total_price=db_order.total_price,
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
+                payment_file_id=db_order.payment_file_id,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -261,6 +269,7 @@ async def test__get_list__validate_filter__delivered_at(
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
+            payment_file_id=db_order.payment_file_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -296,6 +305,7 @@ async def test__get_list__validate_filter__statuses(
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
+            payment_file_id=db_order.payment_file_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -330,6 +340,7 @@ async def test__get_list__validate_filter__pickup_address_id(
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
+            payment_file_id=db_order.payment_file_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -362,6 +373,7 @@ async def test__get_list__validate_filter__user_id(
             total_price=db_order.total_price,
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
+            payment_file_id=db_order.payment_file_id,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -513,6 +525,7 @@ async def test__update_by_id(
         delivered_at=now_utc().date(),
         total_price=1000,
         delivery_price=200,
+        payment_file_id="payment_file_id",
     )
     order = await order_storage.update_by_id(input_dto=update_data)
     assert order == Order(
@@ -525,6 +538,7 @@ async def test__update_by_id(
         total_price=update_data.total_price,
         delivery_price=update_data.delivery_price,
         delivered_at_id=db_order.delivered_at_id,
+        payment_file_id=db_order.payment_file_id,
         created_at=db_order.created_at,
         updated_at=db_order.updated_at,
     )
@@ -546,6 +560,7 @@ async def test__update_by_id__foreign_key_violation_exception__user_id(
         delivered_at=now_utc().date(),
         total_price=1000,
         delivery_price=200,
+        payment_file_id="payment_file_id",
     )
     with pytest.raises(ForeignKeyViolationException):
         await order_storage.update_by_id(input_dto=update_data)

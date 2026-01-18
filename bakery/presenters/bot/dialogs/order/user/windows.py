@@ -26,7 +26,7 @@ from bakery.presenters.bot.dialogs.order.user.redirections import (
     to_main_menu_from_order,
     to_manual_address,
     to_order_categories,
-    to_payment_stub,
+    to_order_payment,
 )
 from bakery.presenters.bot.dialogs.order.user.selections import (
     select_orders_cat_created,
@@ -276,8 +276,8 @@ def create_order_windows() -> list[Window]:
             ),
             Button(
                 Const("💳 Оплатить"),
-                id="pay_stub",
-                on_click=to_payment_stub,
+                id="pay",
+                on_click=to_order_payment,
                 when="is_delivered",
             ),
             state=UserOrder.view_one,
