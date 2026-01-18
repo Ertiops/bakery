@@ -86,3 +86,10 @@ class AdminAdminContact(StatesGroup):
 
 class UserAdminContact(StatesGroup):
     view_one = State()
+
+
+class UserOrderPayment(StatesGroup):
+    show_order_payment = State()
+    add_file = State()
+    confirm = State()
+    finish = State()

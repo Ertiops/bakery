@@ -8,6 +8,7 @@ from bakery.adapters.database.storages.admin_contact import AdminContactStorage
 from bakery.adapters.database.storages.cart import CartStorage
 from bakery.adapters.database.storages.delivery_cost import DeliveryCostStorage
 from bakery.adapters.database.storages.order import OrderStorage
+from bakery.adapters.database.storages.order_payment import OrderPaymentStorage
 from bakery.adapters.database.storages.order_schedule import OrderScheduleStorage
 from bakery.adapters.database.storages.pickup_address import PickupAddressStorage
 from bakery.adapters.database.storages.product import ProductStorage
@@ -18,6 +19,7 @@ from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorag
 from bakery.domains.interfaces.storages.cart import ICartStorage
 from bakery.domains.interfaces.storages.delivery_cost import IDeliveryCostStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
+from bakery.domains.interfaces.storages.order_payment import IOrderPaymentStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
 from bakery.domains.interfaces.storages.pickup_address import IPickupAddressStorage
 from bakery.domains.interfaces.storages.product import IProductStorage
@@ -82,3 +84,7 @@ class DatabaseProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def delivery_cost_storage(self, uow: SqlalchemyUow) -> IDeliveryCostStorage:
         return DeliveryCostStorage(session=uow.session)
+
+    @provide(scope=Scope.REQUEST)
+    def order_payment_storage(self, uow: SqlalchemyUow) -> IOrderPaymentStorage:
+        return OrderPaymentStorage(session=uow.session)

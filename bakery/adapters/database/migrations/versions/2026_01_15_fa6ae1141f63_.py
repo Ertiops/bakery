@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 594d6b5b24f5
+Revision ID: fa6ae1141f63
 Revises:
-Create Date: 2026-01-12 12:19:09.079848
+Create Date: 2026-01-15 12:23:40.603524
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "594d6b5b24f5"
+revision: str = "fa6ae1141f63"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -58,6 +58,27 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("id", sa.UUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__delivery_costs")),
+    )
+    op.create_table(
+        "order_payments",
+        sa.Column("phone", sa.String(length=128), nullable=False),
+        sa.Column("bank", sa.String(length=128), nullable=False),
+        sa.Column("addressee", sa.String(length=128), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("TIMEZONE('utc', now())"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("TIMEZONE('utc', now())"),
+            nullable=False,
+        ),
+        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("id", sa.UUID(), nullable=False),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk__order_payments")),
     )
     op.create_table(
         "order_schedules",
@@ -242,6 +263,7 @@ def upgrade() -> None:
         sa.Column("total_price", sa.Integer(), nullable=False),
         sa.Column("delivery_price", sa.Integer(), nullable=False),
         sa.Column("delivered_at_id", sa.Integer(), nullable=False),
+        sa.Column("payment_file_id", sa.String(length=512), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -297,6 +319,7 @@ def downgrade() -> None:
     )
     op.drop_table("pickup_addresses")
     op.drop_table("order_schedules")
+    op.drop_table("order_payments")
     op.drop_table("delivery_costs")
     op.drop_table("admin_contacts")
     # ### end Alembic commands ###

@@ -52,6 +52,7 @@ class OrderService:
                 total_price=input_dto.total_price,
                 delivery_price=input_dto.delivery_price,
                 delivered_at_id=count_by_delivered_at + 1,
+                payment_file_id="",
             )
         )
 

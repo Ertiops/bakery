@@ -3,7 +3,12 @@ from aiogram_dialog.api.entities import StartMode
 from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.kbd import Button
 
-from bakery.presenters.bot.dialogs.states import UserCart, UserMain, UserOrder
+from bakery.presenters.bot.dialogs.states import (
+    UserCart,
+    UserMain,
+    UserOrder,
+    UserOrderPayment,
+)
 
 
 async def to_cart(
@@ -39,13 +44,19 @@ async def to_order_categories(
     await manager.switch_to(UserOrder.view_categories)
 
 
-async def to_payment_stub(
+async def to_order_payment(
     callback: CallbackQuery,
     button: Button,
     manager: DialogManager,
 ) -> None:
-    await callback.answer(
-        "🧾 Заглушка: здесь будет переход на оплату заказа", show_alert=True
+    order_id = manager.dialog_data.get("selected_order_id")
+    if not order_id:
+        return
+
+    await manager.start(
+        state=UserOrderPayment.show_order_payment,
+        mode=StartMode.NORMAL,
+        data={"selected_order_id": order_id},
     )
 
 

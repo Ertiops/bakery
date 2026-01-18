@@ -19,6 +19,7 @@ from bakery.presenters.bot.dialogs.delivery_cost import admin as admin_delivery_
 from bakery.presenters.bot.dialogs.main_menu import admin as admin_main_menu
 from bakery.presenters.bot.dialogs.main_menu import user as user_main_menu
 from bakery.presenters.bot.dialogs.order import user as user_order
+from bakery.presenters.bot.dialogs.order_payment import user as user_order_payment
 from bakery.presenters.bot.dialogs.pickup_address import admin as admin_pickup_address
 
 
@@ -43,5 +44,6 @@ def register_dialogs(router: Router) -> None:
         user_order.user_order_dialog,
         user_catalogue.user_catalogue_dialog,
         user_admin_contact.user_admin_contact_dialog,
+        user_order_payment.user_order_payment_dialog,
     )
     router.include_router(dialog_router)

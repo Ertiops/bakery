@@ -131,6 +131,7 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
         nullable=False,
     )
     delivered_at_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    payment_file_id: Mapped[str] = mapped_column(String(512), nullable=False)
 
 
 class OrderScheduleTable(BaseTable, TimestampedMixin, IdentifableMixin):
@@ -139,3 +140,11 @@ class OrderScheduleTable(BaseTable, TimestampedMixin, IdentifableMixin):
     weekdays: Mapped[Sequence[int]] = mapped_column(JSONB, nullable=False)
     min_days_before: Mapped[int] = mapped_column(Integer, nullable=False)
     max_days_in_advance: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class OrderPaymentTable(BaseTable, TimestampedMixin, IdentifableMixin):
+    __tablename__ = "order_payments"
+
+    phone: Mapped[str] = mapped_column(String(128), nullable=False)
+    bank: Mapped[str] = mapped_column(String(128), nullable=False)
+    addressee: Mapped[str] = mapped_column(String(128), nullable=False)
