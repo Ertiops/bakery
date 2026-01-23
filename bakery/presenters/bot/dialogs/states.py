@@ -93,3 +93,11 @@ class UserOrderPayment(StatesGroup):
     add_file = State()
     confirm = State()
     finish = State()
+
+
+class AdminOrderPayment(StatesGroup):
+    view = State()
+    phone = State()
+    bank = State()
+    addressee = State()
+    confirm = State()

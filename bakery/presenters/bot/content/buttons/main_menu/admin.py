@@ -1,8 +1,9 @@
 from typing import Final
 
-ADMIN_CONSOLE: Final = "Панель администратора"
-CATALOGUE: Final = "📋 Каталог"
-ORDERS: Final = "📦 Заказы"
-ADDRESSES: Final = "🏠 Адреса"
-CONTACTS: Final = "📞 Мои Контакты"
-DELIVERY_COST: Final = "💳 Стоимость доставки"
+ADMIN_CONSOLE: Final[str] = "Панель администратора"
+CATALOGUE: Final[str] = "📋 Каталог"
+ORDERS: Final[str] = "📦 Заказы"
+ADDRESSES: Final[str] = "🏠 Адреса"
+CONTACTS: Final[str] = "📞 Мои Контакты"
+DELIVERY_COST: Final[str] = "🪙 Стоимость доставки"
+ORDER_PAYMENT: Final[str] = "💳 Реквизиты оплаты"
