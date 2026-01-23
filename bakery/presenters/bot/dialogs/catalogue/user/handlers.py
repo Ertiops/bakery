@@ -6,6 +6,7 @@ from aiogram.types import CallbackQuery
 from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.kbd import Button
 
+from bakery.application.constants.cart import CART_PRODUCT_MAX
 from bakery.domains.entities.cart import CreateCart
 from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
@@ -41,7 +42,8 @@ async def update_quantity(manager: DialogManager, delta: int) -> None:
     product_id = UUID(manager.dialog_data["product_id"])
     quantity = max(0, manager.dialog_data.get("quantity", 0) + delta)
     manager.dialog_data["quantity"] = quantity
-    log.info("Updating quantity for product ID: %s to %d", product_id, quantity)
+    if quantity < 0 or quantity > CART_PRODUCT_MAX:
+        return
     async with uow:
         await service.create_or_update(
             input_dto=CreateCart(
