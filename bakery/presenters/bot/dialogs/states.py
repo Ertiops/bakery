@@ -101,3 +101,12 @@ class AdminOrderPayment(StatesGroup):
     bank = State()
     addressee = State()
     confirm = State()
+
+
+class AdminOrderSchedule(StatesGroup):
+    view = State()
+    pick_weekdays = State()
+    min_days_before = State()
+    max_days_in_advance = State()
+    confirm = State()
+    finish = State()

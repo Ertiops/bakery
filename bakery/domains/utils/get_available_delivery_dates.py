@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from datetime import date, timedelta
 
+from bakery.application.constants.common import WEEKDAYS_BASE
 from bakery.application.constants.order_schedule import ORDER_PERIOD
 from bakery.domains.entities.order_schedule import OrderSchedule
 
@@ -12,7 +13,6 @@ def get_available_delivery_dates(
     *,
     today: date | None = None,
 ) -> Sequence[date]:
-    weekdays_base = 1
     today = today or date.today()
 
     if order_schedule.min_days_before < 0 or order_schedule.max_days_in_advance < 0:
@@ -22,7 +22,7 @@ def get_available_delivery_dates(
 
     allowed_weekdays: set[int] = set()
     for wd in order_schedule.weekdays:
-        wd0 = wd - 1 if weekdays_base == 1 else wd
+        wd0 = wd - 1 if WEEKDAYS_BASE == 1 else wd
         if not 0 <= wd0 <= 6:
             return []
         allowed_weekdays.add(wd0)

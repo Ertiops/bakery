@@ -11,6 +11,7 @@ from bakery.presenters.bot.dialogs.main_menu.admin.handlers import (
     enter_delivery_cost,
     enter_pickup_address_menu,
     to_admin_order_payment,
+    to_admin_order_schedule,
 )
 from bakery.presenters.bot.dialogs.states import AdminMain
 
@@ -44,7 +45,12 @@ def admin_main_menu_window() -> Window:
                 id="admin_order_payment",
                 on_click=to_admin_order_payment,
             ),
-            width=1,
+            Button(
+                Const(admin_main_menu_msg.ORDER_SCHEDULE),
+                id="admin_order_schedule",
+                on_click=to_admin_order_schedule,
+            ),
+            width=2,
         ),
         state=AdminMain.menu,
     )
