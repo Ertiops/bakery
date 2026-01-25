@@ -36,6 +36,7 @@ USER_ORDER_STATUS_MAP: Mapping[UserOrderStatus, Sequence[OrderStatus]] = {
 
 
 class OrderProduct(TypedDict):
+    id: str
     name: str
     price: int
     quantity: int

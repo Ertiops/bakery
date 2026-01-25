@@ -100,11 +100,14 @@ async def on_confirm_order(
         )
 
         for cart in carts:
+            product_id = str(cart.product.id)
             name = cart.product.name
             price = cart.product.price
             qty = cart.quantity
 
-            products.append(OrderProduct(name=name, price=price, quantity=qty))
+            products.append(
+                OrderProduct(id=product_id, name=name, price=price, quantity=qty)
+            )
 
             cart_total += price * qty
 
