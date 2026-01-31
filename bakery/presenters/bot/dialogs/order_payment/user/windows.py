@@ -6,6 +6,9 @@ from aiogram_dialog.widgets.media import DynamicMedia
 from aiogram_dialog.widgets.text import Const, Format, Multi
 
 from bakery.presenters.bot.content.buttons import common as common_btn
+from bakery.presenters.bot.content.messages.order_payment import (
+    user as order_payment_user_msg,
+)
 from bakery.presenters.bot.dialogs.order.user.redirections import (
     to_main_menu_from_order,
 )
@@ -27,28 +30,28 @@ def create_order_payment_windows() -> list[Window]:
     return [
         Window(
             Multi(
-                Const("💳 Оплата заказа\n\n"),
-                Format("🧾 Заказ {number}\n\n", when="has_order"),
+                Const(order_payment_user_msg.TITLE),
+                Format(order_payment_user_msg.ORDER_NUMBER, when="has_order"),
                 Format(
-                    "Отправьте сумму <b>{total_price}₽</b>\n"
-                    "по номеру <b>{phone}</b>\n"
-                    "в банк <b>{bank}</b>\n"
-                    "получателю <b>{addressee}</b>\n\n",
+                    order_payment_user_msg.PAYMENT_DETAILS,
                     when="has_requisites",
                 ),
                 Const(
-                    "❗ Реквизиты оплаты пока не настроены.\nНапишите администратору.",
+                    order_payment_user_msg.REQUISITES_NOT_SET,
                     when=lambda d, *_: d.get("has_order")
                     and not d.get("has_requisites"),
                 ),
-                Const("Заказ не найден 😔", when=lambda d, *_: not d.get("has_order")),
+                Const(
+                    order_payment_user_msg.ORDER_NOT_FOUND,
+                    when=lambda d, *_: not d.get("has_order"),
+                ),
             ),
             Row(
                 Button(
                     Const(common_btn.BACK), id="back", on_click=back_to_previous_dialog
                 ),
                 Button(
-                    Const("📎 Прикрепить чек"),
+                    Const(order_payment_user_msg.BTN_ATTACH_CHECK),
                     id="to_file",
                     on_click=lambda c, b, m: m.switch_to(UserOrderPayment.add_file),
                     when=lambda d, *_: d.get("has_order") and d.get("has_requisites"),
@@ -59,9 +62,9 @@ def create_order_payment_windows() -> list[Window]:
         ),
         Window(
             Multi(
-                Const("📎 Прикрепите чек/скрин оплаты\n\n"),
-                Const("Подойдёт фото или PDF.\n"),
-                Const("\nОтправьте файл одним сообщением 👇"),
+                Const(order_payment_user_msg.ATTACH_FILE_TITLE),
+                Const(order_payment_user_msg.ATTACH_FILE_HINT),
+                Const(order_payment_user_msg.ATTACH_FILE_ACTION),
             ),
             MessageInput(
                 on_payment_file_received,
@@ -85,10 +88,10 @@ def create_order_payment_windows() -> list[Window]:
                 when=lambda d, *_: d.get("payment_file_attachment"),
             ),
             Multi(
-                Format("🧾 Заказ {number}\n"),
-                Format("💰 Сумма: {total_price}₽\n\n"),
+                Format(order_payment_user_msg.CONFIRM_ORDER_NUMBER),
+                Format(order_payment_user_msg.CONFIRM_TOTAL),
                 Const(
-                    "Файл не прикреплён 😔",
+                    order_payment_user_msg.CONFIRM_NO_FILE,
                     when=lambda d, *_: not d.get("has_payment_file"),
                 ),
             ),
@@ -99,7 +102,7 @@ def create_order_payment_windows() -> list[Window]:
                     on_click=lambda c, b, m: m.switch_to(UserOrderPayment.add_file),
                 ),
                 Button(
-                    Const("✅ Подтвердить"),
+                    Const(order_payment_user_msg.BTN_CONFIRM),
                     id="confirm",
                     on_click=to_payment_finish,
                     when="has_payment_file",
@@ -117,12 +120,14 @@ def create_order_payment_windows() -> list[Window]:
         ),
         Window(
             Multi(
-                Const("✅ Спасибо!\n\n"),
-                Const("Мы получили ваше подтверждение оплаты.\n"),
+                Const(order_payment_user_msg.FINISH_TITLE),
+                Const(order_payment_user_msg.FINISH_BODY),
             ),
             Row(
                 Button(
-                    Const("📦 К заказам"), id="to_orders", on_click=to_order_categories
+                    Const(order_payment_user_msg.BTN_TO_ORDERS),
+                    id="to_orders",
+                    on_click=to_order_categories,
                 ),
                 Button(
                     Const(common_btn.MAIN_MENU),

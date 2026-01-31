@@ -32,3 +32,12 @@ async def get_delivery_cost_data(
         price=cost.price,
         cost_id=str(cost.id),
     )
+
+
+async def get_delivery_cost_preview_data(
+    dialog_manager: DialogManager,
+    **_kwargs: Any,
+) -> dict[str, Any]:
+    return dict(
+        price=dialog_manager.dialog_data.get("delivery_cost_price"),
+    )
