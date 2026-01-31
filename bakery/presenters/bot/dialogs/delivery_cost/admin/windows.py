@@ -4,10 +4,17 @@ from aiogram_dialog.widgets.kbd import Button, Row
 from aiogram_dialog.widgets.text import Const, Format, Multi
 
 from bakery.presenters.bot.content.buttons import common as common_btn
+from bakery.presenters.bot.content.messages.delivery_cost import (
+    admin as delivery_cost_msg,
+)
 from bakery.presenters.bot.dialogs.delivery_cost.admin.getters import (
     get_delivery_cost_data,
+    get_delivery_cost_preview_data,
 )
 from bakery.presenters.bot.dialogs.delivery_cost.admin.handlers import (
+    on_delivery_cost_cancel,
+    on_delivery_cost_confirm_create,
+    on_delivery_cost_confirm_update,
     on_delivery_cost_entered_create,
     on_delivery_cost_entered_update,
     to_create_delivery_cost,
@@ -23,10 +30,16 @@ def admin_delivery_cost_windows() -> list[Window]:
     return [
         Window(
             Multi(
-                Const("🚚 Стоимость доставки"),
-                Const("\n\nТекущая стоимость:"),
-                Format("{price} ₸", when=lambda d, *_: d.get("has_cost")),
-                Const("не задана", when=lambda d, *_: not d.get("has_cost")),
+                Const(delivery_cost_msg.TITLE),
+                Const(delivery_cost_msg.CURRENT_COST_LABEL),
+                Format(
+                    delivery_cost_msg.PRICE_FORMAT,
+                    when=lambda d, *_: d.get("has_cost"),
+                ),
+                Const(
+                    delivery_cost_msg.NOT_SET,
+                    when=lambda d, *_: not d.get("has_cost"),
+                ),
             ),
             Row(
                 Button(
@@ -49,7 +62,7 @@ def admin_delivery_cost_windows() -> list[Window]:
             getter=get_delivery_cost_data,
         ),
         Window(
-            Const("➕ Введите стоимость доставки (числом):"),
+            Const(delivery_cost_msg.CREATE_INPUT),
             TextInput(
                 id="delivery_cost_create",
                 type_factory=int,
@@ -65,7 +78,24 @@ def admin_delivery_cost_windows() -> list[Window]:
             state=AdminDeliveryPrice.create,
         ),
         Window(
-            Const("✏️ Введите новую стоимость доставки (числом):"),
+            Format(delivery_cost_msg.CREATE_CONFIRM),
+            Row(
+                Button(
+                    Const(common_btn.CREATE),
+                    id="create",
+                    on_click=on_delivery_cost_confirm_create,
+                ),
+                Button(
+                    Const(common_btn.CANCEL),
+                    id="cancel",
+                    on_click=on_delivery_cost_cancel,
+                ),
+            ),
+            state=AdminDeliveryPrice.create_confirm,
+            getter=get_delivery_cost_preview_data,
+        ),
+        Window(
+            Const(delivery_cost_msg.UPDATE_INPUT),
             TextInput(
                 id="delivery_cost_update",
                 type_factory=int,
@@ -77,8 +107,30 @@ def admin_delivery_cost_windows() -> list[Window]:
                     id="back",
                     on_click=lambda c, b, m: m.switch_to(AdminDeliveryPrice.view),
                 ),
+                Button(
+                    Const(common_btn.SKIP),
+                    id="skip",
+                    on_click=lambda c, b, m: m.switch_to(AdminDeliveryPrice.view),
+                ),
             ),
             state=AdminDeliveryPrice.update,
             getter=get_delivery_cost_data,
+        ),
+        Window(
+            Format(delivery_cost_msg.UPDATE_CONFIRM),
+            Row(
+                Button(
+                    Const(common_btn.UPDATE),
+                    id="update",
+                    on_click=on_delivery_cost_confirm_update,
+                ),
+                Button(
+                    Const(common_btn.CANCEL),
+                    id="cancel",
+                    on_click=on_delivery_cost_cancel,
+                ),
+            ),
+            state=AdminDeliveryPrice.update_confirm,
+            getter=get_delivery_cost_preview_data,
         ),
     ]

@@ -33,14 +33,8 @@ async def on_delivery_cost_entered_create(
     manager: DialogManager,
     value: int,
 ) -> None:
-    container = manager.middleware_data["dishka_container"]
-    service: DeliveryCostService = await container.get(DeliveryCostService)
-    uow: AbstractUow = await container.get(AbstractUow)
-
-    async with uow:
-        await service.create(input_dto=CreateDeliveryCost(price=value))
-
-    await manager.switch_to(AdminDeliveryPrice.view)
+    manager.dialog_data["delivery_cost_price"] = value
+    await manager.switch_to(AdminDeliveryPrice.create_confirm)
 
 
 async def on_delivery_cost_entered_update(
@@ -53,6 +47,40 @@ async def on_delivery_cost_entered_update(
     if not cost_id:
         await manager.switch_to(AdminDeliveryPrice.view)
         return
+    manager.dialog_data["delivery_cost_price"] = value
+    await manager.switch_to(AdminDeliveryPrice.update_confirm)
+
+
+async def on_delivery_cost_confirm_create(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    price = manager.dialog_data.get("delivery_cost_price")
+    if price is None:
+        await manager.switch_to(AdminDeliveryPrice.view)
+        return
+
+    container = manager.middleware_data["dishka_container"]
+    service: DeliveryCostService = await container.get(DeliveryCostService)
+    uow: AbstractUow = await container.get(AbstractUow)
+
+    async with uow:
+        await service.create(input_dto=CreateDeliveryCost(price=price))
+
+    await manager.switch_to(AdminDeliveryPrice.view)
+
+
+async def on_delivery_cost_confirm_update(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    cost_id = manager.dialog_data.get("delivery_cost_id")
+    price = manager.dialog_data.get("delivery_cost_price")
+    if not cost_id or price is None:
+        await manager.switch_to(AdminDeliveryPrice.view)
+        return
 
     container = manager.middleware_data["dishka_container"]
     service: DeliveryCostService = await container.get(DeliveryCostService)
@@ -60,7 +88,15 @@ async def on_delivery_cost_entered_update(
 
     async with uow:
         await service.update_by_id(
-            input_dto=UpdateDeliveryCost(id=UUID(cost_id), price=value)
+            input_dto=UpdateDeliveryCost(id=UUID(cost_id), price=price)
         )
 
+    await manager.switch_to(AdminDeliveryPrice.view)
+
+
+async def on_delivery_cost_cancel(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
     await manager.switch_to(AdminDeliveryPrice.view)
