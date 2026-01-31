@@ -15,7 +15,8 @@ class OrderPaymentTableFactory(
     SQLAlchemyFactory[OrderPaymentTable],
     IdentifableFactoryMixin,
     TimestampedFactoryMixin,
-): ...
+):
+    banks = ["test_bank"]
 
 
 @pytest.fixture

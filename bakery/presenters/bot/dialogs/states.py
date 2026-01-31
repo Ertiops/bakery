@@ -100,7 +100,7 @@ class UserOrderPayment(StatesGroup):
 class AdminOrderPayment(StatesGroup):
     view = State()
     phone = State()
-    bank = State()
+    banks = State()
     addressee = State()
     confirm = State()
 

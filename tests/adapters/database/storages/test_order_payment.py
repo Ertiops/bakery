@@ -23,14 +23,14 @@ async def test__create(
 ) -> None:
     create_data = CreateOrderPayment(
         phone="test_phone",
-        bank="test_bank",
+        banks=["test_bank"],
         addressee="test_addressee",
     )
     order_payment = await order_payment_storage.create(input_dto=create_data)
     assert order_payment == OrderPayment(
         id=IsUUID,
         phone=create_data.phone,
-        bank=create_data.bank,
+        banks=create_data.banks,
         addressee=create_data.addressee,
         created_at=IsDatetime,
         updated_at=IsDatetime,
@@ -49,7 +49,7 @@ async def test__get_last(
     assert order_payment == OrderPayment(
         id=db_order_payment.id,
         phone=db_order_payment.phone,
-        bank=db_order_payment.bank,
+        banks=db_order_payment.banks,
         addressee=db_order_payment.addressee,
         created_at=db_order_payment.created_at,
         updated_at=db_order_payment.updated_at,
@@ -70,14 +70,14 @@ async def test__update_by_id(
     update_data = UpdateOrderPayment(
         id=db_order_payment.id,
         phone="test_phone",
-        bank="test_bank",
+        banks=["test_bank"],
         addressee="test_addressee",
     )
     order_payment = await order_payment_storage.update_by_id(input_dto=update_data)
     assert order_payment == OrderPayment(
         id=db_order_payment.id,
         phone=update_data.phone,
-        bank=update_data.bank,
+        banks=update_data.banks,
         addressee=update_data.addressee,
         created_at=db_order_payment.created_at,
         updated_at=IsDatetime,

@@ -9,7 +9,7 @@ def convert_order_payment(
     return OrderPayment(
         id=result.id,
         phone=result.phone,
-        bank=result.bank,
+        banks=result.banks,
         addressee=result.addressee,
         created_at=result.created_at,
         updated_at=result.updated_at,

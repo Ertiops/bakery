@@ -10,7 +10,13 @@ from bakery.domains.entities.order_payment import CreateOrderPayment, UpdateOrde
 from bakery.domains.services.order_payment import OrderPaymentService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import AdminOrderPayment
-from bakery.presenters.bot.utils.text import UNSET_MARK, extract_value, normalize_text
+from bakery.presenters.bot.utils.text import (
+    UNSET_MARK,
+    extract_list,
+    extract_text,
+    normalize_text,
+    split_items,
+)
 
 
 async def admin_order_payment_start_create(
@@ -21,9 +27,9 @@ async def admin_order_payment_start_create(
     manager.dialog_data["order_payment_mode"] = "create"
     manager.dialog_data.pop("order_payment_id", None)
 
-    manager.dialog_data.pop("order_payment_phone", None)
-    manager.dialog_data.pop("order_payment_bank", None)
-    manager.dialog_data.pop("order_payment_addressee", None)
+    manager.dialog_data.pop("order_payment_phone_value", None)
+    manager.dialog_data.pop("order_payment_banks_value", None)
+    manager.dialog_data.pop("order_payment_addressee_value", None)
 
     await manager.switch_to(AdminOrderPayment.phone)
 
@@ -42,12 +48,12 @@ async def admin_order_payment_start_update(
 
     manager.dialog_data["order_payment_mode"] = "update"
     manager.dialog_data["order_payment_id"] = str(op.id)
-    manager.dialog_data["order_payment_phone"] = op.phone
-    manager.dialog_data["order_payment_bank"] = op.bank
-    manager.dialog_data["order_payment_addressee"] = op.addressee
-    manager.dialog_data["order_payment_original_phone"] = op.phone
-    manager.dialog_data["order_payment_original_bank"] = op.bank
-    manager.dialog_data["order_payment_original_addressee"] = op.addressee
+    manager.dialog_data["order_payment_phone_value"] = op.phone
+    manager.dialog_data["order_payment_banks_value"] = list(op.banks)
+    manager.dialog_data["order_payment_addressee_value"] = op.addressee
+    manager.dialog_data["order_payment_original_phone_value"] = op.phone
+    manager.dialog_data["order_payment_original_banks_value"] = list(op.banks)
+    manager.dialog_data["order_payment_original_addressee_value"] = op.addressee
 
     await manager.switch_to(AdminOrderPayment.phone)
 
@@ -60,7 +66,7 @@ async def admin_order_payment_back_to_view(
     await manager.switch_to(AdminOrderPayment.view)
 
 
-async def admin_order_payment_on_phone(
+async def admin_order_payment_on_phone_input(
     message: Message,
     _widget: object,
     manager: DialogManager,
@@ -70,43 +76,43 @@ async def admin_order_payment_on_phone(
     value = normalize_text(message.text)
     if not value:
         return
-    manager.dialog_data["order_payment_phone"] = value
-    await manager.switch_to(AdminOrderPayment.bank)
+    manager.dialog_data["order_payment_phone_value"] = value
+    await manager.switch_to(AdminOrderPayment.banks)
 
 
-async def admin_order_payment_skip_phone(
+async def admin_order_payment_skip_phone_input(
     callback: CallbackQuery,
     button: Button,
     manager: DialogManager,
 ) -> None:
-    manager.dialog_data["order_payment_phone"] = UNSET_MARK
-    await manager.switch_to(AdminOrderPayment.bank)
+    manager.dialog_data["order_payment_phone_value"] = UNSET_MARK
+    await manager.switch_to(AdminOrderPayment.banks)
 
 
-async def admin_order_payment_on_bank(
+async def admin_order_payment_on_banks_input(
     message: Message,
     _widget: object,
     manager: DialogManager,
 ) -> None:
     if message.content_type != ContentType.TEXT:
         return
-    value = normalize_text(message.text)
-    if not value:
+    items = split_items(message.text)
+    if not items:
         return
-    manager.dialog_data["order_payment_bank"] = value
+    manager.dialog_data["order_payment_banks_value"] = items
     await manager.switch_to(AdminOrderPayment.addressee)
 
 
-async def admin_order_payment_skip_bank(
+async def admin_order_payment_skip_banks_input(
     callback: CallbackQuery,
     button: Button,
     manager: DialogManager,
 ) -> None:
-    manager.dialog_data["order_payment_bank"] = UNSET_MARK
+    manager.dialog_data["order_payment_banks_value"] = UNSET_MARK
     await manager.switch_to(AdminOrderPayment.addressee)
 
 
-async def admin_order_payment_on_addressee(
+async def admin_order_payment_on_addressee_input(
     message: Message,
     _widget: object,
     manager: DialogManager,
@@ -116,28 +122,28 @@ async def admin_order_payment_on_addressee(
     value = normalize_text(message.text)
     if not value:
         return
-    manager.dialog_data["order_payment_addressee"] = value
+    manager.dialog_data["order_payment_addressee_value"] = value
     await manager.switch_to(AdminOrderPayment.confirm)
 
 
-async def admin_order_payment_skip_addressee(
+async def admin_order_payment_skip_addressee_input(
     callback: CallbackQuery,
     button: Button,
     manager: DialogManager,
 ) -> None:
-    manager.dialog_data["order_payment_addressee"] = UNSET_MARK
+    manager.dialog_data["order_payment_addressee_value"] = UNSET_MARK
     await manager.switch_to(AdminOrderPayment.confirm)
 
 
-async def admin_order_payment_to_confirm(
+async def admin_order_payment_go_to_confirm(
     callback: CallbackQuery,
     button: Button,
     manager: DialogManager,
 ) -> None:
     if (
-        manager.dialog_data.get("order_payment_phone")
-        and manager.dialog_data.get("order_payment_bank")
-        and manager.dialog_data.get("order_payment_addressee")
+        manager.dialog_data.get("order_payment_phone_value")
+        and manager.dialog_data.get("order_payment_banks_value")
+        and manager.dialog_data.get("order_payment_addressee_value")
     ):
         await manager.switch_to(AdminOrderPayment.confirm)
 
@@ -155,22 +161,22 @@ async def admin_order_payment_save(
 
     async with uow:
         if mode == "update":
-            phone = extract_value(manager.dialog_data.get("order_payment_phone"))
-            bank = extract_value(manager.dialog_data.get("order_payment_bank"))
-            addressee = extract_value(
-                manager.dialog_data.get("order_payment_addressee")
+            phone = extract_text(manager.dialog_data.get("order_payment_phone_value"))
+            banks = extract_list(manager.dialog_data.get("order_payment_banks_value"))
+            addressee = extract_text(
+                manager.dialog_data.get("order_payment_addressee_value")
             )
             if isinstance(phone, Unset):
                 phone = normalize_text(
-                    manager.dialog_data.get("order_payment_original_phone")
+                    manager.dialog_data.get("order_payment_original_phone_value")
                 )
-            if isinstance(bank, Unset):
-                bank = normalize_text(
-                    manager.dialog_data.get("order_payment_original_bank")
+            if isinstance(banks, Unset):
+                banks = extract_list(
+                    manager.dialog_data.get("order_payment_original_banks_value")
                 )
             if isinstance(addressee, Unset):
                 addressee = normalize_text(
-                    manager.dialog_data.get("order_payment_original_addressee")
+                    manager.dialog_data.get("order_payment_original_addressee_value")
                 )
             order_payment_id = manager.dialog_data.get("order_payment_id")
             if not order_payment_id:
@@ -179,23 +185,23 @@ async def admin_order_payment_save(
                 input_dto=UpdateOrderPayment(
                     id=UUID(order_payment_id),
                     phone=phone,
-                    bank=bank,
+                    banks=banks,
                     addressee=addressee,
                 )
             )
         else:
-            phone = normalize_text(manager.dialog_data.get("order_payment_phone"))
-            bank = normalize_text(manager.dialog_data.get("order_payment_bank"))
+            phone = normalize_text(manager.dialog_data.get("order_payment_phone_value"))
+            banks = extract_list(manager.dialog_data.get("order_payment_banks_value"))
             addressee = normalize_text(
-                manager.dialog_data.get("order_payment_addressee")
+                manager.dialog_data.get("order_payment_addressee_value")
             )
 
-            if not (phone and bank and addressee):
+            if not phone or not addressee or not banks or isinstance(banks, Unset):
                 return
             await service.create(
                 input_dto=CreateOrderPayment(
                     phone=phone,
-                    bank=bank,
+                    banks=banks,
                     addressee=addressee,
                 )
             )

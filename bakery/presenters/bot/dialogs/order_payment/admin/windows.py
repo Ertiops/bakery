@@ -15,13 +15,13 @@ from bakery.presenters.bot.dialogs.order_payment.admin.getters import (
 )
 from bakery.presenters.bot.dialogs.order_payment.admin.handlers import (
     admin_order_payment_back_to_view,
-    admin_order_payment_on_addressee,
-    admin_order_payment_on_bank,
-    admin_order_payment_on_phone,
+    admin_order_payment_on_addressee_input,
+    admin_order_payment_on_banks_input,
+    admin_order_payment_on_phone_input,
     admin_order_payment_save,
-    admin_order_payment_skip_addressee,
-    admin_order_payment_skip_bank,
-    admin_order_payment_skip_phone,
+    admin_order_payment_skip_addressee_input,
+    admin_order_payment_skip_banks_input,
+    admin_order_payment_skip_phone_input,
     admin_order_payment_start_create,
     admin_order_payment_start_update,
 )
@@ -39,7 +39,7 @@ def create_admin_order_payment_windows() -> list[Window]:
                 ),
                 Multi(
                     Format(order_payment_admin_msg.VIEW_PHONE),
-                    Format(order_payment_admin_msg.VIEW_BANK),
+                    Format(order_payment_admin_msg.VIEW_BANKS),
                     Format(order_payment_admin_msg.VIEW_ADDRESSEE),
                     when="has_order_payment",
                 ),
@@ -75,7 +75,7 @@ def create_admin_order_payment_windows() -> list[Window]:
                 Const(order_payment_admin_msg.INPUT_HINT),
             ),
             MessageInput(
-                admin_order_payment_on_phone, content_types=[ContentType.TEXT]
+                admin_order_payment_on_phone_input, content_types=[ContentType.TEXT]
             ),
             Row(
                 Button(
@@ -86,7 +86,7 @@ def create_admin_order_payment_windows() -> list[Window]:
                 Button(
                     Const(common_btn.SKIP),
                     id="skip",
-                    on_click=admin_order_payment_skip_phone,
+                    on_click=admin_order_payment_skip_phone_input,
                     when="is_update",
                 ),
             ),
@@ -95,11 +95,15 @@ def create_admin_order_payment_windows() -> list[Window]:
         ),
         Window(
             Multi(
-                Const(order_payment_admin_msg.BANK_INPUT),
-                Format(order_payment_admin_msg.BANK_CURRENT, when="has_bank"),
+                Const(order_payment_admin_msg.BANKS_INPUT),
+                Format(order_payment_admin_msg.BANKS_CURRENT, when="has_banks"),
+                Const(order_payment_admin_msg.BANKS_HINT),
+                Const("\n"),
                 Const(order_payment_admin_msg.INPUT_HINT),
             ),
-            MessageInput(admin_order_payment_on_bank, content_types=[ContentType.TEXT]),
+            MessageInput(
+                admin_order_payment_on_banks_input, content_types=[ContentType.TEXT]
+            ),
             Row(
                 Button(
                     Const(common_btn.BACK),
@@ -109,11 +113,11 @@ def create_admin_order_payment_windows() -> list[Window]:
                 Button(
                     Const(common_btn.SKIP),
                     id="skip",
-                    on_click=admin_order_payment_skip_bank,
+                    on_click=admin_order_payment_skip_banks_input,
                     when="is_update",
                 ),
             ),
-            state=AdminOrderPayment.bank,
+            state=AdminOrderPayment.banks,
             getter=get_admin_order_payment_edit_data,
         ),
         Window(
@@ -123,18 +127,19 @@ def create_admin_order_payment_windows() -> list[Window]:
                 Const(order_payment_admin_msg.INPUT_HINT),
             ),
             MessageInput(
-                admin_order_payment_on_addressee, content_types=[ContentType.TEXT]
+                admin_order_payment_on_addressee_input,
+                content_types=[ContentType.TEXT],
             ),
             Row(
                 Button(
                     Const(common_btn.BACK),
                     id="back",
-                    on_click=lambda c, b, m: m.switch_to(AdminOrderPayment.bank),
+                    on_click=lambda c, b, m: m.switch_to(AdminOrderPayment.banks),
                 ),
                 Button(
                     Const(common_btn.SKIP),
                     id="skip",
-                    on_click=admin_order_payment_skip_addressee,
+                    on_click=admin_order_payment_skip_addressee_input,
                     when="is_update",
                 ),
             ),
@@ -145,7 +150,7 @@ def create_admin_order_payment_windows() -> list[Window]:
             Multi(
                 Const(order_payment_admin_msg.CONFIRM_TITLE),
                 Format(order_payment_admin_msg.CONFIRM_PHONE),
-                Format(order_payment_admin_msg.CONFIRM_BANK),
+                Format(order_payment_admin_msg.CONFIRM_BANKS),
                 Format(order_payment_admin_msg.CONFIRM_ADDRESSEE),
             ),
             Row(
