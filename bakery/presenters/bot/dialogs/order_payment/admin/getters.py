@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Any
 
 from aiogram_dialog.api.protocols import DialogManager
@@ -6,7 +7,7 @@ from bakery.application.entities import Unset
 from bakery.application.exceptions import EntityNotFoundException
 from bakery.domains.services.order_payment import OrderPaymentService
 from bakery.domains.uow import AbstractUow
-from bakery.presenters.bot.utils.text import UNSET_MARK, display_text
+from bakery.presenters.bot.utils.text import UNSET_MARK, display_list, display_text
 
 
 async def get_admin_order_payment_view_data(
@@ -25,7 +26,7 @@ async def get_admin_order_payment_view_data(
                 has_order_payment=False,
                 order_payment_id=None,
                 phone="",
-                bank="",
+                banks="",
                 addressee="",
             )
 
@@ -33,7 +34,7 @@ async def get_admin_order_payment_view_data(
         has_order_payment=True,
         order_payment_id=str(op.id),
         phone=op.phone,
-        bank=op.bank,
+        banks=display_list(op.banks),
         addressee=op.addressee,
     )
 
@@ -47,28 +48,28 @@ async def get_admin_order_payment_edit_data(
         is_update=dialog_manager.dialog_data.get("order_payment_mode") == "update",
         order_payment_id=dialog_manager.dialog_data.get("order_payment_id"),
         phone=_resolve_value(
-            dialog_manager.dialog_data.get("order_payment_phone"),
-            dialog_manager.dialog_data.get("order_payment_original_phone"),
+            dialog_manager.dialog_data.get("order_payment_phone_value"),
+            dialog_manager.dialog_data.get("order_payment_original_phone_value"),
         ),
-        bank=_resolve_value(
-            dialog_manager.dialog_data.get("order_payment_bank"),
-            dialog_manager.dialog_data.get("order_payment_original_bank"),
+        banks=_resolve_list(
+            dialog_manager.dialog_data.get("order_payment_banks_value"),
+            dialog_manager.dialog_data.get("order_payment_original_banks_value"),
         ),
         addressee=_resolve_value(
-            dialog_manager.dialog_data.get("order_payment_addressee"),
-            dialog_manager.dialog_data.get("order_payment_original_addressee"),
+            dialog_manager.dialog_data.get("order_payment_addressee_value"),
+            dialog_manager.dialog_data.get("order_payment_original_addressee_value"),
         ),
         has_phone=_has_value(
-            dialog_manager.dialog_data.get("order_payment_phone"),
-            dialog_manager.dialog_data.get("order_payment_original_phone"),
+            dialog_manager.dialog_data.get("order_payment_phone_value"),
+            dialog_manager.dialog_data.get("order_payment_original_phone_value"),
         ),
-        has_bank=_has_value(
-            dialog_manager.dialog_data.get("order_payment_bank"),
-            dialog_manager.dialog_data.get("order_payment_original_bank"),
+        has_banks=_has_value(
+            dialog_manager.dialog_data.get("order_payment_banks_value"),
+            dialog_manager.dialog_data.get("order_payment_original_banks_value"),
         ),
         has_addressee=_has_value(
-            dialog_manager.dialog_data.get("order_payment_addressee"),
-            dialog_manager.dialog_data.get("order_payment_original_addressee"),
+            dialog_manager.dialog_data.get("order_payment_addressee_value"),
+            dialog_manager.dialog_data.get("order_payment_original_addressee_value"),
         ),
     )
 
@@ -79,7 +80,16 @@ def _resolve_value(value: str | Unset | None, original: str | None) -> str:
     return display_text(value)
 
 
-def _has_value(value: str | Unset | None, original: str | None) -> bool:
+def _resolve_list(
+    value: Sequence[str] | Unset | None,
+    original: Sequence[str] | None,
+) -> str:
+    if value == UNSET_MARK:
+        return display_list(original)
+    return display_list(value)
+
+
+def _has_value(value: object, original: object) -> bool:
     if value == UNSET_MARK:
         return bool(original)
     return bool(value) and not isinstance(value, Unset) and value != UNSET_MARK

@@ -11,6 +11,7 @@ from bakery.domains.services.order import OrderService
 from bakery.domains.services.order_payment import OrderPaymentService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.utils.order import combine_order_number
+from bakery.presenters.bot.utils.text import display_list
 
 
 def _get_order_id_from_start_or_dialog(manager: DialogManager) -> str | None:
@@ -87,7 +88,7 @@ async def get_order_payment_data(
         is_delivered=(order.status == OrderStatus.DELIVERED),
         has_requisites=has_requisites,
         phone=(requisites.phone if requisites else ""),
-        bank=(requisites.bank if requisites else ""),
+        banks=(display_list(requisites.banks) if requisites else ""),
         addressee=(requisites.addressee if requisites else ""),
         payment_file_id=file_id,
         payment_file_name=file_name or "Файл",

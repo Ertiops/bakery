@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: fa6ae1141f63
+Revision ID: cac07530841d
 Revises:
-Create Date: 2026-01-15 12:23:40.603524
+Create Date: 2026-02-01 01:56:13.061233
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "fa6ae1141f63"
+revision: str = "cac07530841d"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -62,7 +62,7 @@ def upgrade() -> None:
     op.create_table(
         "order_payments",
         sa.Column("phone", sa.String(length=128), nullable=False),
-        sa.Column("bank", sa.String(length=128), nullable=False),
+        sa.Column("banks", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column("addressee", sa.String(length=128), nullable=False),
         sa.Column(
             "created_at",

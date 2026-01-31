@@ -146,5 +146,5 @@ class OrderPaymentTable(BaseTable, TimestampedMixin, IdentifableMixin):
     __tablename__ = "order_payments"
 
     phone: Mapped[str] = mapped_column(String(128), nullable=False)
-    bank: Mapped[str] = mapped_column(String(128), nullable=False)
+    banks: Mapped[Sequence[str]] = mapped_column(JSONB, nullable=False)
     addressee: Mapped[str] = mapped_column(String(128), nullable=False)
