@@ -24,6 +24,8 @@ from bakery.domains.services.order import OrderService
 from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
+from bakery.presenters.bot.content.buttons.order import user as user_order_btn
+from bakery.presenters.bot.content.messages.order import user as user_msg
 from bakery.presenters.bot.dialogs.utils.order import (
     combine_order_number,
     format_order_products,
@@ -212,13 +214,14 @@ async def get_user_orders_data(
         for o in result.items
     ]
     title_map = {
-        UserOrderStatus.CREATED: "🆕 Созданы + изменены",
-        UserOrderStatus.DELIVERED: "📬 Доставлены",
-        UserOrderStatus.PAID: "💳 Оплачены",
+        UserOrderStatus.CREATED: user_order_btn.CATEGORY_CREATED,
+        UserOrderStatus.IN_PROGRESS: user_order_btn.CATEGORY_IN_PROGRESS,
+        UserOrderStatus.DELIVERED: user_order_btn.CATEGORY_DELIVERED,
+        UserOrderStatus.PAID: user_order_btn.CATEGORY_PAID,
     }
 
     return dict(
-        category_title=title_map.get(user_cat, "📦 Мои заказы"),
+        category_title=title_map.get(user_cat, user_msg.CATEGORY_TITLE_FALLBACK),
         orders=orders,
         has_orders=bool(orders),
     )
@@ -266,4 +269,5 @@ async def get_user_order_data(
         delivery_price=order.delivery_price,
         total_price=order.total_price,
         is_delivered=True if order.status == OrderStatus.DELIVERED else False,
+        can_delete=order.status in (OrderStatus.CREATED, OrderStatus.CHANGED),
     )

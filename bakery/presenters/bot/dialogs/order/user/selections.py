@@ -15,6 +15,15 @@ async def select_orders_cat_created(
     await manager.switch_to(UserOrder.view_many)
 
 
+async def select_orders_cat_in_progress(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    manager.dialog_data["user_order_status"] = UserOrderStatus.IN_PROGRESS.value
+    await manager.switch_to(UserOrder.view_many)
+
+
 async def select_orders_cat_delivered(
     callback: CallbackQuery,
     button: Button,

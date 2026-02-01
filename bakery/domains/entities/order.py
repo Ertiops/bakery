@@ -13,6 +13,7 @@ from bakery.domains.entities.common import Pagination, ToDictMixin
 class OrderStatus(StrEnum):
     CREATED = "created"
     CHANGED = "changed"
+    IN_PROGRESS = "in_progress"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
     PAID = "paid"
@@ -21,6 +22,7 @@ class OrderStatus(StrEnum):
 @unique
 class UserOrderStatus(StrEnum):
     CREATED = "created"
+    IN_PROGRESS = "in_progress"
     DELIVERED = "delivered"
     PAID = "paid"
 
@@ -30,6 +32,7 @@ USER_ORDER_STATUS_MAP: Mapping[UserOrderStatus, Sequence[OrderStatus]] = {
         OrderStatus.CREATED,
         OrderStatus.CHANGED,
     ),
+    UserOrderStatus.IN_PROGRESS: (OrderStatus.IN_PROGRESS,),
     UserOrderStatus.DELIVERED: (OrderStatus.DELIVERED,),
     UserOrderStatus.PAID: (OrderStatus.PAID,),
 }

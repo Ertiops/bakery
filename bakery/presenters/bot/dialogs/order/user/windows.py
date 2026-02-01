@@ -4,6 +4,7 @@ from aiogram_dialog.widgets.kbd import Button, Row, ScrollingGroup, Select
 from aiogram_dialog.widgets.text import Const, Format, List, Multi
 
 from bakery.presenters.bot.content.buttons import common as common_btn
+from bakery.presenters.bot.content.buttons.order import user as user_order_btn
 from bakery.presenters.bot.content.messages.order import user as user_msg
 from bakery.presenters.bot.dialogs.order.user.getters import (
     get_available_order_dates,
@@ -16,6 +17,7 @@ from bakery.presenters.bot.dialogs.order.user.handlers import (
     back_to_orders_list,
     on_address_selected,
     on_confirm_order,
+    on_delete_order,
     on_manual_address_entered,
     on_order_date_selected,
     on_user_order_selected,
@@ -31,6 +33,7 @@ from bakery.presenters.bot.dialogs.order.user.redirections import (
 from bakery.presenters.bot.dialogs.order.user.selections import (
     select_orders_cat_created,
     select_orders_cat_delivered,
+    select_orders_cat_in_progress,
     select_orders_cat_paid,
 )
 from bakery.presenters.bot.dialogs.states import UserOrder
@@ -63,8 +66,8 @@ def create_order_windows() -> list[Window]:
             getter=get_pickup_address_data,
         ),
         Window(
-            Const("✍️ Введите адрес доставки одним сообщением:"),
-            Const("\n\nНапример: ул. Шамиля Усманова 10, 1 подъезд, кв. 3"),
+            Const(user_msg.MANUAL_ADDRESS_TITLE),
+            Const(user_msg.MANUAL_ADDRESS_EXAMPLE),
             TextInput(
                 id="manual_address_input",
                 type_factory=str,
@@ -81,12 +84,13 @@ def create_order_windows() -> list[Window]:
         ),
         Window(
             Multi(
-                Const("📅 Выберите дату доставки"),
+                Const(user_msg.ORDER_DATE_TITLE),
                 Const(
-                    "\n\nДоступные даты:", when=lambda d, *_: d.get("has_order_dates")
+                    user_msg.ORDER_DATE_AVAILABLE_SUFFIX,
+                    when=lambda d, *_: d.get("has_order_dates"),
                 ),
                 Const(
-                    "\n\nСейчас нет доступных дат 😔",
+                    user_msg.ORDER_DATE_EMPTY,
                     when=lambda d, *_: not d.get("has_order_dates"),
                 ),
             ),
@@ -115,32 +119,36 @@ def create_order_windows() -> list[Window]:
         ),
         Window(
             Multi(
-                Const("✅ Подтверждение заказа\n\n"),
-                Const("📍 Адрес доставки:"),
+                Const(user_msg.CONFIRM_TITLE),
+                Const(user_msg.CONFIRM_ADDRESS_LABEL),
                 Format(
                     "{pickup_address_name}",
                     when=lambda d, *_: d.get("has_pickup_address"),
                 ),
-                Const("Не выбран", when=lambda d, *_: not d.get("has_pickup_address")),
-                Const("\n\n📅 Дата доставки:"),
+                Const(
+                    user_msg.CONFIRM_ADDRESS_EMPTY,
+                    when=lambda d, *_: not d.get("has_pickup_address"),
+                ),
+                Const(user_msg.CONFIRM_DATE_LABEL),
                 Format(
                     "{order_date_label}", when=lambda d, *_: d.get("has_order_date")
                 ),
-                Const("Не выбрана", when=lambda d, *_: not d.get("has_order_date")),
-                Const("\n\n🧺 Корзина:"),
+                Const(
+                    user_msg.CONFIRM_DATE_EMPTY,
+                    when=lambda d, *_: not d.get("has_order_date"),
+                ),
+                Const(user_msg.CONFIRM_CART_LABEL),
             ),
             List(
-                Format(
-                    "• {item[name]} — {item[qty]} × {item[price]} = {item[subtotal]}"
-                ),
+                Format(user_msg.CART_ITEM_LINE),
                 items="cart_items",
                 when=lambda d, *_: d.get("has_cart_items"),
             ),
             Format(
-                "\n\n🚚 Доставка по городу: {delivery_cost} руб.",
+                user_msg.CONFIRM_DELIVERY_COST,
                 when=lambda d, *_: d.get("is_city_delivery"),
             ),
-            Format("\n\n💰 Итого: {total}", when=lambda d, *_: d.get("has_cart_items")),
+            Format(user_msg.CONFIRM_TOTAL, when=lambda d, *_: d.get("has_cart_items")),
             Row(
                 Button(
                     Const(common_btn.BACK),
@@ -148,7 +156,7 @@ def create_order_windows() -> list[Window]:
                     on_click=lambda c, b, m: m.switch_to(UserOrder.add_date),
                 ),
                 Button(
-                    Const("✅ Подтвердить"),
+                    Const(user_order_btn.CONFIRM_ORDER),
                     id="confirm_order",
                     on_click=on_confirm_order,
                 ),
@@ -157,39 +165,50 @@ def create_order_windows() -> list[Window]:
             getter=get_order_confirm_data,
         ),
         Window(
-            Const("✅ Заказ успешно создан!\n\n"),
+            Const(user_msg.ORDER_CREATED),
             Row(
                 Button(
                     Const(common_btn.MAIN_MENU),
                     id="to_main_menu",
                     on_click=to_main_menu_from_order,
                 ),
-                Button(Const("📦 К заказу"), id="my_orders", on_click=to_created_order),
+                Button(
+                    Const(user_order_btn.TO_ORDER),
+                    id="my_orders",
+                    on_click=to_created_order,
+                ),
             ),
             state=UserOrder.finish,
         ),
         Window(
             Multi(
-                Const("📦 Мои заказы\n\n"),
-                Const("Выберите категорию:"),
+                Const(user_msg.MY_ORDERS_TITLE),
+                Const(user_msg.SELECT_CATEGORY),
             ),
             Row(
                 Button(
-                    Const("🆕 Готовятся"),
+                    Const(user_order_btn.CATEGORY_CREATED),
                     id="cat_created",
                     on_click=select_orders_cat_created,
                 ),
             ),
             Row(
                 Button(
-                    Const("📬 Доставлены"),
+                    Const(user_order_btn.CATEGORY_IN_PROGRESS),
+                    id="cat_in_progress",
+                    on_click=select_orders_cat_in_progress,
+                ),
+            ),
+            Row(
+                Button(
+                    Const(user_order_btn.CATEGORY_DELIVERED),
                     id="cat_delivered",
                     on_click=select_orders_cat_delivered,
                 ),
             ),
             Row(
                 Button(
-                    Const("💳 Оплачены"),
+                    Const(user_order_btn.CATEGORY_PAID),
                     id="cat_paid",
                     on_click=select_orders_cat_paid,
                 ),
@@ -205,16 +224,16 @@ def create_order_windows() -> list[Window]:
         ),
         Window(
             Multi(
-                Format("📦 {category_title}\n\n"),
-                Const("Выберите заказ:"),
+                Format(user_msg.ORDERS_CATEGORY_TITLE),
+                Const(user_msg.SELECT_ORDER),
                 Const(
-                    "\n\nПока заказов нет 😔",
+                    user_msg.NO_ORDERS,
                     when=lambda d, *_: not d.get("has_orders"),
                 ),
             ),
             ScrollingGroup(
                 Select(
-                    Format("🧾 {item[number]} • {item[delivered_at]} • {item[total]}₽"),
+                    Format(user_msg.ORDER_LIST_ITEM),
                     id="user_orders",
                     item_id_getter=lambda item: item["id"],
                     items="orders",
@@ -227,10 +246,12 @@ def create_order_windows() -> list[Window]:
             ),
             Row(
                 Button(
-                    Const("⬅️ К категориям"),
+                    Const(user_order_btn.BACK_TO_CATEGORIES),
                     id="to_categories",
                     on_click=to_order_categories,
                 ),
+            ),
+            Row(
                 Button(
                     Const(common_btn.MAIN_MENU),
                     id="to_main_menu",
@@ -242,32 +263,49 @@ def create_order_windows() -> list[Window]:
         ),
         Window(
             Multi(
-                Format("📦 Заказ {number}\n\n", when=lambda d, *_: d.get("has_order")),
+                Format(user_msg.ORDER_TITLE, when=lambda d, *_: d.get("has_order")),
                 Format(
-                    "📅 Доставка: {delivered_at}\n",
+                    user_msg.ORDER_DELIVERY_DATE,
                     when=lambda d, *_: d.get("has_order"),
                 ),
                 Format(
-                    "📍 Адрес: {pickup_address_name}\n",
+                    user_msg.ORDER_ADDRESS,
                     when=lambda d, *_: d.get("has_order"),
                 ),
-                Const("🧺 Состав заказа:\n", when=lambda d, *_: d.get("has_order")),
-                Format("{products_text}\n\n", when=lambda d, *_: d.get("has_order")),
+                Const(
+                    user_msg.ORDER_CONTENT_LABEL, when=lambda d, *_: d.get("has_order")
+                ),
                 Format(
-                    "🚚 Доставка: {delivery_price}₽\n",
+                    user_msg.ORDER_PRODUCTS_TEXT, when=lambda d, *_: d.get("has_order")
+                ),
+                Format(
+                    user_msg.ORDER_DELIVERY_PRICE,
                     when=lambda d, *_: d.get("has_order"),
                 ),
                 Format(
-                    "💰 Итого: {total_price}₽", when=lambda d, *_: d.get("has_order")
+                    user_msg.ORDER_TOTAL_PRICE,
+                    when=lambda d, *_: d.get("has_order"),
                 ),
-                Const("Заказ не найден 😔", when=lambda d, *_: not d.get("has_order")),
+                Const(
+                    user_msg.ORDER_NOT_FOUND, when=lambda d, *_: not d.get("has_order")
+                ),
             ),
             Row(
                 Button(
-                    Const("⬅️ К заказам"),
+                    Const(user_order_btn.BACK_TO_ORDERS),
                     id="back_to_orders",
                     on_click=back_to_orders_list,
                 ),
+            ),
+            Row(
+                Button(
+                    Const(user_order_btn.DELETE),
+                    id="delete_order",
+                    on_click=on_delete_order,
+                    when="can_delete",
+                ),
+            ),
+            Row(
                 Button(
                     Const(common_btn.MAIN_MENU),
                     id="to_main_menu",
@@ -275,7 +313,7 @@ def create_order_windows() -> list[Window]:
                 ),
             ),
             Button(
-                Const("💳 Оплатить"),
+                Const(user_order_btn.PAY),
                 id="pay",
                 on_click=to_order_payment,
                 when="is_delivered",
