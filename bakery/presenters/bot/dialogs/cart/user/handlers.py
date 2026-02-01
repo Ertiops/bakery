@@ -19,7 +19,11 @@ async def on_view_product_clicked(
     manager: DialogManager,
     item_id: str,
 ) -> None:
-    category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore
+    start_data = manager.start_data
+    if isinstance(start_data, dict):
+        category = manager.dialog_data.get("category") or start_data.get("category")
+    else:
+        category = manager.dialog_data.get("category")
     manager.dialog_data["product_id"] = item_id
     if category:
         manager.dialog_data["category"] = category
