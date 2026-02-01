@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from datetime import time
 
 from bakery.application.constants.common import WEEKDAYS_BASE
 
@@ -10,6 +11,8 @@ def normalize_and_validate_schedule(
     weekdays: Sequence[int],
     min_days_before: int,
     max_days_in_advance: int,
+    order_open_time: time,
+    order_close_time: time,
 ) -> tuple[tuple[int, ...], int, int]:
     if max_days_in_advance > min_days_before:
         raise ValueError(
@@ -22,5 +25,12 @@ def normalize_and_validate_schedule(
             raise ValueError("Дни недели должны быть в диапазоне 1..7.")
         normalized.add(wd)
 
+    if order_open_time is None or order_close_time is None:
+        raise ValueError("Не заполнено время начала/окончания заказа.")
+
     weekdays_sorted = tuple(sorted(normalized))
-    return weekdays_sorted, min_days_before, max_days_in_advance
+    return (
+        weekdays_sorted,
+        min_days_before,
+        max_days_in_advance,
+    )

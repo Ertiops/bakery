@@ -18,6 +18,7 @@ from bakery.domains.entities.order import (
     UpdateOrder,
 )
 from bakery.domains.services.order import OrderService
+from bakery.domains.utils.timezone import MOSCOW_TZ
 from tests.utils import now_utc
 
 
@@ -34,7 +35,7 @@ async def test__create(
         products=[
             dict(name="name", quantity=2),
         ],
-        delivered_at=now_utc().date(),
+        delivered_at=now_utc().astimezone(MOSCOW_TZ).date(),
         total_price=1000,
         delivery_price=200,
     )
@@ -70,7 +71,7 @@ async def test__create__validate_pickup_address(
         products=[
             dict(name="name", quantity=2),
         ],
-        delivered_at=now_utc().date(),
+        delivered_at=now_utc().astimezone(MOSCOW_TZ).date(),
         total_price=1000,
         delivery_price=200,
     )
@@ -104,7 +105,7 @@ async def test__create__foreign_key_violation_exception__user_id(
         products=[
             dict(name="name", quantity=2),
         ],
-        delivered_at=now_utc().date(),
+        delivered_at=now_utc().astimezone(MOSCOW_TZ).date(),
         total_price=1000,
         delivery_price=200,
     )

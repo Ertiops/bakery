@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: cac07530841d
+Revision ID: 5969516e8064
 Revises:
-Create Date: 2026-02-01 01:56:13.061233
+Create Date: 2026-02-01 04:11:55.796699
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "cac07530841d"
+revision: str = "5969516e8064"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -85,6 +85,8 @@ def upgrade() -> None:
         sa.Column("weekdays", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column("min_days_before", sa.Integer(), nullable=False),
         sa.Column("max_days_in_advance", sa.Integer(), nullable=False),
+        sa.Column("order_open_time", sa.Time(), nullable=False),
+        sa.Column("order_close_time", sa.Time(), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

@@ -7,6 +7,7 @@ from aiogram_dialog.widgets.kbd import Button
 from bakery.domains.entities.order_schedule import CreateOrderSchedule
 from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.uow import AbstractUow
+from bakery.domains.utils.timezone import parse_hhmm, time_msk_to_utc_time
 from bakery.presenters.bot.dialogs.states import AdminOrderSchedule
 
 _SELECTED_KEY = "admin_order_schedule_weekdays"
@@ -38,6 +39,8 @@ async def to_pick_weekdays(
     _set_error(manager, None)
     manager.dialog_data.pop("current_min_days_before", None)
     manager.dialog_data.pop("current_max_days_in_advance", None)
+    manager.dialog_data.pop("current_order_open_time", None)
+    manager.dialog_data.pop("current_order_close_time", None)
     await manager.switch_to(AdminOrderSchedule.pick_weekdays)
 
 
@@ -103,6 +106,34 @@ async def on_max_days_in_advance_input(
 
     manager.dialog_data["current_max_days_in_advance"] = value
     _set_error(manager, None)
+    await manager.switch_to(AdminOrderSchedule.open_time)
+
+
+async def on_open_time_input(
+    message: Message, _w: object, manager: DialogManager
+) -> None:
+    try:
+        value = parse_hhmm((message.text or "").strip())
+    except ValueError:
+        _set_error(manager, "Введите время в формате HH:MM (например 00:00).")
+        return
+
+    manager.dialog_data["current_order_open_time"] = value.strftime("%H:%M")
+    _set_error(manager, None)
+    await manager.switch_to(AdminOrderSchedule.close_time)
+
+
+async def on_close_time_input(
+    message: Message, _w: object, manager: DialogManager
+) -> None:
+    try:
+        value = parse_hhmm((message.text or "").strip())
+    except ValueError:
+        _set_error(manager, "Введите время в формате HH:MM (например 12:00).")
+        return
+
+    manager.dialog_data["current_order_close_time"] = value.strftime("%H:%M")
+    _set_error(manager, None)
     await manager.switch_to(AdminOrderSchedule.confirm)
 
 
@@ -112,12 +143,17 @@ async def save_schedule(
     selected = _get_selected(manager)
     min_days_before = manager.dialog_data.get("current_min_days_before")
     max_days_in_advance = manager.dialog_data.get("current_max_days_in_advance")
+    open_time = manager.dialog_data.get("current_order_open_time")
+    close_time = manager.dialog_data.get("current_order_close_time")
 
     if not selected:
         _set_error(manager, "Выберите хотя бы один день недели.")
         return
     if min_days_before is None or max_days_in_advance is None:
         _set_error(manager, "Не заполнены min/max.")
+        return
+    if open_time is None or close_time is None:
+        _set_error(manager, "Не заполнено время открытия/закрытия.")
         return
 
     if int(max_days_in_advance) >= int(min_days_before):
@@ -136,11 +172,15 @@ async def save_schedule(
     service: OrderScheduleService = await container.get(OrderScheduleService)
 
     async with uow:
+        order_open_time = time_msk_to_utc_time(parse_hhmm(open_time))
+        order_close_time = time_msk_to_utc_time(parse_hhmm(close_time))
         await service.create(
             input_dto=CreateOrderSchedule(
                 weekdays=sorted(selected),
                 min_days_before=int(min_days_before),
                 max_days_in_advance=int(max_days_in_advance),
+                order_open_time=order_open_time,
+                order_close_time=order_close_time,
             )
         )
 
@@ -152,7 +192,7 @@ async def back_to_max_days(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
     _clear_error(manager)
-    await manager.switch_to(AdminOrderSchedule.max_days_in_advance)
+    await manager.switch_to(AdminOrderSchedule.close_time)
 
 
 async def back_to_min_days(

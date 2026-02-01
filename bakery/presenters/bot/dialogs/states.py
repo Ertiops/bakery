@@ -110,5 +110,7 @@ class AdminOrderSchedule(StatesGroup):
     pick_weekdays = State()
     min_days_before = State()
     max_days_in_advance = State()
+    open_time = State()
+    close_time = State()
     confirm = State()
     finish = State()

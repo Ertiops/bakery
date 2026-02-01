@@ -17,8 +17,10 @@ from bakery.presenters.bot.dialogs.order_schedule.admin.handlers import (
     back_to_max_days,
     back_to_min_days,
     go_next_from_weekdays,
+    on_close_time_input,
     on_max_days_in_advance_input,
     on_min_days_before_input,
+    on_open_time_input,
     pick_weekday,
     reset_weekdays,
     save_schedule,
@@ -36,6 +38,8 @@ def admin_order_schedule_windows() -> list[Window]:
                 Format("Дни: <b>{current_weekdays}</b>\n"),
                 Format(order_schedule_admin_msg.CURRENT_MIN_DAYS_BEFORE),
                 Format(order_schedule_admin_msg.CURRENT_MAX_DAYS_IN_ADVANCE),
+                Format(order_schedule_admin_msg.CURRENT_OPEN_TIME),
+                Format(order_schedule_admin_msg.CURRENT_CLOSE_TIME),
                 Format("\n❗ {error}\n", when=lambda d, *_: bool(d.get("error"))),
             ),
             Row(
@@ -134,10 +138,50 @@ def admin_order_schedule_windows() -> list[Window]:
         ),
         Window(
             Multi(
+                Const("Введите время открытия заказов (МСК)\n"),
+                Const("Формат: <b>HH:MM</b>\n\n"),
+                Const("Пример: <b>00:00</b>\n"),
+                Format("\n❗ {error}\n", when=lambda d, *_: bool(d.get("error"))),
+            ),
+            MessageInput(on_open_time_input),
+            Row(
+                Button(
+                    Const(common_btn.BACK),
+                    id="back",
+                    on_click=lambda c, b, m: m.switch_to(
+                        AdminOrderSchedule.max_days_in_advance
+                    ),
+                ),
+            ),
+            state=AdminOrderSchedule.open_time,
+            getter=get_admin_order_schedule_data,
+        ),
+        Window(
+            Multi(
+                Const("Введите время закрытия заказов (МСК)\n"),
+                Const("Формат: <b>HH:MM</b>\n\n"),
+                Const("Пример: <b>12:00</b>\n"),
+                Format("\n❗ {error}\n", when=lambda d, *_: bool(d.get("error"))),
+            ),
+            MessageInput(on_close_time_input),
+            Row(
+                Button(
+                    Const(common_btn.BACK),
+                    id="back",
+                    on_click=lambda c, b, m: m.switch_to(AdminOrderSchedule.open_time),
+                ),
+            ),
+            state=AdminOrderSchedule.close_time,
+            getter=get_admin_order_schedule_data,
+        ),
+        Window(
+            Multi(
                 Const("Подтвердите расписание\n\n"),
                 Format("Дни: <b>{selected_weekdays}</b>\n"),
                 Format(order_schedule_admin_msg.MIN_DAYS_BEFORE),
                 Format(order_schedule_admin_msg.MAX_DAYS_IN_ADVANCE),
+                Format(order_schedule_admin_msg.OPEN_TIME),
+                Format(order_schedule_admin_msg.CLOSE_TIME),
                 Format("\n❗ {error}\n", when=lambda d, *_: bool(d.get("error"))),
             ),
             Row(

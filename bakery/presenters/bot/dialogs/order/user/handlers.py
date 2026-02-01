@@ -130,16 +130,21 @@ async def on_confirm_order(
     total_price = cart_total + delivery_price
 
     async with uow:
-        order = await order_service.create(
-            input_dto=CreateOrderAsUser(
-                user_id=user.id,
-                pickup_address_name=pickup_address_name or "",
-                products=products,
-                delivered_at=delivered_at,
-                total_price=total_price,
-                delivery_price=delivery_price,
+        try:
+            order = await order_service.create(
+                input_dto=CreateOrderAsUser(
+                    user_id=user.id,
+                    pickup_address_name=pickup_address_name or "",
+                    products=products,
+                    delivered_at=delivered_at,
+                    total_price=total_price,
+                    delivery_price=delivery_price,
+                )
             )
-        )
+        except ValueError as exc:
+            await callback.answer(str(exc))
+            await manager.switch_to(UserOrder.add_date)
+            return
     manager.dialog_data["selected_order_id"] = str(order.id)
     await manager.switch_to(UserOrder.finish)
 
