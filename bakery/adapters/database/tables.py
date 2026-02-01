@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from datetime import date
+from datetime import date, time
 from uuid import UUID
 
-from sqlalchemy import Date, ForeignKey, Index, Integer, String
+from sqlalchemy import Date, ForeignKey, Index, Integer, String, Time
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -140,6 +140,8 @@ class OrderScheduleTable(BaseTable, TimestampedMixin, IdentifableMixin):
     weekdays: Mapped[Sequence[int]] = mapped_column(JSONB, nullable=False)
     min_days_before: Mapped[int] = mapped_column(Integer, nullable=False)
     max_days_in_advance: Mapped[int] = mapped_column(Integer, nullable=False)
+    order_open_time: Mapped[time] = mapped_column(Time, nullable=False)
+    order_close_time: Mapped[time] = mapped_column(Time, nullable=False)
 
 
 class OrderPaymentTable(BaseTable, TimestampedMixin, IdentifableMixin):

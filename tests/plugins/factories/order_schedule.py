@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from datetime import time
 
 import pytest
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
@@ -15,7 +16,12 @@ class OrderScheduleTableFactory(
     SQLAlchemyFactory[OrderScheduleTable],
     IdentifableFactoryMixin,
     TimestampedFactoryMixin,
-): ...
+):
+    weekdays = [1, 2, 3, 4, 5, 6, 7]
+    min_days_before = 0
+    max_days_in_advance = 0
+    order_open_time = time(21, 0)
+    order_close_time = time(20, 59)
 
 
 @pytest.fixture

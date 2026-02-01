@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from datetime import time
 from uuid import uuid4
 
 import pytest
@@ -24,6 +25,8 @@ async def test__create(
         weekdays=[1, 3],
         min_days_before=1,
         max_days_in_advance=7,
+        order_open_time=time(21, 0),
+        order_close_time=time(9, 0),
     )
     order_schedule = await order_schedule_storage.create(input_dto=create_data)
     assert order_schedule == OrderSchedule(
@@ -31,6 +34,8 @@ async def test__create(
         weekdays=create_data.weekdays,
         min_days_before=create_data.min_days_before,
         max_days_in_advance=create_data.max_days_in_advance,
+        order_open_time=create_data.order_open_time,
+        order_close_time=create_data.order_close_time,
         created_at=IsDatetime,
         updated_at=IsDatetime,
     )
@@ -49,6 +54,8 @@ async def test__get_last(
         weekdays=db_order_schedules[1].weekdays,
         min_days_before=db_order_schedules[1].min_days_before,
         max_days_in_advance=db_order_schedules[1].max_days_in_advance,
+        order_open_time=db_order_schedules[1].order_open_time,
+        order_close_time=db_order_schedules[1].order_close_time,
         created_at=db_order_schedules[1].created_at,
         updated_at=db_order_schedules[1].updated_at,
     )
@@ -66,6 +73,8 @@ async def test__get_last__last_deleted(
         weekdays=db_order_schedule.weekdays,
         min_days_before=db_order_schedule.min_days_before,
         max_days_in_advance=db_order_schedule.max_days_in_advance,
+        order_open_time=db_order_schedule.order_open_time,
+        order_close_time=db_order_schedule.order_close_time,
         created_at=db_order_schedule.created_at,
         updated_at=db_order_schedule.updated_at,
     )
@@ -95,6 +104,8 @@ async def test__update_by_id(
         weekdays=[1, 3],
         min_days_before=1,
         max_days_in_advance=7,
+        order_open_time=time(22, 0),
+        order_close_time=time(10, 0),
     )
     order_schedule = await order_schedule_storage.update_by_id(input_dto=update_data)
     assert order_schedule == OrderSchedule(
@@ -102,6 +113,8 @@ async def test__update_by_id(
         weekdays=update_data.weekdays,
         min_days_before=update_data.min_days_before,
         max_days_in_advance=update_data.max_days_in_advance,
+        order_open_time=update_data.order_open_time,
+        order_close_time=update_data.order_close_time,
         created_at=db_order_schedule.created_at,
         updated_at=IsDatetime,
     )

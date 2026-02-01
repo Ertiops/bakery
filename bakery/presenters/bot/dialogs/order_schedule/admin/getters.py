@@ -7,6 +7,7 @@ from aiogram_dialog.api.protocols import DialogManager
 from bakery.application.exceptions import EntityNotFoundException
 from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.uow import AbstractUow
+from bakery.domains.utils.timezone import format_hhmm, time_utc_to_msk_time
 
 _SELECTED_KEY = "admin_order_schedule_weekdays"
 
@@ -52,6 +53,8 @@ async def get_admin_order_schedule_data(
 
     min_days_before = dialog_manager.dialog_data.get("current_min_days_before")
     max_days_in_advance = dialog_manager.dialog_data.get("current_max_days_in_advance")
+    open_time = dialog_manager.dialog_data.get("current_order_open_time")
+    close_time = dialog_manager.dialog_data.get("current_order_close_time")
 
     return {
         "has_schedule": has_schedule,
@@ -62,12 +65,22 @@ async def get_admin_order_schedule_data(
         "current_max_days_in_advance": schedule.max_days_in_advance
         if schedule
         else "—",
+        "current_open_time": format_hhmm(time_utc_to_msk_time(schedule.order_open_time))
+        if schedule
+        else "—",
+        "current_close_time": format_hhmm(
+            time_utc_to_msk_time(schedule.order_close_time)
+        )
+        if schedule
+        else "—",
         "selected_weekdays": _format_selected(selected),
         "has_selected": bool(selected),
         "min_days_before": min_days_before if min_days_before is not None else "—",
         "max_days_in_advance": max_days_in_advance
         if max_days_in_advance is not None
         else "—",
+        "open_time": open_time if open_time else "—",
+        "close_time": close_time if close_time else "—",
         "wd1_free": 1 not in selected,
         "wd2_free": 2 not in selected,
         "wd3_free": 3 not in selected,

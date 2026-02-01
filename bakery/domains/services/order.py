@@ -14,6 +14,7 @@ from bakery.domains.entities.order_schedule import OrderSchedule
 from bakery.domains.interfaces.storages.cart import ICartStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
+from bakery.domains.utils.get_available_delivery_dates import is_order_date_available
 
 
 class OrderService:
@@ -38,6 +39,11 @@ class OrderService:
                 entity=OrderSchedule,
                 entity_id=None,
             )
+        if not is_order_date_available(
+            order_schedule=order_schedule,
+            delivered_at=input_dto.delivered_at,
+        ):
+            raise ValueError("Дата доставки пока недоступна для заказа.")
         await self.__cart_storage.delete_hard_by_user_id(input_id=input_dto.user_id)
         count_by_delivered_at = await self.__order_storage.count_by_delivered_at(
             input_dto=input_dto.delivered_at
