@@ -8,6 +8,7 @@ from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button
 
+from bakery.application.entities import UNSET
 from bakery.application.exceptions import EntityAlreadyExistsException
 from bakery.domains.entities.product import (
     CreateProduct,
@@ -73,7 +74,7 @@ async def on_update_price_input(
         if price <= 0:
             raise ValueError()
         manager.dialog_data["price"] = price
-        await manager.switch_to(AdminCatalogue.update_confirm)
+        await manager.switch_to(AdminCatalogue.update_photo)
     except ValueError:
         await message.answer("Введите корректную цену (целое положительное число)")
 
@@ -82,6 +83,25 @@ async def on_skip_price(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
     manager.dialog_data["price"] = manager.dialog_data["original_price"]
+    await manager.switch_to(AdminCatalogue.update_photo)
+
+
+async def on_update_photo_input(
+    message: Message, widget: MessageInput, manager: DialogManager
+) -> None:
+    if not message.photo:
+        await message.answer("Пришлите одно фото товара.")
+        return
+    manager.dialog_data["photo_file_id"] = message.photo[-1].file_id
+    await manager.switch_to(AdminCatalogue.update_confirm)
+
+
+async def on_skip_update_photo(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    manager.dialog_data["photo_file_id"] = manager.dialog_data.get(
+        "original_photo_file_id"
+    )
     await manager.switch_to(AdminCatalogue.update_confirm)
 
 
@@ -97,6 +117,9 @@ async def on_update_product(
     )
     log.info("Updating product with ID: %s", product_id)
     try:
+        photo_file_id = manager.dialog_data.get("photo_file_id")
+        if not isinstance(photo_file_id, str) or not photo_file_id:
+            photo_file_id = manager.dialog_data.get("original_photo_file_id")
         async with uow:
             product = await service.update_by_id(
                 input_dto=UpdateProduct(
@@ -104,6 +127,7 @@ async def on_update_product(
                     name=manager.dialog_data["name"],
                     description=manager.dialog_data["description"],
                     price=manager.dialog_data["price"],
+                    photo_file_id=photo_file_id if photo_file_id else UNSET,
                 )
             )
         await manager.start(
@@ -138,6 +162,7 @@ async def on_add_clicked(
 ) -> None:
     category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore
     manager.dialog_data["category"] = category
+    manager.dialog_data.pop("photo_file_id", None)
     await manager.switch_to(AdminCatalogue.add_name)
 
 
@@ -169,7 +194,23 @@ async def on_price_input(
         return
 
     manager.dialog_data["price"] = price
+    await manager.switch_to(AdminCatalogue.add_photo)
+
+
+async def on_photo_input(
+    message: Message, widget: MessageInput, manager: DialogManager
+) -> None:
+    if not message.photo:
+        await message.answer("Пришлите одно фото товара.")
+        return
+    manager.dialog_data["photo_file_id"] = message.photo[-1].file_id
     await manager.switch_to(AdminCatalogue.add_confirm)
+
+
+async def on_skip_photo(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    await callback.answer("Фото обязательно. Пришлите изображение.")
 
 
 async def on_create_product(
@@ -186,6 +227,11 @@ async def on_create_product(
     uow: AbstractUow = await container.get(AbstractUow)
     log.info("Creating product in category: %s", category)
     try:
+        photo_file_id = manager.dialog_data.get("photo_file_id")
+        if not isinstance(photo_file_id, str) or not photo_file_id:
+            await callback.answer("Нужно прикрепить фото.")
+            await manager.switch_to(AdminCatalogue.add_photo)
+            return
         async with uow:
             product = await service.create(
                 input_dto=CreateProduct(
@@ -193,6 +239,7 @@ async def on_create_product(
                     description=manager.dialog_data["description"],
                     category=ProductCategory(category),
                     price=manager.dialog_data["price"],
+                    photo_file_id=photo_file_id,
                 )
             )
         await manager.start(

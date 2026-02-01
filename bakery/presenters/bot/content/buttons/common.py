@@ -3,6 +3,8 @@ from typing import Final
 NEXT: Final = "Продолжить ➡️"
 BACK: Final = "⬅️ Назад"
 ADD: Final = "➕ Добавить"
+QUANTITY_DEC: Final = "➖"
+QUANTITY_INC: Final = "➕"
 SHARE: Final = "📤 Поделиться"
 CREATE: Final = "✅ Создать"
 UPDATE: Final = "✅ Обновить"

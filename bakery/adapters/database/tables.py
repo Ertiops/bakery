@@ -71,6 +71,7 @@ class ProductTable(BaseTable, TimestampedMixin, IdentifableMixin):
         nullable=False,
     )
     price: Mapped[int] = mapped_column(Integer, nullable=False)
+    photo_file_id: Mapped[str] = mapped_column(String(512), nullable=False)
 
 
 class PickupAddressTable(BaseTable, TimestampedMixin, IdentifableMixin):

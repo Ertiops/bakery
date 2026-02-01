@@ -24,6 +24,7 @@ class CreateProduct(ToDictMixin):
     description: str
     category: ProductCategory
     price: int
+    photo_file_id: str
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -35,6 +36,7 @@ class Product:
     price: int
     created_at: datetime
     updated_at: datetime
+    photo_file_id: str
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -44,6 +46,7 @@ class UpdateProduct(ToDictMixin):
     description: str
     price: int
     category: ProductCategory | Unset = UNSET
+    photo_file_id: str | Unset = UNSET
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)

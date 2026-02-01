@@ -5,6 +5,7 @@ from aiogram_dialog.widgets.kbd import (
     Row,
     Select,
 )
+from aiogram_dialog.widgets.media import DynamicMedia
 from aiogram_dialog.widgets.text import Const, Format
 
 from bakery.presenters.bot.content.buttons import common as common_btn
@@ -76,11 +77,19 @@ def product_list_window() -> Window:
 
 def product_card_window() -> Window:
     return Window(
+        DynamicMedia(
+            "product_photo_attachment",
+            when=lambda d, *_: d.get("product_photo_attachment"),
+        ),
         Format(common_catalogue_msg.PRODUCT_CARD),
         Row(
-            Button(Const("➖"), id="dec", on_click=on_decrement_quantity),
+            Button(
+                Const(common_btn.QUANTITY_DEC), id="dec", on_click=on_decrement_quantity
+            ),
             Button(Format("{quantity}"), id="noop", on_click=None),
-            Button(Const("➕"), id="inc", on_click=on_increment_quantity),
+            Button(
+                Const(common_btn.QUANTITY_INC), id="inc", on_click=on_increment_quantity
+            ),
         ),
         Button(Const(common_btn.BACK), id="back", on_click=to_product_list),
         state=UserCatalogue.view_single_product,

@@ -3,6 +3,8 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
+from aiogram.types import ContentType
+from aiogram_dialog.api.entities import MediaAttachment, MediaId
 from aiogram_dialog.api.protocols import DialogManager
 
 from bakery.application.exceptions import EntityNotFoundException
@@ -74,4 +76,16 @@ async def get_selected_product(
             quantity=quantity,
         )
     )
-    return dict(product=product, quantity=quantity)
+    photo_attachment = (
+        MediaAttachment(
+            type=ContentType.PHOTO,
+            file_id=MediaId(product.photo_file_id),
+        )
+        if product.photo_file_id
+        else None
+    )
+    return dict(
+        product=product,
+        quantity=quantity,
+        product_photo_attachment=photo_attachment,
+    )

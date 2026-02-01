@@ -13,7 +13,8 @@ from tests.plugins.factories.utils.mixins import (
 
 class ProductTableFactory(
     SQLAlchemyFactory[ProductTable], IdentifableFactoryMixin, TimestampedFactoryMixin
-): ...
+):
+    photo_file_id = "photo_file_id"
 
 
 @pytest.fixture

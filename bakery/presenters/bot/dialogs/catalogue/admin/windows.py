@@ -1,3 +1,4 @@
+from aiogram.enums import ContentType
 from aiogram_dialog import Window
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import (
@@ -6,6 +7,7 @@ from aiogram_dialog.widgets.kbd import (
     Row,
     Select,
 )
+from aiogram_dialog.widgets.media import DynamicMedia
 from aiogram_dialog.widgets.text import Const, Format
 
 from bakery.presenters.bot.content.buttons import common as common_btn
@@ -30,13 +32,16 @@ from bakery.presenters.bot.dialogs.catalogue.admin.handlers import (
     on_create_product,
     on_description_input,
     on_name_input,
+    on_photo_input,
     on_price_input,
     on_skip_description,
     on_skip_name,
     on_skip_price,
+    on_skip_update_photo,
     on_update_clicked,
     on_update_description_input,
     on_update_name_input,
+    on_update_photo_input,
     on_update_price_input,
     on_update_product,
     on_view_product_clicked,
@@ -114,7 +119,24 @@ def add_product_windows() -> list[Window]:
             state=AdminCatalogue.add_price,
         ),
         Window(
+            Const(admin_catalogue_msg.PHOTO_INPUT),
+            Const(admin_catalogue_msg.PHOTO_INPUT_HINT),
+            MessageInput(on_photo_input, content_types=[ContentType.PHOTO]),
+            Row(
+                Button(
+                    Const(common_btn.BACK),
+                    id="back",
+                    on_click=lambda c, b, m: m.switch_to(AdminCatalogue.add_price),
+                ),
+            ),
+            state=AdminCatalogue.add_photo,
+        ),
+        Window(
             Format(admin_catalogue_msg.ADD_PRODUCT_PREVIEW),
+            DynamicMedia(
+                "product_preview_attachment",
+                when=lambda d, *_: d.get("product_preview_attachment"),
+            ),
             Row(
                 Button(
                     Const(common_btn.CREATE), id="create", on_click=on_create_product
@@ -133,6 +155,10 @@ def add_product_windows() -> list[Window]:
 
 def product_card_window() -> Window:
     return Window(
+        DynamicMedia(
+            "product_photo_attachment",
+            when=lambda d, *_: d.get("product_photo_attachment"),
+        ),
         Format(common_catalogue_msg.PRODUCT_CARD),
         Row(
             Button(Const(common_btn.EDIT), id="update", on_click=on_update_clicked),
@@ -180,7 +206,25 @@ def update_product_windows() -> list[Window]:
             getter=get_selected_product,
         ),
         Window(
+            Const(admin_catalogue_msg.PHOTO_INPUT),
+            Const(admin_catalogue_msg.UPDATE_PHOTO_INPUT_HINT),
+            MessageInput(on_update_photo_input, content_types=[ContentType.PHOTO]),
+            Row(
+                Button(
+                    Const(common_btn.SKIP),
+                    id="skip_photo",
+                    on_click=on_skip_update_photo,
+                ),
+            ),
+            state=AdminCatalogue.update_photo,
+            getter=get_selected_product,
+        ),
+        Window(
             Format(admin_catalogue_msg.UPDATE_PRODUCT_PREVIEW),
+            DynamicMedia(
+                "product_preview_attachment",
+                when=lambda d, *_: d.get("product_preview_attachment"),
+            ),
             Row(
                 Button(Const(common_btn.SAVE), id="save", on_click=on_update_product),
                 Button(
