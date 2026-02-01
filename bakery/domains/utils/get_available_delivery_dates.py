@@ -15,43 +15,10 @@ def is_order_date_available(
     delivered_at: date,
     now: datetime | None = None,
 ) -> bool:
-    now_utc = now or datetime.now(tz=UTC)
-    now_msk = now_utc.astimezone(MOSCOW_TZ)
-    today = now_msk.date()
-
-    if order_schedule.min_days_before < 0 or order_schedule.max_days_in_advance < 0:
-        return False
-    if order_schedule.max_days_in_advance > order_schedule.min_days_before:
-        return False
-
-    allowed_weekdays: set[int] = set()
-    for wd in order_schedule.weekdays:
-        wd0 = wd - 1 if WEEKDAYS_BASE == 1 else wd
-        if not 0 <= wd0 <= 6:
-            return False
-        allowed_weekdays.add(wd0)
-
-    if delivered_at.weekday() not in allowed_weekdays:
-        return False
-
-    days_before = (delivered_at - today).days
-    if days_before < 0:
-        return False
-
-    if not (
-        order_schedule.max_days_in_advance
-        <= days_before
-        <= order_schedule.min_days_before
-    ):
-        return False
-
-    order_open_time_msk = time_utc_to_msk_time(order_schedule.order_open_time)
-    order_close_time_msk = time_utc_to_msk_time(order_schedule.order_close_time)
-    open_date = delivered_at - timedelta(days=order_schedule.min_days_before)
-    close_date = delivered_at - timedelta(days=order_schedule.max_days_in_advance)
-    open_dt_msk = datetime.combine(open_date, order_open_time_msk, tzinfo=MOSCOW_TZ)
-    close_dt_msk = datetime.combine(close_date, order_close_time_msk, tzinfo=MOSCOW_TZ)
-    return open_dt_msk <= now_msk <= close_dt_msk
+    return delivered_at in get_available_delivery_dates(
+        order_schedule=order_schedule,
+        now=now,
+    )
 
 
 def get_available_delivery_dates(

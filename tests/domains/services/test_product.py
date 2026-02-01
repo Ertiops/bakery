@@ -29,6 +29,7 @@ async def test__create(
         description="test_description",
         category=ProductCategory.BREAD,
         price=100,
+        photo_file_id="photo_id",
     )
     user = await product_service.create(input_dto=create_data)
     assert user == Product(
@@ -37,6 +38,7 @@ async def test__create(
         description=create_data.description,
         category=create_data.category,
         price=create_data.price,
+        photo_file_id=create_data.photo_file_id,
         created_at=IsDatetime,
         updated_at=IsDatetime,
     )
@@ -52,6 +54,7 @@ async def test__create__entity_already_exists_exception(
         description="test_description",
         category=ProductCategory.BREAD,
         price=100,
+        photo_file_id="photo_id",
     )
     with pytest.raises(EntityAlreadyExistsException):
         await product_service.create(input_dto=create_data)
@@ -69,6 +72,7 @@ async def test__get_by_id(
         description=db_product.description,
         category=db_product.category,
         price=db_product.price,
+        photo_file_id=db_product.photo_file_id,
         created_at=db_product.created_at,
         updated_at=db_product.updated_at,
     )
@@ -101,6 +105,7 @@ async def test__get_list(
                 description=db_product.description,
                 category=db_product.category,
                 price=db_product.price,
+                photo_file_id=db_product.photo_file_id,
                 created_at=db_product.created_at,
                 updated_at=db_product.updated_at,
             )
@@ -130,6 +135,7 @@ async def test__get_list__validate_filter__category(
                 description=db_product.description,
                 category=db_product.category,
                 price=db_product.price,
+                photo_file_id=db_product.photo_file_id,
                 created_at=db_product.created_at,
                 updated_at=db_product.updated_at,
             )
@@ -158,6 +164,7 @@ async def test__get_list__validate_limit(
                 description=db_product.description,
                 category=db_product.category,
                 price=db_product.price,
+                photo_file_id=db_product.photo_file_id,
                 created_at=db_product.created_at,
                 updated_at=db_product.updated_at,
             )
@@ -186,6 +193,7 @@ async def test__get_list__validate_offset(
                 description=db_product.description,
                 category=db_product.category,
                 price=db_product.price,
+                photo_file_id=db_product.photo_file_id,
                 created_at=db_product.created_at,
                 updated_at=db_product.updated_at,
             )
@@ -214,6 +222,7 @@ async def test__update_by_id(
         description="test_description",
         category=ProductCategory.BREAD,
         price=100,
+        photo_file_id="photo_id",
     )
     product = await product_service.update_by_id(input_dto=update_data)
     assert product == Product(
@@ -222,6 +231,7 @@ async def test__update_by_id(
         description=update_data.description,
         category=update_data.category,
         price=update_data.price,
+        photo_file_id=update_data.photo_file_id,
         created_at=db_product.created_at,
         updated_at=IsDatetime,
     )
@@ -238,6 +248,7 @@ async def test__update_by_id__entity_already_exists_exception(
         description="test_description",
         category=ProductCategory.BREAD,
         price=100,
+        photo_file_id="photo_id",
     )
     with pytest.raises(EntityAlreadyExistsException):
         await product_service.update_by_id(input_dto=update_data)

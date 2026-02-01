@@ -26,10 +26,12 @@ class AdminCatalogue(StatesGroup):
     add_name = State()
     add_description = State()
     add_price = State()
+    add_photo = State()
     add_confirm = State()
     update_name = State()
     update_description = State()
     update_price = State()
+    update_photo = State()
     update_confirm = State()
 
 

@@ -34,9 +34,17 @@ def cart_window() -> Window:
                 Button(Format("{item.product.name}"), id="title"),
             ),
             Row(
-                Button(Const("➖"), id="dec_cart", on_click=on_decrement_quantity),
+                Button(
+                    Const(common_btn.QUANTITY_DEC),
+                    id="dec_cart",
+                    on_click=on_decrement_quantity,
+                ),
                 Button(Format("{item.quantity}"), id="quantity"),
-                Button(Const("➕"), id="inc_cart", on_click=on_increment_quantity),
+                Button(
+                    Const(common_btn.QUANTITY_INC),
+                    id="inc_cart",
+                    on_click=on_increment_quantity,
+                ),
             ),
             id="carts",
             item_id_getter=lambda item: str(item.product.id),

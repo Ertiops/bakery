@@ -3,6 +3,8 @@ from collections.abc import Sequence
 from typing import Any
 from uuid import UUID
 
+from aiogram.types import ContentType
+from aiogram_dialog.api.entities import MediaAttachment, MediaId
 from aiogram_dialog.api.protocols import DialogManager
 
 from bakery.domains.entities.product import Product, ProductCategory, ProductListParams
@@ -39,18 +41,31 @@ async def get_products_data(
 async def get_product_preview_data(
     dialog_manager: DialogManager,
     **kwargs: Any,
-) -> dict[str, str]:
+) -> dict[str, Any]:
+    photo_file_id = dialog_manager.dialog_data.get("photo_file_id")
+    original_photo_file_id = dialog_manager.dialog_data.get("original_photo_file_id")
+    if photo_file_id is None:
+        photo_file_id = original_photo_file_id
+    photo_attachment = (
+        MediaAttachment(
+            type=ContentType.PHOTO,
+            file_id=MediaId(photo_file_id),
+        )
+        if photo_file_id
+        else None
+    )
     return dict(
         name=dialog_manager.dialog_data.get("name", "<нет>"),
         description=dialog_manager.dialog_data.get("description", "<нет>"),
         price=dialog_manager.dialog_data.get("price", "?"),
+        product_preview_attachment=photo_attachment,
     )
 
 
 async def get_selected_product(
     dialog_manager: DialogManager,
     **kwargs: Any,
-) -> dict[str, Product]:
+) -> dict[str, Any]:
     uow: AbstractUow = await dialog_manager.middleware_data["dishka_container"].get(
         AbstractUow
     )
@@ -70,6 +85,15 @@ async def get_selected_product(
             "original_name": product.name,
             "original_description": product.description,
             "original_price": product.price,
+            "original_photo_file_id": product.photo_file_id,
         }
     )
-    return dict(product=product)
+    photo_attachment = (
+        MediaAttachment(
+            type=ContentType.PHOTO,
+            file_id=MediaId(product.photo_file_id),
+        )
+        if product.photo_file_id
+        else None
+    )
+    return dict(product=product, product_photo_attachment=photo_attachment)

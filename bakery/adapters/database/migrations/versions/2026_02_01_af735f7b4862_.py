@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 5969516e8064
+Revision ID: af735f7b4862
 Revises:
-Create Date: 2026-02-01 04:11:55.796699
+Create Date: 2026-02-01 12:58:45.692567
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "5969516e8064"
+revision: str = "af735f7b4862"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -147,6 +147,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("price", sa.Integer(), nullable=False),
+        sa.Column("photo_file_id", sa.String(length=512), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
