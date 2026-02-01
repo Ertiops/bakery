@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: af735f7b4862
+Revision ID: f719adf2ac89
 Revises:
-Create Date: 2026-02-01 12:58:45.692567
+Create Date: 2026-02-01 22:42:19.683927
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "af735f7b4862"
+revision: str = "f719adf2ac89"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -254,6 +254,7 @@ def upgrade() -> None:
             postgresql.ENUM(
                 "created",
                 "changed",
+                "in_progress",
                 "delivered",
                 "cancelled",
                 "paid",

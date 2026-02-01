@@ -13,6 +13,7 @@ from bakery.domains.entities.cart import CartListParams
 from bakery.domains.entities.order import (
     CreateOrderAsUser,
     OrderProduct,
+    OrderStatus,
 )
 from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
@@ -157,6 +158,36 @@ async def on_user_order_selected(
 ) -> None:
     manager.dialog_data["selected_order_id"] = item_id
     await manager.switch_to(UserOrder.view_one)
+
+
+async def on_delete_order(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    order_id_raw = manager.dialog_data.get("selected_order_id")
+    if not order_id_raw:
+        return
+    try:
+        order_uuid = UUID(order_id_raw)
+    except ValueError:
+        return
+
+    container = manager.middleware_data["dishka_container"]
+    uow: AbstractUow = await container.get(AbstractUow)
+    order_service: OrderService = await container.get(OrderService)
+
+    async with uow:
+        try:
+            order = await order_service.get_by_id(input_id=order_uuid)
+        except EntityNotFoundException:
+            return
+
+        if order.status not in (OrderStatus.CREATED, OrderStatus.CHANGED):
+            await callback.answer("Нельзя удалить заказ в работе.")
+            return
+
+        await order_service.delete_by_id(input_id=order.id)
+
+    await manager.switch_to(UserOrder.view_many)
 
 
 async def back_to_orders_list(
