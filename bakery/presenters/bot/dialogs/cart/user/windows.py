@@ -2,16 +2,13 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import Button, ListGroup, Row
+from aiogram_dialog.widgets.kbd import Button, ScrollingGroup, Select
 from aiogram_dialog.widgets.text import Const, Format
 
 from bakery.presenters.bot.content.buttons import common as common_btn
 from bakery.presenters.bot.content.messages.cart import user as user_msg
 from bakery.presenters.bot.dialogs.cart.user.getters import get_cart_data
-from bakery.presenters.bot.dialogs.cart.user.handlers import (
-    on_decrement_quantity,
-    on_increment_quantity,
-)
+from bakery.presenters.bot.dialogs.cart.user.handlers import on_view_product_clicked
 from bakery.presenters.bot.dialogs.cart.user.redirections import to_order_create
 from bakery.presenters.bot.dialogs.main_menu.user.redirections import to_main_menu
 from bakery.presenters.bot.dialogs.states import UserCart
@@ -29,26 +26,17 @@ def cart_window() -> Window:
     return Window(
         Const(user_msg.CART_EMPTY, when=lambda d, *_: not _has_items(d)),
         Format("{cart_text}", when=_has_items),
-        ListGroup(
-            Row(
-                Button(Format("{item.product.name}"), id="title"),
+        ScrollingGroup(
+            Select(
+                Format("{item.product.name}"),
+                id="cart_item",
+                item_id_getter=lambda item: str(item.product.id),
+                items=_carts_getter,
+                on_click=on_view_product_clicked,
             ),
-            Row(
-                Button(
-                    Const(common_btn.QUANTITY_DEC),
-                    id="dec_cart",
-                    on_click=on_decrement_quantity,
-                ),
-                Button(Format("{item.quantity}"), id="quantity"),
-                Button(
-                    Const(common_btn.QUANTITY_INC),
-                    id="inc_cart",
-                    on_click=on_increment_quantity,
-                ),
-            ),
-            id="carts",
-            item_id_getter=lambda item: str(item.product.id),
-            items=_carts_getter,
+            id="cart_scroll",
+            width=1,
+            height=5,
             when=_has_items,
         ),
         Button(

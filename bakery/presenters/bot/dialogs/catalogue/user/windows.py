@@ -3,6 +3,7 @@ from aiogram_dialog.widgets.kbd import (
     Button,
     Group,
     Row,
+    ScrollingGroup,
     Select,
 )
 from aiogram_dialog.widgets.media import DynamicMedia
@@ -22,6 +23,7 @@ from bakery.presenters.bot.dialogs.catalogue.user.handlers import (
     on_view_product_clicked,
 )
 from bakery.presenters.bot.dialogs.catalogue.user.redirections import (
+    to_cart,
     to_product_categories,
     to_product_list,
 )
@@ -55,7 +57,7 @@ def select_category_window() -> Window:
 def product_list_window() -> Window:
     return Window(
         Const(common_catalogue_msg.CATALOGUE_CATEGORY),
-        Group(
+        ScrollingGroup(
             Select(
                 id="product_select",
                 items="products",
@@ -63,12 +65,12 @@ def product_list_window() -> Window:
                 text=Format("{item.name} — {item.price}₽"),
                 on_click=on_view_product_clicked,
             ),
-            Row(
-                Button(
-                    Const(common_btn.BACK), id="back", on_click=to_product_categories
-                ),
-            ),
+            id="product_scroll",
             width=1,
+            height=6,
+        ),
+        Row(
+            Button(Const(common_btn.BACK), id="back", on_click=to_product_categories),
         ),
         state=UserCatalogue.view_products,
         getter=get_products_data,
@@ -91,6 +93,7 @@ def product_card_window() -> Window:
                 Const(common_btn.QUANTITY_INC), id="inc", on_click=on_increment_quantity
             ),
         ),
+        Button(Const(common_btn.CART), id="to_cart", on_click=to_cart),
         Button(Const(common_btn.BACK), id="back", on_click=to_product_list),
         state=UserCatalogue.view_single_product,
         getter=get_selected_product,

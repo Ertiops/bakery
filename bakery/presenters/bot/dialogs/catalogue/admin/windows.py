@@ -5,6 +5,7 @@ from aiogram_dialog.widgets.kbd import (
     Button,
     Group,
     Row,
+    ScrollingGroup,
     Select,
 )
 from aiogram_dialog.widgets.media import DynamicMedia
@@ -80,7 +81,7 @@ def select_category_window() -> Window:
 def list_products_window() -> Window:
     return Window(
         Const(common_catalogue_msg.CATALOGUE_CATEGORY),
-        Group(
+        ScrollingGroup(
             Select(
                 id="product_select",
                 items="products",
@@ -88,13 +89,13 @@ def list_products_window() -> Window:
                 text=Format("{item.name} — {item.price}₽"),
                 on_click=on_view_product_clicked,
             ),
-            Row(
-                Button(Const(common_btn.ADD), id="add", on_click=on_add_clicked),
-                Button(
-                    Const(common_btn.BACK), id="back", on_click=to_product_categories
-                ),
-            ),
+            id="product_scroll",
             width=1,
+            height=6,
+        ),
+        Row(
+            Button(Const(common_btn.ADD), id="add", on_click=on_add_clicked),
+            Button(Const(common_btn.BACK), id="back", on_click=to_product_categories),
         ),
         state=AdminCatalogue.view_products,
         getter=get_products_data,
