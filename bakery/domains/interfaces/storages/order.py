@@ -8,8 +8,10 @@ from bakery.domains.entities.order import (
     CreateOrder,
     Order,
     OrderListParams,
+    OrderTopProductsParams,
     UpdateOrder,
 )
+from bakery.domains.entities.product import Product
 
 
 class IOrderStorage(Protocol):
@@ -43,4 +45,12 @@ class IOrderStorage(Protocol):
 
     @abstractmethod
     async def delete_by_id(self, *, input_id: UUID) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_top_products_for_user(
+        self,
+        *,
+        input_dto: OrderTopProductsParams,
+    ) -> Sequence[Product]:
         raise NotImplementedError

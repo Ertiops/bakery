@@ -96,6 +96,13 @@ class OrderListParams(Pagination):
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class OrderTopProductsParams:
+    user_id: UUID
+    limit: int
+    exclude_product_ids: Sequence[UUID]
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class OrderList:
     total: int
     items: Sequence[Order]
