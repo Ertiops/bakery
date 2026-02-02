@@ -38,8 +38,10 @@ class AdminCatalogue(StatesGroup):
 class AdminDeliveryPrice(StatesGroup):
     view = State()
     create = State()
+    create_free_amount = State()
     create_confirm = State()
     update = State()
+    update_free_amount = State()
     update_confirm = State()
 
 

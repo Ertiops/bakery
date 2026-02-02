@@ -55,8 +55,10 @@ async def get_pickup_address_data(
         try:
             cost = await delivery_cost_service.get_last()
             delivery_cost = cost.price
+            free_delivery_amount = cost.free_delivery_amount
         except EntityNotFoundException:
             delivery_cost = 0
+            free_delivery_amount = None
 
     return dict(
         addresses=[
@@ -65,6 +67,8 @@ async def get_pickup_address_data(
         ],
         has_addresses=bool(pickup_addresses.items),
         delivery_cost=delivery_cost,
+        free_delivery_amount=free_delivery_amount,
+        has_free_delivery_amount=free_delivery_amount is not None,
     )
 
 
@@ -86,7 +90,7 @@ async def get_order_confirm_data(
     pickup_address_id: str | None = dialog_manager.dialog_data.get("pickup_address_id")
 
     cart_items: list[dict[str, Any]] = []
-    total = 0
+    cart_total = 0
     pickup_address_name: str | None = dialog_manager.dialog_data.get(
         "pickup_address_name"
     )
@@ -103,7 +107,7 @@ async def get_order_confirm_data(
             price = cart.product.price
             qty = cart.quantity
             subtotal = price * qty
-            total += subtotal
+            cart_total += subtotal
 
             cart_items.append(
                 dict(
@@ -117,14 +121,22 @@ async def get_order_confirm_data(
         try:
             cost = await delivery_cost_service.get_last()
             delivery_cost = cost.price
+            free_delivery_amount = cost.free_delivery_amount
         except EntityNotFoundException:
             delivery_cost = 0
+            free_delivery_amount = None
 
     is_city_delivery = dialog_manager.dialog_data.get(
         "pickup_address_id"
     ) is None and bool(pickup_address_name)
 
-    total = total + (delivery_cost if is_city_delivery else 0)
+    delivery_price = 0
+    if is_city_delivery:
+        delivery_price = delivery_cost
+        if free_delivery_amount is not None and cart_total >= free_delivery_amount:
+            delivery_price = 0
+
+    total = cart_total + delivery_price
 
     if pickup_address_id:
         async with uow:
@@ -147,7 +159,8 @@ async def get_order_confirm_data(
         order_date_label=order_date_label,
         has_order_date=bool(order_date_label),
         total=total,
-        delivery_cost=delivery_cost,
+        delivery_cost=delivery_price,
+        free_delivery_amount=free_delivery_amount,
         is_city_delivery=is_city_delivery,
     )
 

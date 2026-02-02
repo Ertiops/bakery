@@ -15,7 +15,8 @@ class DeliveryCostTableFactory(
     SQLAlchemyFactory[DeliveryCostTable],
     IdentifableFactoryMixin,
     TimestampedFactoryMixin,
-): ...
+):
+    free_delivery_amount = 1000
 
 
 @pytest.fixture

@@ -94,6 +94,7 @@ async def on_confirm_order(
     delivery_price = 0
     products: list[OrderProduct] = []
     cart_total = 0
+    free_delivery_amount: int | None = None
 
     async with uow:
         carts = await cart_service.get_list(
@@ -125,8 +126,12 @@ async def on_confirm_order(
             try:
                 delivery_cost = await delivery_cost_service.get_last()
                 delivery_price = delivery_cost.price
+                free_delivery_amount = delivery_cost.free_delivery_amount
             except EntityNotFoundException:
                 delivery_price = 0
+
+    if free_delivery_amount is not None and cart_total >= free_delivery_amount:
+        delivery_price = 0
 
     total_price = cart_total + delivery_price
 

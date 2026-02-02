@@ -42,7 +42,13 @@ from bakery.presenters.bot.dialogs.states import UserOrder
 def create_order_windows() -> list[Window]:
     return [
         Window(
-            Format(user_msg.CREATE_ORDER),
+            Multi(
+                Format(user_msg.CREATE_ORDER),
+                Format(
+                    user_msg.FREE_DELIVERY_HINT,
+                    when=lambda d, *_: d.get("has_free_delivery_amount"),
+                ),
+            ),
             ScrollingGroup(
                 Select(
                     Format("{item[name]}"),

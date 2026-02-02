@@ -5,6 +5,7 @@ CREATE_ORDER: Final[str] = (
     "Вы можете пропустить этот шаг, если вы хотите оформить доставку по городу*.\n"
     "*Доставка по городу - {delivery_cost} руб.\n"
 )
+FREE_DELIVERY_HINT: Final[str] = "*Бесплатная доставка от {free_delivery_amount} руб.\n"
 MANUAL_ADDRESS_TITLE: Final[str] = "✍️ Введите адрес доставки одним сообщением:"
 MANUAL_ADDRESS_EXAMPLE: Final[str] = (
     "\n\nНапример: ул. Шамиля Усманова 10, 1 подъезд, кв. 3"

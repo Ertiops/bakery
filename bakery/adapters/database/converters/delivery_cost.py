@@ -9,6 +9,7 @@ def convert_delivery_cost(
     return DeliveryCost(
         id=result.id,
         price=result.price,
+        free_delivery_amount=result.free_delivery_amount,
         created_at=result.created_at,
         updated_at=result.updated_at,
     )
