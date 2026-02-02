@@ -66,6 +66,7 @@ class CreateOrder(ToDictMixin):
     delivery_price: int
     delivered_at_id: int
     payment_file_id: str
+    rating: int | None = None
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -80,6 +81,7 @@ class Order:
     delivery_price: int
     delivered_at_id: int
     payment_file_id: str
+    rating: int | None
     created_at: datetime
     updated_at: datetime
 
@@ -110,3 +112,4 @@ class UpdateOrder(ToDictMixin):
     total_price: int | Unset = UNSET
     delivery_price: int | Unset = UNSET
     payment_file_id: str | Unset = UNSET
+    rating: int | Unset = UNSET

@@ -133,6 +133,7 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
     )
     delivered_at_id: Mapped[int] = mapped_column(Integer, nullable=False)
     payment_file_id: Mapped[str] = mapped_column(String(512), nullable=False)
+    rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class OrderScheduleTable(BaseTable, TimestampedMixin, IdentifableMixin):

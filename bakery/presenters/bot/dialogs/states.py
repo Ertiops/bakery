@@ -96,6 +96,7 @@ class UserOrderPayment(StatesGroup):
     show_order_payment = State()
     add_file = State()
     confirm = State()
+    rate = State()
     finish = State()
 
 
