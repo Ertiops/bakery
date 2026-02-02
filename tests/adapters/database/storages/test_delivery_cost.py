@@ -21,11 +21,12 @@ from tests.utils import now_utc
 async def test__create(
     delivery_cost_storage: DeliveryCostStorage,
 ) -> None:
-    create_data = CreateDeliveryCost(price=100)
+    create_data = CreateDeliveryCost(price=100, free_delivery_amount=1000)
     delivery_cost = await delivery_cost_storage.create(input_dto=create_data)
     assert delivery_cost == DeliveryCost(
         id=IsUUID,
         price=create_data.price,
+        free_delivery_amount=create_data.free_delivery_amount,
         created_at=IsDatetime,
         updated_at=IsDatetime,
     )
@@ -43,6 +44,7 @@ async def test__get_last(
     assert delivery_cost == DeliveryCost(
         id=db_delivery_cost.id,
         price=db_delivery_cost.price,
+        free_delivery_amount=db_delivery_cost.free_delivery_amount,
         created_at=db_delivery_cost.created_at,
         updated_at=db_delivery_cost.updated_at,
     )
@@ -62,11 +64,13 @@ async def test__update_by_id(
     update_data = UpdateDeliveryCost(
         id=db_delivery_cost.id,
         price=200,
+        free_delivery_amount=1500,
     )
     delivery_cost = await delivery_cost_storage.update_by_id(input_dto=update_data)
     assert delivery_cost == DeliveryCost(
         id=db_delivery_cost.id,
         price=update_data.price,
+        free_delivery_amount=update_data.free_delivery_amount,
         created_at=db_delivery_cost.created_at,
         updated_at=IsDatetime,
     )

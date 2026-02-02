@@ -34,7 +34,7 @@ async def on_delivery_cost_entered_create(
     value: int,
 ) -> None:
     manager.dialog_data["delivery_cost_price"] = value
-    await manager.switch_to(AdminDeliveryPrice.create_confirm)
+    await manager.switch_to(AdminDeliveryPrice.create_free_amount)
 
 
 async def on_delivery_cost_entered_update(
@@ -48,6 +48,30 @@ async def on_delivery_cost_entered_update(
         await manager.switch_to(AdminDeliveryPrice.view)
         return
     manager.dialog_data["delivery_cost_price"] = value
+    await manager.switch_to(AdminDeliveryPrice.update_free_amount)
+
+
+async def on_free_delivery_amount_entered_create(
+    message: Message,
+    widget: ManagedTextInput[int],
+    manager: DialogManager,
+    value: int,
+) -> None:
+    manager.dialog_data["delivery_cost_free_amount"] = value
+    await manager.switch_to(AdminDeliveryPrice.create_confirm)
+
+
+async def on_free_delivery_amount_entered_update(
+    message: Message,
+    widget: ManagedTextInput[int],
+    manager: DialogManager,
+    value: int,
+) -> None:
+    cost_id = manager.dialog_data.get("delivery_cost_id")
+    if not cost_id:
+        await manager.switch_to(AdminDeliveryPrice.view)
+        return
+    manager.dialog_data["delivery_cost_free_amount"] = value
     await manager.switch_to(AdminDeliveryPrice.update_confirm)
 
 
@@ -57,7 +81,8 @@ async def on_delivery_cost_confirm_create(
     manager: DialogManager,
 ) -> None:
     price = manager.dialog_data.get("delivery_cost_price")
-    if price is None:
+    free_delivery_amount = manager.dialog_data.get("delivery_cost_free_amount")
+    if price is None or free_delivery_amount is None:
         await manager.switch_to(AdminDeliveryPrice.view)
         return
 
@@ -66,7 +91,11 @@ async def on_delivery_cost_confirm_create(
     uow: AbstractUow = await container.get(AbstractUow)
 
     async with uow:
-        await service.create(input_dto=CreateDeliveryCost(price=price))
+        await service.create(
+            input_dto=CreateDeliveryCost(
+                price=price, free_delivery_amount=free_delivery_amount
+            )
+        )
 
     await manager.switch_to(AdminDeliveryPrice.view)
 
@@ -78,7 +107,8 @@ async def on_delivery_cost_confirm_update(
 ) -> None:
     cost_id = manager.dialog_data.get("delivery_cost_id")
     price = manager.dialog_data.get("delivery_cost_price")
-    if not cost_id or price is None:
+    free_delivery_amount = manager.dialog_data.get("delivery_cost_free_amount")
+    if not cost_id or price is None or free_delivery_amount is None:
         await manager.switch_to(AdminDeliveryPrice.view)
         return
 
@@ -88,7 +118,11 @@ async def on_delivery_cost_confirm_update(
 
     async with uow:
         await service.update_by_id(
-            input_dto=UpdateDeliveryCost(id=UUID(cost_id), price=price)
+            input_dto=UpdateDeliveryCost(
+                id=UUID(cost_id),
+                price=price,
+                free_delivery_amount=free_delivery_amount,
+            )
         )
 
     await manager.switch_to(AdminDeliveryPrice.view)

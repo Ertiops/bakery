@@ -22,14 +22,24 @@ async def get_delivery_cost_data(
         return dict(
             has_cost=False,
             price=None,
+            free_delivery_amount=None,
+            has_free_delivery_amount=False,
             cost_id=None,
         )
 
     dialog_manager.dialog_data["delivery_cost_id"] = str(cost.id)
+    if "delivery_cost_price" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["delivery_cost_price"] = cost.price
+    if "delivery_cost_free_amount" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["delivery_cost_free_amount"] = (
+            cost.free_delivery_amount
+        )
 
     return dict(
         has_cost=True,
         price=cost.price,
+        free_delivery_amount=cost.free_delivery_amount,
+        has_free_delivery_amount=cost.free_delivery_amount is not None,
         cost_id=str(cost.id),
     )
 
@@ -40,4 +50,7 @@ async def get_delivery_cost_preview_data(
 ) -> dict[str, Any]:
     return dict(
         price=dialog_manager.dialog_data.get("delivery_cost_price"),
+        free_delivery_amount=dialog_manager.dialog_data.get(
+            "delivery_cost_free_amount"
+        ),
     )

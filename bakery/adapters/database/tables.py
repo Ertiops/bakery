@@ -50,6 +50,7 @@ class DeliveryCostTable(BaseTable, TimestampedMixin, IdentifableMixin):
     __tablename__ = "delivery_costs"
 
     price: Mapped[int] = mapped_column(Integer, nullable=False)
+    free_delivery_amount: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class ProductTable(BaseTable, TimestampedMixin, IdentifableMixin):
