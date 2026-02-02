@@ -20,6 +20,7 @@ from bakery.domains.entities.pickup_address import PickupAddressListParams
 from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
 from bakery.domains.services.delivery_cost import DeliveryCostService
+from bakery.domains.services.feedback_group import FeedbackGroupService
 from bakery.domains.services.order import OrderService
 from bakery.domains.services.order_schedule import OrderScheduleService
 from bakery.domains.services.pickup_address import PickupAddressService
@@ -233,6 +234,9 @@ async def get_user_order_data(
 ) -> dict[str, Any]:
     container = dialog_manager.middleware_data["dishka_container"]
     order_service: OrderService = await container.get(OrderService)
+    feedback_group_service: FeedbackGroupService = await container.get(
+        FeedbackGroupService
+    )
     uow: AbstractUow = await container.get(AbstractUow)
 
     order_id_raw: str | None = dialog_manager.dialog_data.get("selected_order_id")
@@ -249,6 +253,11 @@ async def get_user_order_data(
             order = await order_service.get_by_id(input_id=order_uuid)
         except EntityNotFoundException:
             return dict(has_order=False)
+
+        try:
+            feedback_group = await feedback_group_service.get_last()
+        except EntityNotFoundException:
+            feedback_group = None
 
     delivered_at = order.delivered_at
     delivered_at_label = delivered_at.strftime("%d.%m.%Y") if delivered_at else ""
@@ -269,5 +278,8 @@ async def get_user_order_data(
         delivery_price=order.delivery_price,
         total_price=order.total_price,
         is_delivered=True if order.status == OrderStatus.DELIVERED else False,
+        is_paid=True if order.status == OrderStatus.PAID else False,
         can_delete=order.status in (OrderStatus.CREATED, OrderStatus.CHANGED),
+        feedback_group_url=(feedback_group.url if feedback_group else ""),
+        has_feedback_group=bool(feedback_group),
     )

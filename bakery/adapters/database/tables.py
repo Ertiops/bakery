@@ -151,3 +151,9 @@ class OrderPaymentTable(BaseTable, TimestampedMixin, IdentifableMixin):
     phone: Mapped[str] = mapped_column(String(128), nullable=False)
     banks: Mapped[Sequence[str]] = mapped_column(JSONB, nullable=False)
     addressee: Mapped[str] = mapped_column(String(128), nullable=False)
+
+
+class FeedbackGroupTable(BaseTable, TimestampedMixin, IdentifableMixin):
+    __tablename__ = "feedback_groups"
+
+    url: Mapped[str] = mapped_column(String(512), nullable=False)

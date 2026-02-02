@@ -5,6 +5,7 @@ from aiogram_dialog.widgets.kbd import Button
 from bakery.presenters.bot.dialogs.states import (
     AdminCatalogue,
     AdminDeliveryPrice,
+    AdminFeedbackGroup,
     AdminOrderPayment,
     AdminOrderSchedule,
     AdminPickupAddress,
@@ -55,3 +56,11 @@ async def to_admin_order_schedule(
     manager: DialogManager,
 ) -> None:
     await manager.start(state=AdminOrderSchedule.view, mode=StartMode.RESET_STACK)
+
+
+async def to_admin_feedback_group(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    await manager.start(state=AdminFeedbackGroup.view, mode=StartMode.RESET_STACK)

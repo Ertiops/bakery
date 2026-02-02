@@ -11,4 +11,5 @@ pytest_plugins = (
     "tests.plugins.factories.admin_contact",
     "tests.plugins.factories.delivery_cost",
     "tests.plugins.factories.order_payment",
+    "tests.plugins.factories.feedback_group",
 )

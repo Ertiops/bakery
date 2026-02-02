@@ -10,3 +10,4 @@ PAY: Final = "💳 Оплатить"
 DELETE: Final = "🗑 Удалить"
 CONFIRM_ORDER: Final = "✅ Подтвердить"
 TO_ORDER: Final = "📦 К заказу"
+FEEDBACK_GROUP: Final = "💬 Оставить отзыв"
