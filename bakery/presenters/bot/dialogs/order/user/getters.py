@@ -14,6 +14,7 @@ from bakery.domains.entities.order import (
     USER_ORDER_STATUS_MAP,
     OrderListParams,
     OrderStatus,
+    OrderTopProductsParams,
     UserOrderStatus,
 )
 from bakery.domains.entities.pickup_address import PickupAddressListParams
@@ -85,11 +86,13 @@ async def get_order_confirm_data(
     delivery_cost_service: DeliveryCostService = await container.get(
         DeliveryCostService
     )
+    order_service: OrderService = await container.get(OrderService)
 
     user: User = dialog_manager.middleware_data["current_user"]
     pickup_address_id: str | None = dialog_manager.dialog_data.get("pickup_address_id")
 
     cart_items: list[dict[str, Any]] = []
+    exclude_product_ids: list[UUID] = []
     cart_total = 0
     pickup_address_name: str | None = dialog_manager.dialog_data.get(
         "pickup_address_name"
@@ -118,6 +121,7 @@ async def get_order_confirm_data(
                     subtotal=subtotal,
                 )
             )
+            exclude_product_ids.append(cart.product.id)
         try:
             cost = await delivery_cost_service.get_last()
             delivery_cost = cost.price
@@ -125,6 +129,14 @@ async def get_order_confirm_data(
         except EntityNotFoundException:
             delivery_cost = 0
             free_delivery_amount = None
+
+        top_products = await order_service.get_top_products_for_user(
+            input_dto=OrderTopProductsParams(
+                user_id=user.id,
+                limit=3,
+                exclude_product_ids=exclude_product_ids,
+            )
+        )
 
     is_city_delivery = dialog_manager.dialog_data.get(
         "pickup_address_id"
@@ -162,6 +174,11 @@ async def get_order_confirm_data(
         delivery_cost=delivery_price,
         free_delivery_amount=free_delivery_amount,
         is_city_delivery=is_city_delivery,
+        top_products=[
+            dict(id=str(product.id), name=product.name, price=product.price)
+            for product in top_products
+        ],
+        has_top_products=bool(top_products),
     )
 
 

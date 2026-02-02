@@ -16,6 +16,7 @@ from bakery.domains.entities.order import (
     Order,
     OrderListParams,
     OrderStatus,
+    OrderTopProductsParams,
     UpdateOrder,
 )
 from tests.utils import now_utc
@@ -596,3 +597,186 @@ async def test__delete_by_id(
 
 async def test__delete_by_id__none(order_storage: OrderStorage) -> None:
     assert await order_storage.delete_by_id(input_id=uuid4()) is None
+
+
+async def test__get_top_products_for_user__user_orders_exclude_cart_and_deleted(
+    order_storage: OrderStorage,
+    create_user: Callable,
+    create_product: Callable,
+    create_order: Callable,
+    create_cart: Callable,
+) -> None:
+    user = await create_user()
+    product_one = await create_product()
+    product_two = await create_product()
+    product_three = await create_product()
+    deleted_product = await create_product(deleted_at=now_utc())
+
+    await create_order(
+        user_id=user.id,
+        status=OrderStatus.CREATED,
+        pickup_address_name="addr",
+        delivered_at=now_utc().date(),
+        total_price=0,
+        delivery_price=0,
+        delivered_at_id=1,
+        payment_file_id="payment_file_id",
+        products=[
+            dict(
+                id=str(product_one.id),
+                name=product_one.name,
+                price=product_one.price,
+                quantity=2,
+            ),
+            dict(
+                id=str(product_two.id),
+                name=product_two.name,
+                price=product_two.price,
+                quantity=1,
+            ),
+            dict(
+                id=str(deleted_product.id),
+                name=deleted_product.name,
+                price=deleted_product.price,
+                quantity=10,
+            ),
+        ],
+    )
+    await create_order(
+        user_id=user.id,
+        status=OrderStatus.CREATED,
+        pickup_address_name="addr",
+        delivered_at=now_utc().date(),
+        total_price=0,
+        delivery_price=0,
+        delivered_at_id=2,
+        payment_file_id="payment_file_id",
+        products=[
+            dict(
+                id=str(product_one.id),
+                name=product_one.name,
+                price=product_one.price,
+                quantity=1,
+            ),
+            dict(
+                id=str(product_three.id),
+                name=product_three.name,
+                price=product_three.price,
+                quantity=5,
+            ),
+        ],
+    )
+
+    await create_cart(user_id=user.id, product_id=product_two.id, quantity=1)
+    await create_cart(user_id=user.id, product_id=product_three.id, quantity=2)
+
+    result = await order_storage.get_top_products_for_user(
+        input_dto=OrderTopProductsParams(
+            user_id=user.id,
+            limit=3,
+            exclude_product_ids=[product_two.id, product_three.id],
+        ),
+    )
+
+    assert [item.id for item in result] == [product_one.id]
+
+
+async def test__get_top_products_for_user__fallback_to_all_orders(
+    order_storage: OrderStorage,
+    create_user: Callable,
+    create_product: Callable,
+    create_order: Callable,
+    create_cart: Callable,
+) -> None:
+    user = await create_user()
+    other_user = await create_user()
+    product_one = await create_product()
+    product_two = await create_product()
+    product_three = await create_product()
+    product_four = await create_product()
+    product_five = await create_product()
+    deleted_product = await create_product(deleted_at=now_utc())
+
+    await create_order(
+        user_id=other_user.id,
+        status=OrderStatus.CREATED,
+        pickup_address_name="addr",
+        delivered_at=now_utc().date(),
+        total_price=0,
+        delivery_price=0,
+        delivered_at_id=1,
+        payment_file_id="payment_file_id",
+        products=[
+            dict(
+                id=str(product_one.id),
+                name=product_one.name,
+                price=product_one.price,
+                quantity=6,
+            ),
+            dict(
+                id=str(product_two.id),
+                name=product_two.name,
+                price=product_two.price,
+                quantity=3,
+            ),
+            dict(
+                id=str(product_three.id),
+                name=product_three.name,
+                price=product_three.price,
+                quantity=5,
+            ),
+            dict(
+                id=str(product_four.id),
+                name=product_four.name,
+                price=product_four.price,
+                quantity=2,
+            ),
+            dict(
+                id=str(deleted_product.id),
+                name=deleted_product.name,
+                price=deleted_product.price,
+                quantity=10,
+            ),
+        ],
+    )
+    await create_order(
+        user_id=other_user.id,
+        status=OrderStatus.CREATED,
+        pickup_address_name="addr",
+        delivered_at=now_utc().date(),
+        total_price=0,
+        delivery_price=0,
+        delivered_at_id=2,
+        payment_file_id="payment_file_id",
+        products=[
+            dict(
+                id=str(product_one.id),
+                name=product_one.name,
+                price=product_one.price,
+                quantity=2,
+            ),
+            dict(
+                id=str(product_five.id),
+                name=product_five.name,
+                price=product_five.price,
+                quantity=4,
+            ),
+        ],
+    )
+
+    await create_cart(user_id=user.id, product_id=product_one.id, quantity=1)
+    await create_cart(user_id=user.id, product_id=product_two.id, quantity=1)
+
+    result = await order_storage.get_top_products_for_user(
+        input_dto=OrderTopProductsParams(
+            user_id=user.id,
+            limit=3,
+            exclude_product_ids=[product_one.id, product_two.id],
+        ),
+    )
+
+    assert [item.id for item in result] == [
+        product_three.id,
+        product_five.id,
+        product_four.id,
+    ]

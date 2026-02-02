@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from uuid import UUID
 
 from bakery.application.exceptions import EntityNotFoundException
@@ -8,9 +9,11 @@ from bakery.domains.entities.order import (
     OrderList,
     OrderListParams,
     OrderStatus,
+    OrderTopProductsParams,
     UpdateOrder,
 )
 from bakery.domains.entities.order_schedule import OrderSchedule
+from bakery.domains.entities.product import Product
 from bakery.domains.interfaces.storages.cart import ICartStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
@@ -82,3 +85,8 @@ class OrderService:
         if not await self.__order_storage.exists_by_id(input_id=input_id):
             raise EntityNotFoundException(entity=Order, entity_id=input_id)
         await self.__order_storage.delete_by_id(input_id=input_id)
+
+    async def get_top_products_for_user(
+        self, *, input_dto: OrderTopProductsParams
+    ) -> Sequence[Product]:
+        return await self.__order_storage.get_top_products_for_user(input_dto=input_dto)

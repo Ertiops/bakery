@@ -20,6 +20,7 @@ from bakery.presenters.bot.dialogs.order.user.handlers import (
     on_delete_order,
     on_manual_address_entered,
     on_order_date_selected,
+    on_top_product_add,
     on_user_order_selected,
 )
 from bakery.presenters.bot.dialogs.order.user.redirections import (
@@ -155,6 +156,23 @@ def create_order_windows() -> list[Window]:
                 when=lambda d, *_: d.get("is_city_delivery"),
             ),
             Format(user_msg.CONFIRM_TOTAL, when=lambda d, *_: d.get("has_cart_items")),
+            Const(
+                user_msg.CONFIRM_SUGGESTED_TITLE,
+                when=lambda d, *_: d.get("has_top_products"),
+            ),
+            ScrollingGroup(
+                Select(
+                    Format(user_msg.CONFIRM_SUGGESTED_ITEM),
+                    id="top_products",
+                    item_id_getter=lambda item: item["id"],
+                    items="top_products",
+                    on_click=on_top_product_add,
+                ),
+                id="top_products_scroll",
+                width=1,
+                height=3,
+                when=lambda d, *_: d.get("has_top_products"),
+            ),
             Row(
                 Button(
                     Const(common_btn.BACK),

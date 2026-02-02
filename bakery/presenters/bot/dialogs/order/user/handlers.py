@@ -8,8 +8,13 @@ from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.input import ManagedTextInput
 from aiogram_dialog.widgets.kbd import Button, Select
 
+from bakery.application.constants.cart import CART_PRODUCT_MAX
 from bakery.application.exceptions import EntityNotFoundException
-from bakery.domains.entities.cart import CartListParams
+from bakery.domains.entities.cart import (
+    CartListParams,
+    CreateCart,
+    GetCartByUserProductIds,
+)
 from bakery.domains.entities.order import (
     CreateOrderAsUser,
     OrderProduct,
@@ -153,6 +158,44 @@ async def on_confirm_order(
             return
     manager.dialog_data["selected_order_id"] = str(order.id)
     await manager.switch_to(UserOrder.finish)
+
+
+async def on_top_product_add(
+    callback: CallbackQuery,
+    widget: Select,
+    manager: DialogManager,
+    item_id: str,
+) -> None:
+    try:
+        product_id = UUID(item_id)
+    except ValueError:
+        return
+
+    container = manager.middleware_data["dishka_container"]
+    cart_service: CartService = await container.get(CartService)
+    uow: AbstractUow = await container.get(AbstractUow)
+    user: User = manager.middleware_data["current_user"]
+
+    async with uow:
+        try:
+            cart_item = await cart_service.get_w_product_by_user_product_ids(
+                input_dto=GetCartByUserProductIds(
+                    user_id=user.id, product_id=product_id
+                )
+            )
+            quantity = cart_item.quantity + 1
+        except EntityNotFoundException:
+            quantity = 1
+
+        quantity = min(quantity, CART_PRODUCT_MAX)
+        await cart_service.create_or_update(
+            input_dto=CreateCart(
+                user_id=user.id, product_id=product_id, quantity=quantity
+            )
+        )
+
+    manager.show_mode = ShowMode.EDIT
+    await manager.show()
 
 
 async def on_user_order_selected(
