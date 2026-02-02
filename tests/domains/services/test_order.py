@@ -51,6 +51,7 @@ async def test__create(
         delivery_price=create_data.delivery_price,
         delivered_at_id=1,
         payment_file_id=IsStr,
+        rating=None,
         created_at=IsDatetime,
         updated_at=IsDatetime,
     )
@@ -87,6 +88,7 @@ async def test__create__validate_pickup_address(
         delivery_price=create_data.delivery_price,
         delivered_at_id=1,
         payment_file_id=IsStr,
+        rating=None,
         created_at=IsDatetime,
         updated_at=IsDatetime,
     )
@@ -130,6 +132,7 @@ async def test__get_by_id(
         delivery_price=db_order.delivery_price,
         delivered_at_id=db_order.delivered_at_id,
         payment_file_id=db_order.payment_file_id,
+        rating=db_order.rating,
         created_at=db_order.created_at,
         updated_at=db_order.updated_at,
     )
@@ -171,6 +174,7 @@ async def test__get_list(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -199,6 +203,7 @@ async def test__get_list__validate_limit(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -227,6 +232,7 @@ async def test__get_list__validate_offset(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -257,6 +263,7 @@ async def test__get_list__validate_order(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -293,6 +300,7 @@ async def test__get_list__validate_filter__delivered_at(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -329,6 +337,7 @@ async def test__get_list__validate_filter__statuses(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -367,6 +376,7 @@ async def test__get_list__validate_filter__pickup_address_name(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -399,6 +409,7 @@ async def test__get_list__validate_filter__user_id(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -431,6 +442,7 @@ async def test__update_by_id(
         delivered_at=now_utc().date(),
         total_price=1000,
         delivery_price=200,
+        rating=4,
     )
     order = await order_service.update_by_id(input_dto=update_data)
     assert order == Order(
@@ -444,6 +456,7 @@ async def test__update_by_id(
         delivery_price=update_data.delivery_price,
         delivered_at_id=db_order.delivered_at_id,
         payment_file_id=db_order.payment_file_id,
+        rating=update_data.rating,
         created_at=db_order.created_at,
         updated_at=db_order.updated_at,
     )

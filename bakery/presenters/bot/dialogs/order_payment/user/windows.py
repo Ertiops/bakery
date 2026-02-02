@@ -18,6 +18,10 @@ from bakery.presenters.bot.dialogs.order_payment.user.getters import (
 from bakery.presenters.bot.dialogs.order_payment.user.handlers import (
     back_to_previous_dialog,
     on_payment_file_received,
+    rate_decrement,
+    rate_increment,
+    save_rating_and_finish,
+    skip_rating,
     to_payment_finish,
 )
 from bakery.presenters.bot.dialogs.order_payment.user.redirections import (
@@ -116,6 +120,43 @@ def create_order_payment_windows() -> list[Window]:
                 ),
             ),
             state=UserOrderPayment.confirm,
+            getter=get_order_payment_data,
+        ),
+        Window(
+            Multi(
+                Const(order_payment_user_msg.RATE_TITLE),
+                Const(order_payment_user_msg.RATE_BODY),
+            ),
+            Row(
+                Button(
+                    Const(order_payment_user_msg.BTN_RATE_DEC),
+                    id="rate_dec",
+                    on_click=rate_decrement,
+                ),
+                Button(
+                    Format("{rating}/5"),
+                    id="rate_value",
+                    on_click=None,
+                ),
+                Button(
+                    Const(order_payment_user_msg.BTN_RATE_INC),
+                    id="rate_inc",
+                    on_click=rate_increment,
+                ),
+            ),
+            Row(
+                Button(
+                    Const(order_payment_user_msg.BTN_RATE_SKIP),
+                    id="rate_skip",
+                    on_click=skip_rating,
+                ),
+                Button(
+                    Const(order_payment_user_msg.BTN_RATE_SUBMIT),
+                    id="rate_submit",
+                    on_click=save_rating_and_finish,
+                ),
+            ),
+            state=UserOrderPayment.rate,
             getter=get_order_payment_data,
         ),
         Window(

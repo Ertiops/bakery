@@ -51,6 +51,7 @@ async def test__create(
         delivery_price=create_data.delivery_price,
         delivered_at_id=create_data.delivered_at_id,
         payment_file_id=IsStr,
+        rating=create_data.rating,
         created_at=IsDatetime,
         updated_at=IsDatetime,
     )
@@ -95,6 +96,7 @@ async def test__get_by_id(
         delivery_price=db_order.delivery_price,
         delivered_at_id=db_order.delivered_at_id,
         payment_file_id=db_order.payment_file_id,
+        rating=db_order.rating,
         created_at=db_order.created_at,
         updated_at=db_order.updated_at,
     )
@@ -134,6 +136,7 @@ async def test__get_list(
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
             payment_file_id=db_order.payment_file_id,
+            rating=db_order.rating,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -165,6 +168,7 @@ async def test__get_list__validate_limit(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -197,6 +201,7 @@ async def test__get_list__validate_offset(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -232,6 +237,7 @@ async def test__get_list__validate_order(
                 delivery_price=db_order.delivery_price,
                 delivered_at_id=db_order.delivered_at_id,
                 payment_file_id=db_order.payment_file_id,
+                rating=db_order.rating,
                 created_at=db_order.created_at,
                 updated_at=db_order.updated_at,
             )
@@ -270,6 +276,7 @@ async def test__get_list__validate_filter__delivered_at(
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
             payment_file_id=db_order.payment_file_id,
+            rating=db_order.rating,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -306,6 +313,7 @@ async def test__get_list__validate_filter__statuses(
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
             payment_file_id=db_order.payment_file_id,
+            rating=db_order.rating,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -341,6 +349,7 @@ async def test__get_list__validate_filter__pickup_address_id(
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
             payment_file_id=db_order.payment_file_id,
+            rating=db_order.rating,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -374,6 +383,7 @@ async def test__get_list__validate_filter__user_id(
             delivery_price=db_order.delivery_price,
             delivered_at_id=db_order.delivered_at_id,
             payment_file_id=db_order.payment_file_id,
+            rating=db_order.rating,
             created_at=db_order.created_at,
             updated_at=db_order.updated_at,
         )
@@ -526,6 +536,7 @@ async def test__update_by_id(
         total_price=1000,
         delivery_price=200,
         payment_file_id="payment_file_id",
+        rating=4,
     )
     order = await order_storage.update_by_id(input_dto=update_data)
     assert order == Order(
@@ -539,6 +550,7 @@ async def test__update_by_id(
         delivery_price=update_data.delivery_price,
         delivered_at_id=db_order.delivered_at_id,
         payment_file_id=db_order.payment_file_id,
+        rating=update_data.rating,
         created_at=db_order.created_at,
         updated_at=db_order.updated_at,
     )

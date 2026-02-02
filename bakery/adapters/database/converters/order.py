@@ -17,6 +17,7 @@ def convert_order_to_dto(
         delivery_price=result.delivery_price,
         delivered_at_id=result.delivered_at_id,
         payment_file_id=result.payment_file_id,
+        rating=result.rating,
         created_at=result.created_at,
         updated_at=result.updated_at,
     )

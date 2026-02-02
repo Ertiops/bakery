@@ -88,6 +88,15 @@ async def get_order_payment_data(
         if file_id
         else None
     )
+    if "order_rating" not in dialog_manager.dialog_data and order.rating is not None:
+        dialog_manager.dialog_data["order_rating"] = order.rating
+    rating_raw = dialog_manager.dialog_data.get("order_rating", 5)
+    try:
+        rating = int(rating_raw)
+    except (TypeError, ValueError):
+        rating = 5
+    rating = max(1, min(5, rating))
+    dialog_manager.dialog_data["order_rating"] = rating
 
     return dict(
         has_order=True,
@@ -103,6 +112,7 @@ async def get_order_payment_data(
         payment_file_name=file_name or "Файл",
         has_payment_file=bool(file_id),
         payment_file_attachment=payment_file_attachment,
+        rating=rating,
         feedback_group_url=(feedback_group.url if feedback_group else ""),
         has_feedback_group=bool(feedback_group),
     )
