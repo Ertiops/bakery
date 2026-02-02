@@ -7,6 +7,7 @@ from bakery.adapters.database.config import DatabaseConfig
 from bakery.adapters.database.storages.admin_contact import AdminContactStorage
 from bakery.adapters.database.storages.cart import CartStorage
 from bakery.adapters.database.storages.delivery_cost import DeliveryCostStorage
+from bakery.adapters.database.storages.feedback_group import FeedbackGroupStorage
 from bakery.adapters.database.storages.order import OrderStorage
 from bakery.adapters.database.storages.order_payment import OrderPaymentStorage
 from bakery.adapters.database.storages.order_schedule import OrderScheduleStorage
@@ -18,6 +19,7 @@ from bakery.adapters.database.utils import create_engine, create_sessionmaker
 from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorage
 from bakery.domains.interfaces.storages.cart import ICartStorage
 from bakery.domains.interfaces.storages.delivery_cost import IDeliveryCostStorage
+from bakery.domains.interfaces.storages.feedback_group import IFeedbackGroupStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
 from bakery.domains.interfaces.storages.order_payment import IOrderPaymentStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
@@ -88,3 +90,7 @@ class DatabaseProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def order_payment_storage(self, uow: SqlalchemyUow) -> IOrderPaymentStorage:
         return OrderPaymentStorage(session=uow.session)
+
+    @provide(scope=Scope.REQUEST)
+    def feedback_group_storage(self, uow: SqlalchemyUow) -> IFeedbackGroupStorage:
+        return FeedbackGroupStorage(session=uow.session)

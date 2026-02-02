@@ -3,6 +3,7 @@ import pytest
 from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorage
 from bakery.domains.interfaces.storages.cart import ICartStorage
 from bakery.domains.interfaces.storages.delivery_cost import IDeliveryCostStorage
+from bakery.domains.interfaces.storages.feedback_group import IFeedbackGroupStorage
 from bakery.domains.interfaces.storages.order import IOrderStorage
 from bakery.domains.interfaces.storages.order_payment import IOrderPaymentStorage
 from bakery.domains.interfaces.storages.order_schedule import IOrderScheduleStorage
@@ -12,6 +13,7 @@ from bakery.domains.interfaces.storages.user import IUserStorage
 from bakery.domains.services.admin_contact import AdminContactService
 from bakery.domains.services.cart import CartService
 from bakery.domains.services.delivery_cost import DeliveryCostService
+from bakery.domains.services.feedback_group import FeedbackGroupService
 from bakery.domains.services.order import OrderService
 from bakery.domains.services.order_payment import OrderPaymentService
 from bakery.domains.services.order_schedule import OrderScheduleService
@@ -81,3 +83,10 @@ def order_payment_service(
     order_payment_storage: IOrderPaymentStorage,
 ) -> OrderPaymentService:
     return OrderPaymentService(order_payment_storage=order_payment_storage)
+
+
+@pytest.fixture
+def feedback_group_service(
+    feedback_group_storage: IFeedbackGroupStorage,
+) -> FeedbackGroupService:
+    return FeedbackGroupService(feedback_group_storage=feedback_group_storage)

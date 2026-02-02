@@ -1,7 +1,7 @@
 from aiogram.enums import ContentType
 from aiogram_dialog import Window
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Row
+from aiogram_dialog.widgets.kbd import Button, Row, Url
 from aiogram_dialog.widgets.media import DynamicMedia
 from aiogram_dialog.widgets.text import Const, Format, Multi
 
@@ -123,6 +123,11 @@ def create_order_payment_windows() -> list[Window]:
                 Const(order_payment_user_msg.FINISH_TITLE),
                 Const(order_payment_user_msg.FINISH_BODY),
             ),
+            Url(
+                Const(order_payment_user_msg.BTN_FEEDBACK_GROUP),
+                url=Format("{feedback_group_url}"),
+                when="has_feedback_group",
+            ),
             Row(
                 Button(
                     Const(order_payment_user_msg.BTN_TO_ORDERS),
@@ -136,5 +141,6 @@ def create_order_payment_windows() -> list[Window]:
                 ),
             ),
             state=UserOrderPayment.finish,
+            getter=get_order_payment_data,
         ),
     ]

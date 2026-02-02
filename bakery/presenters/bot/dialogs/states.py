@@ -107,6 +107,12 @@ class AdminOrderPayment(StatesGroup):
     confirm = State()
 
 
+class AdminFeedbackGroup(StatesGroup):
+    view = State()
+    url = State()
+    confirm = State()
+
+
 class AdminOrderSchedule(StatesGroup):
     view = State()
     pick_weekdays = State()

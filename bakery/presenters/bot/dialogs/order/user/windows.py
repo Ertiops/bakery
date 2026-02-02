@@ -1,6 +1,6 @@
 from aiogram_dialog import Window
 from aiogram_dialog.widgets.input import TextInput
-from aiogram_dialog.widgets.kbd import Button, Row, ScrollingGroup, Select
+from aiogram_dialog.widgets.kbd import Button, Row, ScrollingGroup, Select, Url
 from aiogram_dialog.widgets.text import Const, Format, List, Multi
 
 from bakery.presenters.bot.content.buttons import common as common_btn
@@ -296,6 +296,11 @@ def create_order_windows() -> list[Window]:
                     id="back_to_orders",
                     on_click=back_to_orders_list,
                 ),
+            ),
+            Url(
+                Const(user_order_btn.FEEDBACK_GROUP),
+                url=Format("{feedback_group_url}"),
+                when=lambda d, *_: d.get("is_paid") and d.get("has_feedback_group"),
             ),
             Row(
                 Button(

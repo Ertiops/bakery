@@ -7,6 +7,7 @@ from aiogram_dialog.api.protocols import DialogManager
 
 from bakery.application.exceptions import EntityNotFoundException
 from bakery.domains.entities.order import OrderStatus
+from bakery.domains.services.feedback_group import FeedbackGroupService
 from bakery.domains.services.order import OrderService
 from bakery.domains.services.order_payment import OrderPaymentService
 from bakery.domains.uow import AbstractUow
@@ -33,6 +34,9 @@ async def get_order_payment_data(
     order_service: OrderService = await container.get(OrderService)
     order_payment_service: OrderPaymentService = await container.get(
         OrderPaymentService
+    )
+    feedback_group_service: FeedbackGroupService = await container.get(
+        FeedbackGroupService
     )
 
     order_id_raw = _get_order_id_from_start_or_dialog(dialog_manager)
@@ -61,6 +65,11 @@ async def get_order_payment_data(
         except EntityNotFoundException:
             requisites = None
             has_requisites = False
+
+        try:
+            feedback_group = await feedback_group_service.get_last()
+        except EntityNotFoundException:
+            feedback_group = None
 
     delivered_at = order.delivered_at
     number = (
@@ -94,4 +103,6 @@ async def get_order_payment_data(
         payment_file_name=file_name or "Файл",
         has_payment_file=bool(file_id),
         payment_file_attachment=payment_file_attachment,
+        feedback_group_url=(feedback_group.url if feedback_group else ""),
+        has_feedback_group=bool(feedback_group),
     )

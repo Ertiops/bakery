@@ -27,3 +27,4 @@ FINISH_BODY: Final[str] = "Мы получили ваше подтвержден
 BTN_ATTACH_CHECK: Final[str] = "📎 Прикрепить чек"
 BTN_CONFIRM: Final[str] = "✅ Подтвердить"
 BTN_TO_ORDERS: Final[str] = "📦 К заказам"
+BTN_FEEDBACK_GROUP: Final[str] = "💬 Оставить отзыв"

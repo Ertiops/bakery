@@ -10,6 +10,7 @@ from bakery.presenters.bot.dialogs.main_menu.admin.handlers import (
     enter_catalog,
     enter_delivery_cost,
     enter_pickup_address_menu,
+    to_admin_feedback_group,
     to_admin_order_payment,
     to_admin_order_schedule,
 )
@@ -49,6 +50,11 @@ def admin_main_menu_window() -> Window:
                 Const(admin_main_menu_msg.ORDER_SCHEDULE),
                 id="admin_order_schedule",
                 on_click=to_admin_order_schedule,
+            ),
+            Button(
+                Const(admin_main_menu_msg.FEEDBACK_GROUP),
+                id="admin_feedback_group",
+                on_click=to_admin_feedback_group,
             ),
             width=2,
         ),

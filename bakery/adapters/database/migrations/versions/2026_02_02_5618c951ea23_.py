@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f719adf2ac89
+Revision ID: 5618c951ea23
 Revises:
-Create Date: 2026-02-01 22:42:19.683927
+Create Date: 2026-02-02 11:32:21.320233
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "f719adf2ac89"
+revision: str = "5618c951ea23"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -58,6 +58,25 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("id", sa.UUID(), nullable=False),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__delivery_costs")),
+    )
+    op.create_table(
+        "feedback_groups",
+        sa.Column("url", sa.String(length=512), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("TIMEZONE('utc', now())"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("TIMEZONE('utc', now())"),
+            nullable=False,
+        ),
+        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("id", sa.UUID(), nullable=False),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk__feedback_groups")),
     )
     op.create_table(
         "order_payments",
@@ -324,6 +343,7 @@ def downgrade() -> None:
     op.drop_table("pickup_addresses")
     op.drop_table("order_schedules")
     op.drop_table("order_payments")
+    op.drop_table("feedback_groups")
     op.drop_table("delivery_costs")
     op.drop_table("admin_contacts")
     # ### end Alembic commands ###
