@@ -18,6 +18,7 @@ from bakery.presenters.bot.dialogs.order.user.handlers import (
     on_address_selected,
     on_confirm_order,
     on_delete_order,
+    on_edit_order,
     on_manual_address_entered,
     on_order_date_selected,
     on_top_product_add,
@@ -332,6 +333,14 @@ def create_order_windows() -> list[Window]:
                     id="delete_order",
                     on_click=on_delete_order,
                     when="can_delete",
+                ),
+            ),
+            Row(
+                Button(
+                    Const(common_btn.EDIT),
+                    id="edit_order",
+                    on_click=on_edit_order,
+                    when="can_edit",
                 ),
             ),
             Row(

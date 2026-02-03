@@ -25,17 +25,31 @@ async def get_cart_data(
             )
         )
         if not carts:
+            dialog_manager.dialog_data["cart_item_index"] = {}
             return dict(cart_text=user_cart_msg.CART_EMPTY)
     lines = []
     total = 0
-    for cart in carts:
+    cart_items = []
+    cart_item_index: dict[str, str] = {}
+    for idx, cart in enumerate(carts, start=1):
         subtotal = cart.product.price * cart.quantity
         lines.append(user_cart_msg.CART_ITEM.format(cart=cart, subtotal=subtotal))
         total += subtotal
+        idx_str = str(idx)
+        cart_items.append(
+            dict(
+                idx=idx_str,
+                product_id=str(cart.product.id),
+                name=cart.product.name,
+                quantity=cart.quantity,
+            )
+        )
+        cart_item_index[idx_str] = str(cart.product.id)
+    dialog_manager.dialog_data["cart_item_index"] = cart_item_index
 
     return dict(
         cart_text="\n".join(lines)
         + "\n\n"
         + user_cart_msg.CART_TOTAL.format(total=total),
-        carts=carts,
+        carts=cart_items,
     )

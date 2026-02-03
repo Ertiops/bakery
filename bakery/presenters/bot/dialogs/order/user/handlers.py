@@ -4,6 +4,7 @@ from uuid import UUID
 
 from aiogram.types import CallbackQuery, Message
 from aiogram_dialog import ShowMode
+from aiogram_dialog.api.entities import StartMode
 from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.input import ManagedTextInput
 from aiogram_dialog.widgets.kbd import Button, Select
@@ -26,7 +27,7 @@ from bakery.domains.services.delivery_cost import DeliveryCostService
 from bakery.domains.services.order import OrderService
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
-from bakery.presenters.bot.dialogs.states import UserOrder
+from bakery.presenters.bot.dialogs.states import UserCatalogue, UserOrder
 
 USER_ORDERS_PAGE_SIZE = 5
 
@@ -236,6 +237,22 @@ async def on_delete_order(
         await order_service.delete_by_id(input_id=order.id)
 
     await manager.switch_to(UserOrder.view_many)
+
+
+async def on_edit_order(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    order_id = manager.dialog_data.get("selected_order_id")
+    if not order_id:
+        return
+    manager.dialog_data["order_edit_id"] = order_id
+    await manager.start(
+        state=UserCatalogue.select_category,
+        mode=StartMode.RESET_STACK,
+        data={"order_edit_id": order_id},
+    )
 
 
 async def back_to_orders_list(
