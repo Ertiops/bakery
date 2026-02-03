@@ -10,6 +10,7 @@ from aiogram_dialog.widgets.media import DynamicMedia
 from aiogram_dialog.widgets.text import Const, Format
 
 from bakery.presenters.bot.content.buttons import common as common_btn
+from bakery.presenters.bot.content.buttons.order import user as user_order_btn
 from bakery.presenters.bot.content.messages.catalogue import (
     common as common_catalogue_msg,
 )
@@ -24,6 +25,7 @@ from bakery.presenters.bot.dialogs.catalogue.user.handlers import (
 )
 from bakery.presenters.bot.dialogs.catalogue.user.redirections import (
     to_cart,
+    to_order,
     to_product_categories,
     to_product_list,
 )
@@ -93,7 +95,18 @@ def product_card_window() -> Window:
                 Const(common_btn.QUANTITY_INC), id="inc", on_click=on_increment_quantity
             ),
         ),
-        Button(Const(common_btn.CART), id="to_cart", on_click=to_cart),
+        Button(
+            Const(user_order_btn.TO_ORDER),
+            id="to_order",
+            on_click=to_order,
+            when=lambda d, *_: d.get("has_order_edit"),
+        ),
+        Button(
+            Const(common_btn.CART),
+            id="to_cart",
+            on_click=to_cart,
+            when=lambda d, *_: not d.get("has_order_edit"),
+        ),
         Button(Const(common_btn.BACK), id="back", on_click=to_product_list),
         state=UserCatalogue.view_single_product,
         getter=get_selected_product,

@@ -269,9 +269,14 @@ async def get_user_order_data(
     )
     uow: AbstractUow = await container.get(AbstractUow)
 
-    order_id_raw: str | None = dialog_manager.dialog_data.get("selected_order_id")
+    order_id_raw: str | None = dialog_manager.dialog_data.get("selected_order_id") or (
+        dialog_manager.start_data.get("selected_order_id")
+        if isinstance(dialog_manager.start_data, dict)
+        else None
+    )
     if not order_id_raw:
         return dict(has_order=False)
+    dialog_manager.dialog_data["selected_order_id"] = order_id_raw
 
     try:
         order_uuid = UUID(order_id_raw)
@@ -310,6 +315,7 @@ async def get_user_order_data(
         is_delivered=True if order.status == OrderStatus.DELIVERED else False,
         is_paid=True if order.status == OrderStatus.PAID else False,
         can_delete=order.status in (OrderStatus.CREATED, OrderStatus.CHANGED),
+        can_edit=order.status in (OrderStatus.CREATED, OrderStatus.CHANGED),
         feedback_group_url=(feedback_group.url if feedback_group else ""),
         has_feedback_group=bool(feedback_group),
     )

@@ -7,11 +7,18 @@ from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.kbd import Button
 
 from bakery.application.constants.cart import CART_PRODUCT_MAX
+from bakery.application.exceptions import EntityNotFoundException
 from bakery.domains.entities.cart import CreateCart
+from bakery.domains.entities.order import OrderProduct, OrderStatus
 from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
+from bakery.domains.services.order import OrderService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import UserCatalogue
+from bakery.presenters.bot.dialogs.utils.order_edit import (
+    get_order_edit_id,
+    update_order_products,
+)
 
 log = logging.getLogger(__name__)
 
@@ -23,17 +30,37 @@ async def on_view_product_clicked(
     item_id: str,
 ) -> None:
     category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore
+    order_edit_id = get_order_edit_id(manager)
     manager.dialog_data["product_id"] = item_id
     if category:
         manager.dialog_data["category"] = category
 
+    data = dict(product_id=item_id, category=category)
+    if order_edit_id:
+        data["order_edit_id"] = order_edit_id
+
     await manager.start(
         state=UserCatalogue.view_single_product,
-        data=dict(product_id=item_id, category=category),
+        data=data,
     )
 
 
-async def update_quantity(manager: DialogManager, delta: int) -> None:
+async def update_quantity(
+    callback: CallbackQuery,
+    manager: DialogManager,
+    delta: int,
+) -> None:
+    order_edit_id = get_order_edit_id(manager)
+    if order_edit_id:
+        updated = await _update_order_item_quantity(
+            manager=manager,
+            order_edit_id=order_edit_id,
+            delta=delta,
+        )
+        if not updated:
+            await callback.answer("Нельзя изменить заказ в работе.")
+        return
+
     container = manager.middleware_data["dishka_container"]
     service: CartService = await container.get(CartService)
     user: User = manager.middleware_data["current_user"]
@@ -56,10 +83,113 @@ async def update_quantity(manager: DialogManager, delta: int) -> None:
 async def on_increment_quantity(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
-    await update_quantity(manager, delta=1)
+    await update_quantity(callback, manager, delta=1)
 
 
 async def on_decrement_quantity(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
-    await update_quantity(manager, delta=-1)
+    await update_quantity(callback, manager, delta=-1)
+
+
+async def _update_order_item_quantity(  # noqa: C901
+    *,
+    manager: DialogManager,
+    order_edit_id: str,
+    delta: int,
+) -> bool:
+    try:
+        order_uuid = UUID(order_edit_id)
+    except ValueError:
+        return False
+
+    container = manager.middleware_data["dishka_container"]
+    order_service: OrderService = await container.get(OrderService)
+    uow: AbstractUow = await container.get(AbstractUow)
+
+    product_id = UUID(manager.dialog_data["product_id"])
+
+    async with uow:
+        try:
+            order = await order_service.get_by_id(input_id=order_uuid)
+        except EntityNotFoundException:
+            return False
+
+    if order.status not in (OrderStatus.CREATED, OrderStatus.CHANGED):
+        return False
+
+    product_id_str = str(product_id)
+    current_qty = 0
+    current_item = None
+    for item in order.products:
+        if item["id"] == product_id_str:
+            current_qty = item["quantity"]
+            current_item = item
+            break
+
+    quantity = max(0, current_qty + delta)
+    quantity = min(quantity, CART_PRODUCT_MAX)
+
+    name = manager.dialog_data.get("original_name")
+    price = manager.dialog_data.get("original_price")
+    if current_item:
+        name = name or current_item["name"]
+        if price is None:
+            price = current_item["price"]
+
+    if name is None or price is None:
+        return False
+
+    updated_products: list[OrderProduct] = []
+    found = False
+    for item in order.products:
+        if item["id"] == product_id_str:
+            found = True
+            if quantity > 0:
+                updated_products.append(
+                    _make_order_product(
+                        product_id=product_id_str,
+                        name=name,
+                        price=price,
+                        quantity=quantity,
+                    )
+                )
+        else:
+            updated_products.append(item)
+
+    if not found and quantity > 0:
+        updated_products.append(
+            _make_order_product(
+                product_id=product_id_str,
+                name=name,
+                price=price,
+                quantity=quantity,
+            )
+        )
+
+    updated = await update_order_products(
+        manager,
+        order_id=order_uuid,
+        products=updated_products,
+    )
+    if not updated:
+        return False
+
+    manager.dialog_data["quantity"] = quantity
+    await manager.show()
+    return True
+
+
+def _make_order_product(
+    *,
+    product_id: str,
+    name: str,
+    price: int,
+    quantity: int,
+) -> OrderProduct:
+    return OrderProduct(
+        id=product_id,
+        name=name,
+        price=price,
+        quantity=quantity,
+    )

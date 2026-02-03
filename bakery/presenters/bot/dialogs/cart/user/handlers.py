@@ -69,3 +69,36 @@ async def on_decrement_quantity(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
     await update_quantity(manager, delta=-1)
+
+
+async def on_cart_item_delete(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    item_id = getattr(manager, "item_id", None)
+    if not item_id:
+        return
+    cart_item_index = manager.dialog_data.get("cart_item_index") or {}
+    product_id_raw = cart_item_index.get(str(item_id))
+    if not product_id_raw:
+        return
+    try:
+        product_id = UUID(product_id_raw)
+    except ValueError:
+        return
+
+    container = manager.middleware_data["dishka_container"]
+    service: CartService = await container.get(CartService)
+    uow: AbstractUow = await container.get(AbstractUow)
+    user: User = manager.middleware_data["current_user"]
+
+    async with uow:
+        await service.create_or_update(
+            input_dto=CreateCart(
+                user_id=user.id,
+                product_id=product_id,
+                quantity=0,
+            )
+        )
+    await manager.show()
