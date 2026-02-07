@@ -10,7 +10,7 @@ from bakery.application.constants.cart import CART_PRODUCT_MAX
 from bakery.application.exceptions import EntityNotFoundException
 from bakery.domains.entities.cart import CreateCart
 from bakery.domains.entities.order import OrderProduct, OrderStatus
-from bakery.domains.entities.user import User
+from bakery.domains.entities.user import User, UserRole
 from bakery.domains.services.cart import CartService
 from bakery.domains.services.order import OrderService
 from bakery.domains.uow import AbstractUow
@@ -31,6 +31,19 @@ async def on_view_product_clicked(
 ) -> None:
     category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore
     order_edit_id = get_order_edit_id(manager)
+    admin_order_edit = bool(
+        manager.dialog_data.get("admin_order_edit")
+        or manager.start_data.get("admin_order_edit")  # type: ignore
+    )
+    admin_selected_date = (
+        manager.dialog_data.get("admin_selected_date")
+        or manager.start_data.get("admin_selected_date")  # type: ignore
+    )
+    admin_deleted_flow = (
+        manager.dialog_data.get("admin_deleted_flow")
+        if manager.dialog_data.get("admin_deleted_flow") is not None
+        else manager.start_data.get("admin_deleted_flow")  # type: ignore
+    )
     manager.dialog_data["product_id"] = item_id
     if category:
         manager.dialog_data["category"] = category
@@ -38,6 +51,12 @@ async def on_view_product_clicked(
     data = dict(product_id=item_id, category=category)
     if order_edit_id:
         data["order_edit_id"] = order_edit_id
+    if admin_order_edit:
+        data["admin_order_edit"] = True
+    if admin_selected_date:
+        data["admin_selected_date"] = admin_selected_date
+    if admin_deleted_flow is not None:
+        data["admin_deleted_flow"] = admin_deleted_flow
 
     await manager.start(
         state=UserCatalogue.view_single_product,
@@ -115,13 +134,21 @@ async def _update_order_item_quantity(  # noqa: C901
         except EntityNotFoundException:
             return False
 
-    if order.status not in (OrderStatus.CREATED, OrderStatus.CHANGED):
-        return False
+    current_user: User = manager.middleware_data["current_user"]
+    if current_user.role != UserRole.ADMIN:
+        if order.status not in (OrderStatus.CREATED, OrderStatus.CHANGED):
+            return False
+
+    if current_user.role == UserRole.ADMIN:
+        if not any(item.get("is_deleted", False) for item in order.products):
+            return False
 
     product_id_str = str(product_id)
     current_qty = 0
     current_item = None
     for item in order.products:
+        if item.get("is_deleted", False):
+            continue
         if item["id"] == product_id_str:
             current_qty = item["quantity"]
             current_item = item
@@ -143,7 +170,7 @@ async def _update_order_item_quantity(  # noqa: C901
     updated_products: list[OrderProduct] = []
     found = False
     for item in order.products:
-        if item["id"] == product_id_str:
+        if item["id"] == product_id_str and not item.get("is_deleted", False):
             found = True
             if quantity > 0:
                 updated_products.append(
@@ -192,4 +219,5 @@ def _make_order_product(
         name=name,
         price=price,
         quantity=quantity,
+        is_deleted=False,
     )

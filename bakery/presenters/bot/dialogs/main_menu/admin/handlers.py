@@ -7,6 +7,7 @@ from bakery.presenters.bot.dialogs.states import (
     AdminDeliveryPrice,
     AdminFeedbackGroup,
     AdminOrderPayment,
+    AdminOrders,
     AdminOrderSchedule,
     AdminPickupAddress,
 )
@@ -64,3 +65,11 @@ async def to_admin_feedback_group(
     manager: DialogManager,
 ) -> None:
     await manager.start(state=AdminFeedbackGroup.view, mode=StartMode.RESET_STACK)
+
+
+async def enter_orders(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    await manager.start(state=AdminOrders.view_categories, mode=StartMode.RESET_STACK)

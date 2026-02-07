@@ -5,8 +5,10 @@ from uuid import UUID
 
 from sqlalchemy import (
     Integer,
+    case,
     cast,
     exists,
+    false,
     func,
     insert,
     or_,
@@ -14,13 +16,16 @@ from sqlalchemy import (
     true,
     update,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from bakery.adapters.database.base import now_with_tz
 from bakery.adapters.database.converters.order import convert_order_to_dto
 from bakery.adapters.database.converters.product import convert_product
-from bakery.adapters.database.tables import OrderTable, ProductTable
+from bakery.adapters.database.converters.user import convert_user
+from bakery.adapters.database.tables import OrderTable, ProductTable, UserTable
 from bakery.application.exceptions import (
     EntityNotFoundException,
     ForeignKeyViolationException,
@@ -28,9 +33,13 @@ from bakery.application.exceptions import (
 )
 from bakery.domains.entities.order import (
     CreateOrder,
+    DeleteOrderParams,
     Order,
+    OrderListByDateWithProductParams,
     OrderListParams,
+    OrderListWithUsersParams,
     OrderTopProductsParams,
+    OrderWithUser,
     UpdateOrder,
 )
 from bakery.domains.entities.product import Product
@@ -82,6 +91,48 @@ class OrderStorage(IOrderStorage):
 
         result = await self.__session.scalars(stmt)
         return [convert_order_to_dto(result=r) for r in result]
+
+    async def get_list_by_date_with_product(
+        self, *, input_dto: OrderListByDateWithProductParams
+    ) -> Sequence[Order]:
+        stmt = (
+            select(OrderTable)
+            .where(
+                OrderTable.deleted_at.is_(None),
+                OrderTable.delivered_at == input_dto.delivered_at,
+                OrderTable.products.contains([{"id": str(input_dto.product_id)}]),
+            )
+            .order_by(OrderTable.created_at.desc())
+            .limit(input_dto.limit)
+            .offset(input_dto.offset)
+        )
+        result = await self.__session.scalars(stmt)
+        return [convert_order_to_dto(result=r) for r in result]
+
+    async def get_list_with_users_by_date(
+        self, *, input_dto: OrderListWithUsersParams
+    ) -> Sequence[OrderWithUser]:
+        stmt = (
+            select(OrderTable, UserTable)
+            .join(UserTable, UserTable.id == OrderTable.user_id)
+            .where(
+                OrderTable.deleted_at.is_(None),
+                UserTable.deleted_at.is_(None),
+                OrderTable.delivered_at == input_dto.delivered_at,
+            )
+            .order_by(OrderTable.created_at.desc())
+            .limit(input_dto.limit)
+            .offset(input_dto.offset)
+        )
+        result = await self.__session.execute(stmt)
+        rows = result.all()
+        return [
+            OrderWithUser(
+                order=convert_order_to_dto(result=order),
+                user=convert_user(result=user),
+            )
+            for order, user in rows
+        ]
 
     async def count(self, *, input_dto: OrderListParams) -> int:
         stmt = (
@@ -138,10 +189,67 @@ class OrderStorage(IOrderStorage):
             self.__raise_exception(e)
         return convert_order_to_dto(result=result)
 
-    async def delete_by_id(self, *, input_id: UUID) -> None:
+    async def update_list(self, *, input_dto: Sequence[UpdateOrder]) -> Sequence[Order]:
+        if not input_dto:
+            return []
+
+        id_to_dtos = {item.id: item.to_dict() for item in input_dto}
+        ids = list(id_to_dtos.keys())
+
         stmt = (
             update(OrderTable)
-            .where(OrderTable.id == input_id)
+            .where(OrderTable.id.in_(ids))
+            .values(
+                products=case(
+                    (false(), None),
+                    *(
+                        (OrderTable.id == id_, cast(dto.get("products"), JSONB))
+                        for id_, dto in id_to_dtos.items()
+                        if "products" in dto
+                    ),
+                    else_=OrderTable.products,
+                ),
+                total_price=case(
+                    (false(), None),
+                    *(
+                        (OrderTable.id == id_, dto.get("total_price"))
+                        for id_, dto in id_to_dtos.items()
+                        if "total_price" in dto
+                    ),
+                    else_=OrderTable.total_price,
+                ),
+                delivery_price=case(
+                    (false(), None),
+                    *(
+                        (OrderTable.id == id_, dto.get("delivery_price"))
+                        for id_, dto in id_to_dtos.items()
+                        if "delivery_price" in dto
+                    ),
+                    else_=OrderTable.delivery_price,
+                ),
+                status=case(
+                    (false(), None),
+                    *(
+                        (OrderTable.id == id_, dto.get("status"))
+                        for id_, dto in id_to_dtos.items()
+                        if "status" in dto
+                    ),
+                    else_=OrderTable.status,
+                ),
+                updated_at=now_with_tz(),
+            )
+            .returning(OrderTable)
+        )
+        try:
+            result = (await self.__session.scalars(stmt)).all()
+        except IntegrityError as e:
+            self.__raise_exception(e)
+        return [convert_order_to_dto(result=r) for r in result]
+
+    async def delete_by_id(self, *, input_dto: DeleteOrderParams) -> None:
+        stmt = (
+            update(OrderTable)
+            .where(OrderTable.id == input_dto.id)
             .values(deleted_at=datetime.now(tz=UTC))
         )
         await self.__session.execute(stmt)

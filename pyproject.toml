@@ -29,6 +29,7 @@ pydantic = {extras = ["email"], version = "^2.10.3"}
 aiobotocore = "^2.22.0"
 greenlet = "^3.2.4"
 mashumaro = "^3.17"
+reportlab = "^4.2.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -118,5 +119,6 @@ no_implicit_optional = true
 module = [
     "py_expression_eval.*",
     "asyncpg.*",
+    "reportlab.*",
 ]
 ignore_missing_imports = true

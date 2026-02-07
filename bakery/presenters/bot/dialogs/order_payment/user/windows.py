@@ -67,13 +67,9 @@ def create_order_payment_windows() -> list[Window]:
         Window(
             Multi(
                 Const(order_payment_user_msg.ATTACH_FILE_TITLE),
-                Const(order_payment_user_msg.ATTACH_FILE_HINT),
                 Const(order_payment_user_msg.ATTACH_FILE_ACTION),
             ),
-            MessageInput(
-                on_payment_file_received,
-                content_types=[ContentType.PHOTO, ContentType.DOCUMENT],
-            ),
+            MessageInput(on_payment_file_received, content_types=[ContentType.PHOTO]),
             Row(
                 Button(
                     Const(common_btn.BACK),

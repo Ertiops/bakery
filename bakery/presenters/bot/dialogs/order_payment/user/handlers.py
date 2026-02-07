@@ -1,6 +1,5 @@
 from uuid import UUID
 
-from aiogram.enums import ContentType
 from aiogram.types import CallbackQuery, Message
 from aiogram_dialog.api.protocols import DialogManager
 from aiogram_dialog.widgets.kbd import Button
@@ -26,21 +25,13 @@ async def on_payment_file_received(
     manager: DialogManager,
 ) -> None:
     file_id: str | None = None
-    file_name: str | None = None
 
     if message.photo:
         file_id = message.photo[-1].file_id
-        file_name = "Фото"
-        manager.dialog_data["payment_file_type"] = ContentType.PHOTO
-    elif message.document:
-        file_id = message.document.file_id
-        file_name = message.document.file_name or "Документ"
-        manager.dialog_data["payment_file_type"] = ContentType.DOCUMENT
     else:
         return
 
     manager.dialog_data["payment_file_id"] = file_id
-    manager.dialog_data["payment_file_name"] = file_name
 
     await manager.switch_to(UserOrderPayment.confirm)
 
@@ -59,6 +50,9 @@ async def to_payment_finish(
     container = manager.middleware_data["dishka_container"]
     uow: AbstractUow = await container.get(AbstractUow)
     order_service: OrderService = await container.get(OrderService)
+    current_user = manager.middleware_data.get("current_user")
+    if current_user is None:
+        return
 
     async with uow:
         try:
@@ -71,7 +65,8 @@ async def to_payment_finish(
                 id=order.id,
                 status=OrderStatus.PAID,
                 payment_file_id=payment_file_id,  # type: ignore[arg-type]
-            )
+            ),
+            user=current_user,
         )
 
     manager.dialog_data.setdefault("order_rating", 5)
@@ -136,6 +131,10 @@ async def save_rating_and_finish(
     container = manager.middleware_data["dishka_container"]
     uow: AbstractUow = await container.get(AbstractUow)
     order_service: OrderService = await container.get(OrderService)
+    current_user = manager.middleware_data.get("current_user")
+    if current_user is None:
+        await manager.switch_to(UserOrderPayment.finish)
+        return
 
     async with uow:
         try:
@@ -143,7 +142,8 @@ async def save_rating_and_finish(
                 input_dto=UpdateOrder(
                     id=order_uuid,
                     rating=rating,
-                )
+                ),
+                user=current_user,
             )
         except EntityNotFoundException:
             pass

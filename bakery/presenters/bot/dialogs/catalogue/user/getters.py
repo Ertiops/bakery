@@ -20,6 +20,25 @@ from bakery.presenters.bot.dialogs.utils.order_edit import get_order_edit_id
 log = logging.getLogger(__name__)
 
 
+async def get_catalogue_context(
+    dialog_manager: DialogManager,
+    **_kwargs: Any,
+) -> dict[str, Any]:
+    admin_order_edit = bool(dialog_manager.start_data.get("admin_order_edit"))  # type: ignore[union-attr]
+    admin_deleted_flow = dialog_manager.start_data.get("admin_deleted_flow")  # type: ignore[union-attr]
+    order_edit_id = dialog_manager.start_data.get("order_edit_id")  # type: ignore[union-attr]
+    admin_selected_date = dialog_manager.start_data.get("admin_selected_date")  # type: ignore[union-attr]
+    if admin_order_edit:
+        dialog_manager.dialog_data["admin_order_edit"] = True
+    if admin_deleted_flow is not None:
+        dialog_manager.dialog_data["admin_deleted_flow"] = admin_deleted_flow
+    if order_edit_id:
+        dialog_manager.dialog_data["order_edit_id"] = order_edit_id
+    if admin_selected_date:
+        dialog_manager.dialog_data["admin_selected_date"] = admin_selected_date
+    return {}
+
+
 async def get_products_data(
     dialog_manager: DialogManager,
     **kwargs: Any,
@@ -37,6 +56,13 @@ async def get_products_data(
     order_edit_id = get_order_edit_id(dialog_manager)
     if order_edit_id:
         dialog_manager.dialog_data["order_edit_id"] = order_edit_id
+    if isinstance(dialog_manager.start_data, dict):
+        if dialog_manager.start_data.get("admin_order_edit"):
+            dialog_manager.dialog_data["admin_order_edit"] = True
+        if dialog_manager.start_data.get("admin_deleted_flow") is not None:
+            dialog_manager.dialog_data["admin_deleted_flow"] = (
+                dialog_manager.start_data.get("admin_deleted_flow")
+            )
     log.info("Fetching products for category: %s", category)
     async with uow:
         product_list = await service.get_list(
@@ -47,7 +73,7 @@ async def get_products_data(
     return dict(products=product_list.items)
 
 
-async def get_selected_product(
+async def get_selected_product(  # noqa: C901
     dialog_manager: DialogManager,
     **kwargs: Any,
 ) -> dict[str, Any]:
@@ -62,6 +88,13 @@ async def get_selected_product(
     ) or dialog_manager.dialog_data.get("product_id")
     log.info("Fetching product with ID: %s", product_id)
     order_edit_id = get_order_edit_id(dialog_manager)
+    if isinstance(dialog_manager.start_data, dict):
+        if dialog_manager.start_data.get("admin_order_edit"):
+            dialog_manager.dialog_data["admin_order_edit"] = True
+        if dialog_manager.start_data.get("admin_deleted_flow") is not None:
+            dialog_manager.dialog_data["admin_deleted_flow"] = (
+                dialog_manager.start_data.get("admin_deleted_flow")
+            )
     async with uow:
         product = await product_service.get_by_id(input_id=UUID(product_id))  # type: ignore[arg-type]
         quantity = 0
@@ -69,6 +102,8 @@ async def get_selected_product(
             try:
                 order = await order_service.get_by_id(input_id=UUID(order_edit_id))
                 for item in order.products:
+                    if item.get("is_deleted", False):
+                        continue
                     if item["id"] == str(product.id):
                         quantity = item["quantity"]
                         break

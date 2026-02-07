@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from datetime import date, time
 from uuid import UUID
 
-from sqlalchemy import Date, ForeignKey, Index, Integer, String, Time
+from sqlalchemy import BigInteger, Date, ForeignKey, Index, Integer, String, Time
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -34,7 +34,7 @@ class UserTable(BaseTable, TimestampedMixin, IdentifableMixin):
     )
 
     name: Mapped[str] = mapped_column(String(63), nullable=False)
-    tg_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    tg_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     phone: Mapped[str] = mapped_column(String(16), nullable=False)
     role: Mapped[UserRole] = mapped_column(make_pg_enum(UserRole, name="user_role"))
 
@@ -112,6 +112,10 @@ class OrderTable(BaseTable, TimestampedMixin, IdentifableMixin):
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), primary_key=True)
     pickup_address_name: Mapped[str] = mapped_column(String(512), nullable=False)
+    pickup_address_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("pickup_addresses.id"),
+        nullable=True,
+    )
     status: Mapped[OrderStatus] = mapped_column(
         make_pg_enum(OrderStatus, name="order_status"),
         nullable=False,

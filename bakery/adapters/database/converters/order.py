@@ -10,6 +10,7 @@ def convert_order_to_dto(
         id=result.id,
         user_id=result.user_id,
         pickup_address_name=result.pickup_address_name,
+        pickup_address_id=result.pickup_address_id,
         status=result.status,
         products=result.products,
         delivered_at=result.delivered_at,

@@ -79,10 +79,9 @@ async def get_order_payment_data(
     )
 
     file_id = dialog_manager.dialog_data.get("payment_file_id")
-    file_name = dialog_manager.dialog_data.get("payment_file_name")
     payment_file_attachment = (
         MediaAttachment(
-            type=ContentType.PHOTO if file_name == "Фото" else ContentType.DOCUMENT,
+            type=ContentType.PHOTO,
             file_id=MediaId(file_id),
         )
         if file_id
@@ -109,7 +108,6 @@ async def get_order_payment_data(
         banks=(display_list(requisites.banks) if requisites else ""),
         addressee=(requisites.addressee if requisites else ""),
         payment_file_id=file_id,
-        payment_file_name=file_name or "Файл",
         has_payment_file=bool(file_id),
         payment_file_attachment=payment_file_attachment,
         rating=rating,

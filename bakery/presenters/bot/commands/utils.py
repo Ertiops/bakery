@@ -14,6 +14,7 @@ from bakery.presenters.bot.content.messages.utils import ADMIN_HELP, USER_HELP
 from bakery.presenters.bot.dialogs.states import (
     AdminAdminContact,
     AdminMain,
+    RegistrationMenu,
     UserAdminContact,
     UserMain,
 )
@@ -45,6 +46,11 @@ async def start_command(message: Message, dialog_manager: DialogManager) -> None
         return
     user: User | None = dialog_manager.middleware_data["current_user"]
     if not user:
+        await dialog_manager.start(
+            state=RegistrationMenu.personal_data_accept,
+            mode=StartMode.RESET_STACK,
+        )
+        await message.delete()
         return
     match user.role:
         case UserRole.USER:

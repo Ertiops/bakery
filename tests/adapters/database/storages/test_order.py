@@ -30,6 +30,7 @@ async def test__create(
     create_data = CreateOrder(
         user_id=db_user.id,
         pickup_address_name="pickup_address_name",
+        pickup_address_id=None,
         status=OrderStatus.CREATED,
         products=[
             dict(name="name", quantity=2),
@@ -45,6 +46,7 @@ async def test__create(
         id=IsUUID,
         user_id=create_data.user_id,
         pickup_address_name=create_data.pickup_address_name,
+        pickup_address_id=create_data.pickup_address_id,
         status=create_data.status,
         products=create_data.products,
         delivered_at=create_data.delivered_at,
@@ -66,6 +68,7 @@ async def test__create__foreign_key_violation_exception__user_id(
     create_data = CreateOrder(
         user_id=uuid4(),
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
         status=OrderStatus.CREATED,
         products=[
             dict(name="name", quantity=2),
@@ -90,6 +93,7 @@ async def test__get_by_id(
         id=db_order.id,
         user_id=db_order.user_id,
         pickup_address_name=db_order.pickup_address_name,
+        pickup_address_id=db_order.pickup_address_id,
         status=db_order.status,
         products=db_order.products,
         delivered_at=db_order.delivered_at,
@@ -122,7 +126,11 @@ async def test__get_list(
 ) -> None:
     db_pickup_address: PickupAddressTable = await create_pickup_address()
     db_orders: list[OrderTable] = [
-        await create_order(pickup_address_name=db_pickup_address.name) for _ in range(2)
+        await create_order(
+            pickup_address_name=db_pickup_address.name,
+            pickup_address_id=db_pickup_address.id,
+        )
+        for _ in range(2)
     ][::-1]
     orders = await order_storage.get_list(input_dto=OrderListParams(limit=10, offset=0))
     assert orders == [
@@ -130,6 +138,7 @@ async def test__get_list(
             id=db_order.id,
             user_id=db_order.user_id,
             pickup_address_name=db_order.pickup_address_name,
+            pickup_address_id=db_order.pickup_address_id,
             status=db_order.status,
             products=db_order.products,
             delivered_at=db_order.delivered_at,
@@ -152,7 +161,11 @@ async def test__get_list__validate_limit(
 ) -> None:
     db_pickup_address: PickupAddressTable = await create_pickup_address()
     db_orders: list[OrderTable] = [
-        await create_order(pickup_address_name=db_pickup_address.name) for _ in range(2)
+        await create_order(
+            pickup_address_name=db_pickup_address.name,
+            pickup_address_id=db_pickup_address.id,
+        )
+        for _ in range(2)
     ][::-1]
     orders = await order_storage.get_list(input_dto=OrderListParams(limit=1, offset=0))
     assert (
@@ -162,6 +175,7 @@ async def test__get_list__validate_limit(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -185,7 +199,11 @@ async def test__get_list__validate_offset(
 ) -> None:
     db_pickup_address: PickupAddressTable = await create_pickup_address()
     db_orders: list[OrderTable] = [
-        await create_order(pickup_address_name=db_pickup_address.name) for _ in range(2)
+        await create_order(
+            pickup_address_name=db_pickup_address.name,
+            pickup_address_id=db_pickup_address.id,
+        )
+        for _ in range(2)
     ][::-1]
     orders = await order_storage.get_list(input_dto=OrderListParams(limit=2, offset=1))
     assert (
@@ -195,6 +213,7 @@ async def test__get_list__validate_offset(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -219,7 +238,9 @@ async def test__get_list__validate_order(
     db_pickup_address: PickupAddressTable = await create_pickup_address()
     db_orders: list[OrderTable] = [
         await create_order(
-            pickup_address_name=db_pickup_address.name, created_at=now_utc(days=-i)
+            pickup_address_name=db_pickup_address.name,
+            pickup_address_id=db_pickup_address.id,
+            created_at=now_utc(days=-i),
         )
         for i in range(2)
     ][::-1]
@@ -231,6 +252,7 @@ async def test__get_list__validate_order(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -256,7 +278,9 @@ async def test__get_list__validate_filter__delivered_at(
     db_pickup_address: PickupAddressTable = await create_pickup_address()
     await create_order(delivered_at=now_utc(days=1).date())
     db_order: OrderTable = await create_order(
-        pickup_address_name=db_pickup_address.name, delivered_at=delivered_at
+        pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
+        delivered_at=delivered_at,
     )
     orders = await order_storage.get_list(
         input_dto=OrderListParams(
@@ -270,6 +294,7 @@ async def test__get_list__validate_filter__delivered_at(
             id=db_order.id,
             user_id=db_order.user_id,
             pickup_address_name=db_order.pickup_address_name,
+            pickup_address_id=db_order.pickup_address_id,
             status=db_order.status,
             products=db_order.products,
             delivered_at=db_order.delivered_at,
@@ -293,6 +318,7 @@ async def test__get_list__validate_filter__statuses(
     await create_order(status=OrderStatus.DELIVERED)
     db_order: OrderTable = await create_order(
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
         status=OrderStatus.CREATED,
     )
     orders = await order_storage.get_list(
@@ -307,6 +333,7 @@ async def test__get_list__validate_filter__statuses(
             id=db_order.id,
             user_id=db_order.user_id,
             pickup_address_name=db_order.pickup_address_name,
+            pickup_address_id=db_order.pickup_address_id,
             status=db_order.status,
             products=db_order.products,
             delivered_at=db_order.delivered_at,
@@ -332,6 +359,7 @@ async def test__get_list__validate_filter__pickup_address_id(
     )
     db_order: OrderTable = await create_order(
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
     )
     orders = await order_storage.get_list(
         input_dto=OrderListParams(
@@ -343,6 +371,7 @@ async def test__get_list__validate_filter__pickup_address_id(
             id=db_order.id,
             user_id=db_order.user_id,
             pickup_address_name=db_order.pickup_address_name,
+            pickup_address_id=db_order.pickup_address_id,
             status=db_order.status,
             products=db_order.products,
             delivered_at=db_order.delivered_at,
@@ -368,6 +397,7 @@ async def test__get_list__validate_filter__user_id(
     )
     db_order: OrderTable = await create_order(
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
     )
     orders = await order_storage.get_list(
         input_dto=OrderListParams(limit=10, offset=0, user_id=db_order.user_id)
@@ -377,6 +407,7 @@ async def test__get_list__validate_filter__user_id(
             id=db_order.id,
             user_id=db_order.user_id,
             pickup_address_name=db_order.pickup_address_name,
+            pickup_address_id=db_order.pickup_address_id,
             status=db_order.status,
             products=db_order.products,
             delivered_at=db_order.delivered_at,
@@ -429,6 +460,7 @@ async def test__count__validate_filters(
     )
     await create_order(
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
         status=OrderStatus.CREATED,
         delivered_at=now_utc().date(),
     )
@@ -454,6 +486,7 @@ async def test__count__validate_filter__pickup_address_name(
     )
     await create_order(
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
     )
     count = await order_storage.count(
         input_dto=OrderListParams(
@@ -531,6 +564,7 @@ async def test__update_by_id(
         id=db_order.id,
         user_id=db_user.id,
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
         status=OrderStatus.PAID,
         products=[],
         delivered_at=now_utc().date(),
@@ -544,6 +578,7 @@ async def test__update_by_id(
         id=db_order.id,
         user_id=update_data.user_id,
         pickup_address_name=update_data.pickup_address_name,
+        pickup_address_id=update_data.pickup_address_id,
         status=update_data.status,
         products=update_data.products,
         delivered_at=update_data.delivered_at,
@@ -557,6 +592,93 @@ async def test__update_by_id(
     )
 
 
+async def test__update_list(
+    order_storage: OrderStorage,
+    create_order: Callable,
+) -> None:
+    order_one: OrderTable = await create_order(
+        status=OrderStatus.CREATED,
+        pickup_address_name="addr-1",
+        pickup_address_id=None,
+        delivered_at=now_utc().date(),
+        total_price=100,
+        delivery_price=10,
+        delivered_at_id=1,
+        payment_file_id="payment_file_id",
+        products=[
+            dict(id=str(uuid4()), name="p1", price=100, quantity=1),
+        ],
+    )
+    order_two: OrderTable = await create_order(
+        status=OrderStatus.CREATED,
+        pickup_address_name="addr-2",
+        pickup_address_id=None,
+        delivered_at=now_utc().date(),
+        total_price=200,
+        delivery_price=20,
+        delivered_at_id=2,
+        payment_file_id="payment_file_id",
+        products=[
+            dict(id=str(uuid4()), name="p2", price=200, quantity=1),
+        ],
+    )
+    update_items = [
+        UpdateOrder(
+            id=order_one.id,
+            pickup_address_id=order_one.pickup_address_id,
+            products=[dict(id=str(uuid4()), name="p1", price=150, quantity=2)],
+            total_price=300,
+            delivery_price=0,
+            status=OrderStatus.CHANGED,
+        ),
+        UpdateOrder(
+            id=order_two.id,
+            pickup_address_id=order_two.pickup_address_id,
+            products=[dict(id=str(uuid4()), name="p2", price=500, quantity=1)],
+            total_price=520,
+            delivery_price=20,
+            status=OrderStatus.PAID,
+        ),
+    ]
+
+    result = await order_storage.update_list(input_dto=update_items)
+
+    assert result == [
+        Order(
+            id=update_items[0].id,
+            user_id=order_one.user_id,
+            pickup_address_name=order_one.pickup_address_name,
+            pickup_address_id=order_one.pickup_address_id,
+            status=update_items[0].status,
+            products=update_items[0].products,
+            delivered_at=order_one.delivered_at,
+            total_price=update_items[0].total_price,
+            delivery_price=update_items[0].delivery_price,
+            delivered_at_id=order_one.delivered_at_id,
+            payment_file_id=order_one.payment_file_id,
+            rating=order_one.rating,
+            created_at=order_one.created_at,
+            updated_at=IsDatetime,
+        ),
+        Order(
+            id=update_items[1].id,
+            user_id=order_two.user_id,
+            pickup_address_name=order_two.pickup_address_name,
+            pickup_address_id=order_two.pickup_address_id,
+            status=update_items[1].status,
+            products=update_items[1].products,
+            delivered_at=order_two.delivered_at,
+            total_price=update_items[1].total_price,
+            delivery_price=update_items[1].delivery_price,
+            delivered_at_id=order_two.delivered_at_id,
+            payment_file_id=order_two.payment_file_id,
+            rating=order_two.rating,
+            created_at=order_two.created_at,
+            updated_at=IsDatetime,
+        ),
+    ]
+
+
 async def test__update_by_id__foreign_key_violation_exception__user_id(
     order_storage: OrderStorage,
     create_order: Callable,
@@ -568,6 +690,7 @@ async def test__update_by_id__foreign_key_violation_exception__user_id(
         id=db_order.id,
         user_id=uuid4(),
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
         status=OrderStatus.PAID,
         products=[],
         delivered_at=now_utc().date(),
@@ -616,6 +739,7 @@ async def test__get_top_products_for_user__user_orders_exclude_cart_and_deleted(
         user_id=user.id,
         status=OrderStatus.CREATED,
         pickup_address_name="addr",
+        pickup_address_id=None,
         delivered_at=now_utc().date(),
         total_price=0,
         delivery_price=0,
@@ -646,6 +770,7 @@ async def test__get_top_products_for_user__user_orders_exclude_cart_and_deleted(
         user_id=user.id,
         status=OrderStatus.CREATED,
         pickup_address_name="addr",
+        pickup_address_id=None,
         delivered_at=now_utc().date(),
         total_price=0,
         delivery_price=0,
@@ -701,6 +826,7 @@ async def test__get_top_products_for_user__fallback_to_all_orders(
         user_id=other_user.id,
         status=OrderStatus.CREATED,
         pickup_address_name="addr",
+        pickup_address_id=None,
         delivered_at=now_utc().date(),
         total_price=0,
         delivery_price=0,
@@ -743,6 +869,7 @@ async def test__get_top_products_for_user__fallback_to_all_orders(
         user_id=other_user.id,
         status=OrderStatus.CREATED,
         pickup_address_name="addr",
+        pickup_address_id=None,
         delivered_at=now_utc().date(),
         total_price=0,
         delivery_price=0,

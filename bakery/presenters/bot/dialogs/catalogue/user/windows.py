@@ -15,6 +15,7 @@ from bakery.presenters.bot.content.messages.catalogue import (
     common as common_catalogue_msg,
 )
 from bakery.presenters.bot.dialogs.catalogue.user.getters import (
+    get_catalogue_context,
     get_products_data,
     get_selected_product,
 )
@@ -25,6 +26,7 @@ from bakery.presenters.bot.dialogs.catalogue.user.handlers import (
 )
 from bakery.presenters.bot.dialogs.catalogue.user.redirections import (
     to_cart,
+    to_catalogue_root,
     to_order,
     to_product_categories,
     to_product_list,
@@ -33,7 +35,6 @@ from bakery.presenters.bot.dialogs.catalogue.user.selections import (
     on_category_selected,
 )
 from bakery.presenters.bot.dialogs.catalogue.windows import CATEGORY_ITEMS
-from bakery.presenters.bot.dialogs.main_menu.user.redirections import to_main_menu
 from bakery.presenters.bot.dialogs.states import UserCatalogue
 
 
@@ -51,8 +52,9 @@ def select_category_window() -> Window:
             ),
             width=2,
         ),
-        Button(Const(common_btn.BACK), id="back_to_main", on_click=to_main_menu),
+        Button(Const(common_btn.BACK), id="back_to_main", on_click=to_catalogue_root),
         state=UserCatalogue.select_category,
+        getter=get_catalogue_context,
     )
 
 

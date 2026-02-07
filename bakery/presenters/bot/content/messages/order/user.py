@@ -40,6 +40,14 @@ ORDER_PRODUCTS_TEXT: Final[str] = "{products_text}\n\n"
 ORDER_DELIVERY_PRICE: Final[str] = "🚚 Доставка: {delivery_price}₽\n"
 ORDER_TOTAL_PRICE: Final[str] = "💰 Итого: {total_price}₽"
 ORDER_NOT_FOUND: Final[str] = "Заказ не найден 😔"
+ORDER_PRODUCT_REMOVED: Final[str] = (
+    "📨 Из вашего заказа {order_number} удален товар: {product_name}.\n"
+    "Причина: {reason}"
+)
+DELIVERY_STARTED: Final[str] = "🚚 Начат развоз вашего заказа {order_number}."
+ORDER_DELIVERED: Final[str] = "✅ Ваш заказ доставлен."
+PRODUCT_NAME_FALLBACK: Final[str] = "товар"
+ORDER_DELETED: Final[str] = "🛑 Ваш заказ {order_number} удален.\nПричина: {reason}"
 CART_ITEM_LINE: Final[str] = (
     "• {item[name]} — {item[qty]} × {item[price]} = {item[subtotal]}"
 )

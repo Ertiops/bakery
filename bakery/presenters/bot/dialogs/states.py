@@ -125,3 +125,17 @@ class AdminOrderSchedule(StatesGroup):
     close_time = State()
     confirm = State()
     finish = State()
+
+
+class AdminOrders(StatesGroup):
+    view_categories = State()
+    view_dates = State()
+    view_date = State()
+    view_products = State()
+    delete_reason = State()
+    delete_confirm = State()
+    view_user_orders = State()
+    view_user_order = State()
+    view_deleted_orders = State()
+    delete_order_reason = State()
+    delete_order_confirm = State()
