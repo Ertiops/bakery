@@ -36,7 +36,7 @@ async def test__create(
         pickup_address_name="pickup_address_name",
         pickup_address_id=None,
         products=[
-            dict(name="name", quantity=2),
+            dict(name="name", quantity=2, is_deleted=False),
         ],
         delivered_at=now_utc().astimezone(MOSCOW_TZ).date(),
         total_price=1000,
@@ -75,7 +75,7 @@ async def test__create__validate_pickup_address(
         pickup_address_name=db_pickup_address.name,
         pickup_address_id=db_pickup_address.id,
         products=[
-            dict(name="name", quantity=2),
+            dict(name="name", quantity=2, is_deleted=False),
         ],
         delivered_at=now_utc().astimezone(MOSCOW_TZ).date(),
         total_price=1000,
@@ -112,7 +112,7 @@ async def test__create__foreign_key_violation_exception__user_id(
         pickup_address_name=db_pickup_address.name,
         pickup_address_id=db_pickup_address.id,
         products=[
-            dict(name="name", quantity=2),
+            dict(name="name", quantity=2, is_deleted=False),
         ],
         delivered_at=now_utc().astimezone(MOSCOW_TZ).date(),
         total_price=1000,

@@ -13,6 +13,7 @@ from bakery.application.exceptions import (
 )
 from bakery.domains.entities.order import (
     CreateOrder,
+    DeleteOrderParams,
     Order,
     OrderListParams,
     OrderStatus,
@@ -714,12 +715,15 @@ async def test__delete_by_id(
     create_order: Callable,
 ) -> None:
     db_order: OrderTable = await create_order()
-    await order_storage.delete_by_id(input_id=db_order.id)
+    await order_storage.delete_by_id(input_dto=DeleteOrderParams(id=db_order.id))
     assert db_order.deleted_at is not None
 
 
 async def test__delete_by_id__none(order_storage: OrderStorage) -> None:
-    assert await order_storage.delete_by_id(input_id=uuid4()) is None
+    assert (
+        await order_storage.delete_by_id(input_dto=DeleteOrderParams(id=uuid4()))
+        is None
+    )
 
 
 async def test__get_top_products_for_user__user_orders_exclude_cart_and_deleted(
