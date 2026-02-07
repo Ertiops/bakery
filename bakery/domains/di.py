@@ -47,11 +47,17 @@ class DomainProvider(Provider):
         order_storage: IOrderStorage,
         order_schedule_storage: IOrderScheduleStorage,
         cart_storage: ICartStorage,
+        delivery_cost_storage: IDeliveryCostStorage,
+        pickup_address_storage: IPickupAddressStorage,
+        user_storage: IUserStorage,
     ) -> OrderService:
         return OrderService(
             order_storage=order_storage,
             order_schedule_storage=order_schedule_storage,
             cart_storage=cart_storage,
+            delivery_cost_storage=delivery_cost_storage,
+            pickup_address_storage=pickup_address_storage,
+            user_storage=user_storage,
         )
 
     @provide(scope=Scope.REQUEST)

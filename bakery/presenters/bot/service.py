@@ -13,6 +13,7 @@ from dishka import make_async_container
 from dishka.integrations.aiogram import setup_dishka
 
 from bakery.adapters.database.di import DatabaseProvider
+from bakery.adapters.pdf.di import PdfProvider
 from bakery.config import MainConfig
 from bakery.domains.di import DomainProvider
 from bakery.presenters.bot.commands.utils import set_ui_commands
@@ -91,6 +92,7 @@ class TelegramBotService(Service):
     def __add_dependency_overrides(self) -> None:
         self.__container = make_async_container(
             DatabaseProvider(self.config.db),
+            PdfProvider(),
             DomainProvider(),
             TelegramProvider(self.config),
             skip_validation=True,

@@ -16,5 +16,8 @@ def format_order_products(products: Sequence[OrderProduct]) -> str:
         name = p.get("name") or "—"
         price = int(p.get("price") or 0)
         qty = int(p.get("quantity") or 0)
-        lines.append(f"• {name} — {qty} × {price}₽")
+        text = f"• {name} — {qty} × {price}₽"
+        if p.get("is_deleted", False):
+            text = f"• <s>{name} — {qty} × {price}₽</s>"
+        lines.append(text)
     return "\n".join(lines)

@@ -18,6 +18,7 @@ from bakery.domains.entities.cart import (
 )
 from bakery.domains.entities.order import (
     CreateOrderAsUser,
+    DeleteOrderParams,
     OrderProduct,
     OrderStatus,
 )
@@ -97,6 +98,7 @@ async def on_confirm_order(
     manual_address_name: str | None = manager.dialog_data.get("pickup_address_name")
 
     pickup_address_name: str | None = None
+    pickup_address_uuid: UUID | None = None
     delivery_price = 0
     products: list[OrderProduct] = []
     cart_total = 0
@@ -114,14 +116,21 @@ async def on_confirm_order(
             qty = cart.quantity
 
             products.append(
-                OrderProduct(id=product_id, name=name, price=price, quantity=qty)
+                OrderProduct(
+                    id=product_id,
+                    name=name,
+                    price=price,
+                    quantity=qty,
+                    is_deleted=False,
+                )
             )
 
             cart_total += price * qty
 
         if pickup_address_id:
+            pickup_address_uuid = UUID(pickup_address_id)
             pickup_address = await pickup_address_service.get_by_id(
-                input_id=UUID(pickup_address_id)
+                input_id=pickup_address_uuid
             )
             pickup_address_name = pickup_address.name
         else:
@@ -147,6 +156,7 @@ async def on_confirm_order(
                 input_dto=CreateOrderAsUser(
                     user_id=user.id,
                     pickup_address_name=pickup_address_name or "",
+                    pickup_address_id=pickup_address_uuid,
                     products=products,
                     delivered_at=delivered_at,
                     total_price=total_price,
@@ -223,6 +233,7 @@ async def on_delete_order(
     container = manager.middleware_data["dishka_container"]
     uow: AbstractUow = await container.get(AbstractUow)
     order_service: OrderService = await container.get(OrderService)
+    user: User = manager.middleware_data["current_user"]
 
     async with uow:
         try:
@@ -234,7 +245,10 @@ async def on_delete_order(
             await callback.answer("Нельзя удалить заказ в работе.")
             return
 
-        await order_service.delete_by_id(input_id=order.id)
+        await order_service.delete_by_id(
+            input_dto=DeleteOrderParams(id=order.id),
+            user=user,
+        )
 
     await manager.switch_to(UserOrder.view_many)
 

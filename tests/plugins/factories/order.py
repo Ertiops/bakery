@@ -13,7 +13,8 @@ from tests.plugins.factories.utils.mixins import (
 
 class OrderTableFactory(
     SQLAlchemyFactory[OrderTable], IdentifableFactoryMixin, TimestampedFactoryMixin
-): ...
+):
+    pickup_address_id = None
 
 
 @pytest.fixture

@@ -13,8 +13,7 @@ REQUISITES_NOT_SET: Final[str] = (
 )
 ORDER_NOT_FOUND: Final[str] = "Заказ не найден 😔"
 
-ATTACH_FILE_TITLE: Final[str] = "📎 Прикрепите чек/скрин оплаты\n\n"
-ATTACH_FILE_HINT: Final[str] = "Подойдёт фото или PDF.\n"
+ATTACH_FILE_TITLE: Final[str] = "📎 Прикрепите фото скриншота оплаты из банка\n\n"
 ATTACH_FILE_ACTION: Final[str] = "\nОтправьте файл одним сообщением 👇"
 
 CONFIRM_ORDER_NUMBER: Final[str] = "🧾 Заказ {number}\n"

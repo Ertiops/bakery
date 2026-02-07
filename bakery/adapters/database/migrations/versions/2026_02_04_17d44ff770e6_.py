@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: ab992975111e
+Revision ID: 17d44ff770e6
 Revises:
-Create Date: 2026-02-02 21:20:15.212285
+Create Date: 2026-02-04 21:18:46.995334
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "ab992975111e"
+revision: str = "17d44ff770e6"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -194,7 +194,7 @@ def upgrade() -> None:
     op.create_table(
         "users",
         sa.Column("name", sa.String(length=63), nullable=False),
-        sa.Column("tg_id", sa.Integer(), nullable=False),
+        sa.Column("tg_id", sa.BigInteger(), nullable=False),
         sa.Column("phone", sa.String(length=16), nullable=False),
         sa.Column(
             "role", postgresql.ENUM("admin", "user", name="user_role"), nullable=False
@@ -269,12 +269,14 @@ def upgrade() -> None:
         "orders",
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("pickup_address_name", sa.String(length=512), nullable=False),
+        sa.Column("pickup_address_id", sa.UUID(), nullable=True),
         sa.Column(
             "status",
             postgresql.ENUM(
                 "created",
                 "changed",
                 "in_progress",
+                "delivering",
                 "delivered",
                 "cancelled",
                 "paid",
@@ -303,6 +305,11 @@ def upgrade() -> None:
         ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("id", sa.UUID(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["pickup_address_id"],
+            ["pickup_addresses.id"],
+            name=op.f("fk__orders__pickup_address_id__pickup_addresses"),
+        ),
         sa.ForeignKeyConstraint(
             ["user_id"], ["users.id"], name=op.f("fk__orders__user_id__users")
         ),

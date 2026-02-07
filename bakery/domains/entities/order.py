@@ -7,6 +7,7 @@ from uuid import UUID
 
 from bakery.application.entities import UNSET, Unset
 from bakery.domains.entities.common import Pagination, ToDictMixin
+from bakery.domains.entities.user import User
 
 
 @unique
@@ -14,6 +15,7 @@ class OrderStatus(StrEnum):
     CREATED = "created"
     CHANGED = "changed"
     IN_PROGRESS = "in_progress"
+    DELIVERING = "delivering"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
     PAID = "paid"
@@ -32,7 +34,10 @@ USER_ORDER_STATUS_MAP: Mapping[UserOrderStatus, Sequence[OrderStatus]] = {
         OrderStatus.CREATED,
         OrderStatus.CHANGED,
     ),
-    UserOrderStatus.IN_PROGRESS: (OrderStatus.IN_PROGRESS,),
+    UserOrderStatus.IN_PROGRESS: (
+        OrderStatus.IN_PROGRESS,
+        OrderStatus.DELIVERING,
+    ),
     UserOrderStatus.DELIVERED: (OrderStatus.DELIVERED,),
     UserOrderStatus.PAID: (OrderStatus.PAID,),
 }
@@ -43,12 +48,14 @@ class OrderProduct(TypedDict):
     name: str
     price: int
     quantity: int
+    is_deleted: bool
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class CreateOrderAsUser:
     user_id: UUID
     pickup_address_name: str
+    pickup_address_id: UUID | None
     products: Sequence[OrderProduct]
     delivered_at: date
     total_price: int
@@ -59,6 +66,7 @@ class CreateOrderAsUser:
 class CreateOrder(ToDictMixin):
     user_id: UUID
     pickup_address_name: str
+    pickup_address_id: UUID | None
     status: OrderStatus
     products: Sequence[OrderProduct]
     delivered_at: date
@@ -74,6 +82,7 @@ class Order:
     id: UUID
     user_id: UUID
     pickup_address_name: str
+    pickup_address_id: UUID | None
     status: OrderStatus
     products: Sequence[OrderProduct]
     delivered_at: date
@@ -96,6 +105,17 @@ class OrderListParams(Pagination):
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class OrderListWithDeletedProductsParams(Pagination):
+    delivered_at: date
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class OrderListByDateWithProductParams(Pagination):
+    delivered_at: date
+    product_id: UUID
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class OrderTopProductsParams:
     user_id: UUID
     limit: int
@@ -109,10 +129,22 @@ class OrderList:
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class OrderWithUser:
+    order: Order
+    user: User
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class OrderListWithUsersParams(Pagination):
+    delivered_at: date
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class UpdateOrder(ToDictMixin):
     id: UUID
     user_id: UUID | Unset = UNSET
     pickup_address_name: str | Unset = UNSET
+    pickup_address_id: UUID | Unset = UNSET
     status: OrderStatus | Unset = UNSET
     products: Sequence[OrderProduct] | Unset = UNSET
     delivered_at: date | Unset = UNSET
@@ -120,3 +152,9 @@ class UpdateOrder(ToDictMixin):
     delivery_price: int | Unset = UNSET
     payment_file_id: str | Unset = UNSET
     rating: int | Unset = UNSET
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class DeleteOrderParams:
+    id: UUID
+    reason: str | None = None

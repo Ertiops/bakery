@@ -11,12 +11,14 @@ from bakery.application.exceptions import (
 )
 from bakery.domains.entities.order import (
     CreateOrderAsUser,
+    DeleteOrderParams,
     Order,
     OrderList,
     OrderListParams,
     OrderStatus,
     UpdateOrder,
 )
+from bakery.domains.entities.user import User, UserRole
 from bakery.domains.services.order import OrderService
 from bakery.domains.utils.timezone import MOSCOW_TZ
 from tests.utils import now_utc
@@ -32,8 +34,9 @@ async def test__create(
     create_data = CreateOrderAsUser(
         user_id=db_user.id,
         pickup_address_name="pickup_address_name",
+        pickup_address_id=None,
         products=[
-            dict(name="name", quantity=2),
+            dict(name="name", quantity=2, is_deleted=False),
         ],
         delivered_at=now_utc().astimezone(MOSCOW_TZ).date(),
         total_price=1000,
@@ -44,6 +47,7 @@ async def test__create(
         id=IsUUID,
         user_id=create_data.user_id,
         pickup_address_name=create_data.pickup_address_name,
+        pickup_address_id=create_data.pickup_address_id,
         status=OrderStatus.CREATED,
         products=create_data.products,
         delivered_at=create_data.delivered_at,
@@ -69,8 +73,9 @@ async def test__create__validate_pickup_address(
     create_data = CreateOrderAsUser(
         user_id=db_user.id,
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
         products=[
-            dict(name="name", quantity=2),
+            dict(name="name", quantity=2, is_deleted=False),
         ],
         delivered_at=now_utc().astimezone(MOSCOW_TZ).date(),
         total_price=1000,
@@ -81,6 +86,7 @@ async def test__create__validate_pickup_address(
         id=IsUUID,
         user_id=create_data.user_id,
         pickup_address_name=create_data.pickup_address_name,
+        pickup_address_id=create_data.pickup_address_id,
         status=OrderStatus.CREATED,
         products=create_data.products,
         delivered_at=create_data.delivered_at,
@@ -104,8 +110,9 @@ async def test__create__foreign_key_violation_exception__user_id(
     create_data = CreateOrderAsUser(
         user_id=uuid4(),
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
         products=[
-            dict(name="name", quantity=2),
+            dict(name="name", quantity=2, is_deleted=False),
         ],
         delivered_at=now_utc().astimezone(MOSCOW_TZ).date(),
         total_price=1000,
@@ -125,6 +132,7 @@ async def test__get_by_id(
         id=db_order.id,
         user_id=db_order.user_id,
         pickup_address_name=db_order.pickup_address_name,
+        pickup_address_id=db_order.pickup_address_id,
         status=db_order.status,
         products=db_order.products,
         delivered_at=db_order.delivered_at,
@@ -167,6 +175,7 @@ async def test__get_list(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -196,6 +205,7 @@ async def test__get_list__validate_limit(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -225,6 +235,7 @@ async def test__get_list__validate_offset(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -256,6 +267,7 @@ async def test__get_list__validate_order(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -293,6 +305,7 @@ async def test__get_list__validate_filter__delivered_at(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -330,6 +343,7 @@ async def test__get_list__validate_filter__statuses(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -369,6 +383,7 @@ async def test__get_list__validate_filter__pickup_address_name(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -402,6 +417,7 @@ async def test__get_list__validate_filter__user_id(
                 id=db_order.id,
                 user_id=db_order.user_id,
                 pickup_address_name=db_order.pickup_address_name,
+                pickup_address_id=db_order.pickup_address_id,
                 status=db_order.status,
                 products=db_order.products,
                 delivered_at=db_order.delivered_at,
@@ -431,12 +447,13 @@ async def test__update_by_id(
     create_user: Callable,
 ) -> None:
     db_pickup_address: PickupAddressTable = await create_pickup_address()
-    db_user: UserTable = await create_user()
+    db_user: UserTable = await create_user(role=UserRole.ADMIN)
     db_order: OrderTable = await create_order()
     update_data = UpdateOrder(
         id=db_order.id,
         user_id=db_user.id,
         pickup_address_name=db_pickup_address.name,
+        pickup_address_id=db_pickup_address.id,
         status=OrderStatus.PAID,
         products=[],
         delivered_at=now_utc().date(),
@@ -444,11 +461,21 @@ async def test__update_by_id(
         delivery_price=200,
         rating=4,
     )
-    order = await order_service.update_by_id(input_dto=update_data)
+    user = User(
+        id=db_user.id,
+        name=db_user.name,
+        tg_id=db_user.tg_id,
+        phone=db_user.phone,
+        role=db_user.role,
+        created_at=db_user.created_at,
+        updated_at=db_user.updated_at,
+    )
+    order = await order_service.update_by_id(input_dto=update_data, user=user)
     assert order == Order(
         id=db_order.id,
         user_id=update_data.user_id,
         pickup_address_name=update_data.pickup_address_name,
+        pickup_address_id=update_data.pickup_address_id,
         status=update_data.status,
         products=update_data.products,
         delivered_at=update_data.delivered_at,
@@ -462,11 +489,49 @@ async def test__update_by_id(
     )
 
 
-async def test__update_by_id__foreign_key_violation_exception__user_id(
+async def test__update_list(
     order_service: OrderService,
     create_order: Callable,
 ) -> None:
+    db_orders = [await create_order(), await create_order()]
+    statuses = [OrderStatus.IN_PROGRESS, OrderStatus.DELIVERING]
+    update_items = [
+        UpdateOrder(id=order.id, status=status)
+        for order, status in zip(db_orders, statuses, strict=True)
+    ]
+
+    orders = await order_service.update_list(input_dto=update_items)
+    assert sorted(orders, key=lambda item: item.id) == sorted(
+        [
+            Order(
+                id=order.id,
+                user_id=order.user_id,
+                pickup_address_name=order.pickup_address_name,
+                pickup_address_id=order.pickup_address_id,
+                status=status,
+                products=order.products,
+                delivered_at=order.delivered_at,
+                total_price=order.total_price,
+                delivery_price=order.delivery_price,
+                delivered_at_id=order.delivered_at_id,
+                payment_file_id=order.payment_file_id,
+                rating=order.rating,
+                created_at=order.created_at,
+                updated_at=IsDatetime,
+            )
+            for order, status in zip(db_orders, statuses, strict=True)
+        ],
+        key=lambda item: item.id,
+    )
+
+
+async def test__update_by_id__foreign_key_violation_exception__user_id(
+    order_service: OrderService,
+    create_order: Callable,
+    create_user: Callable,
+) -> None:
     db_order: OrderTable = await create_order()
+    db_user: UserTable = await create_user(role=UserRole.ADMIN)
     update_data = UpdateOrder(
         id=db_order.id,
         user_id=uuid4(),
@@ -477,28 +542,76 @@ async def test__update_by_id__foreign_key_violation_exception__user_id(
         total_price=1000,
         delivery_price=200,
     )
+    user = User(
+        id=db_user.id,
+        name=db_user.name,
+        tg_id=db_user.tg_id,
+        phone=db_user.phone,
+        role=db_user.role,
+        created_at=db_user.created_at,
+        updated_at=db_user.updated_at,
+    )
     with pytest.raises(ForeignKeyViolationException):
-        await order_service.update_by_id(input_dto=update_data)
+        await order_service.update_by_id(input_dto=update_data, user=user)
 
 
 async def test__update_by_id__entity_not_found_exception(
     order_service: OrderService,
+    create_user: Callable,
 ) -> None:
+    db_user: UserTable = await create_user(role=UserRole.ADMIN)
+    user = User(
+        id=db_user.id,
+        name=db_user.name,
+        tg_id=db_user.tg_id,
+        phone=db_user.phone,
+        role=db_user.role,
+        created_at=db_user.created_at,
+        updated_at=db_user.updated_at,
+    )
     with pytest.raises(EntityNotFoundException):
-        await order_service.update_by_id(input_dto=UpdateOrder(id=uuid4()))
+        await order_service.update_by_id(input_dto=UpdateOrder(id=uuid4()), user=user)
 
 
 async def test__delete_by_id(
     order_service: OrderService,
     create_order: Callable,
+    create_user: Callable,
 ) -> None:
     db_order: OrderTable = await create_order()
-    await order_service.delete_by_id(input_id=db_order.id)
+    db_user: UserTable = await create_user(role=UserRole.ADMIN)
+    user = User(
+        id=db_user.id,
+        name=db_user.name,
+        tg_id=db_user.tg_id,
+        phone=db_user.phone,
+        role=db_user.role,
+        created_at=db_user.created_at,
+        updated_at=db_user.updated_at,
+    )
+    await order_service.delete_by_id(
+        input_dto=DeleteOrderParams(id=db_order.id),
+        user=user,
+    )
     assert db_order.deleted_at is not None
 
 
 async def test__delete_by_id__entity_not_found_exception(
     order_service: OrderService,
+    create_user: Callable,
 ) -> None:
+    db_user: UserTable = await create_user(role=UserRole.ADMIN)
+    user = User(
+        id=db_user.id,
+        name=db_user.name,
+        tg_id=db_user.tg_id,
+        phone=db_user.phone,
+        role=db_user.role,
+        created_at=db_user.created_at,
+        updated_at=db_user.updated_at,
+    )
     with pytest.raises(EntityNotFoundException):
-        await order_service.delete_by_id(input_id=uuid4()) is None
+        await order_service.delete_by_id(
+            input_dto=DeleteOrderParams(id=uuid4()),
+            user=user,
+        )
