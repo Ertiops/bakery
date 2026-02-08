@@ -12,6 +12,7 @@ from bakery.domains.entities.order import (
     OrderListParams,
     OrderListWithUsersParams,
     OrderTopProductsParams,
+    OrderUnpaidListParams,
     OrderWithUser,
     UpdateOrder,
 )
@@ -44,11 +45,21 @@ class IOrderStorage(Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    async def get_unpaid_list_with_users(
+        self, *, input_dto: OrderUnpaidListParams
+    ) -> Sequence[OrderWithUser]:
+        raise NotImplementedError
+
+    @abstractmethod
     async def count(self, *, input_dto: OrderListParams) -> int:
         raise NotImplementedError
 
     @abstractmethod
     async def count_by_delivered_at(self, *, input_dto: date) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def count_unpaid(self, *, input_dto: OrderUnpaidListParams) -> int:
         raise NotImplementedError
 
     @abstractmethod

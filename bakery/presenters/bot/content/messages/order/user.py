@@ -44,8 +44,10 @@ ORDER_PRODUCT_REMOVED: Final[str] = (
     "📨 Из вашего заказа {order_number} удален товар: {product_name}.\n"
     "Причина: {reason}"
 )
-DELIVERY_STARTED: Final[str] = "🚚 Начат развоз вашего заказа {order_number}."
-ORDER_DELIVERED: Final[str] = "✅ Ваш заказ доставлен."
+DELIVERY_STARTED: Final[str] = (
+    "🚚 Начат развоз вашего заказа {order_number}.\nДоставим в течение {hours} часов."
+)
+ORDER_DELIVERED: Final[str] = "✅ Ваш заказ {order_number} доставлен."
 PRODUCT_NAME_FALLBACK: Final[str] = "товар"
 ORDER_DELETED: Final[str] = "🛑 Ваш заказ {order_number} удален.\nПричина: {reason}"
 CART_ITEM_LINE: Final[str] = (
