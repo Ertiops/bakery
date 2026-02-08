@@ -12,18 +12,18 @@ async def on_category_selected(
     callback: CallbackQuery, widget: Select, manager: DialogManager, item_id: str
 ) -> None:
     order_edit_id = get_order_edit_id(manager)
+    start_data = manager.start_data if isinstance(manager.start_data, dict) else {}
     admin_order_edit = bool(
         manager.dialog_data.get("admin_order_edit")
-        or manager.start_data.get("admin_order_edit")  # type: ignore
+        or start_data.get("admin_order_edit")
     )
-    admin_selected_date = (
-        manager.dialog_data.get("admin_selected_date")
-        or manager.start_data.get("admin_selected_date")  # type: ignore
-    )
+    admin_selected_date = manager.dialog_data.get(
+        "admin_selected_date"
+    ) or start_data.get("admin_selected_date")
     admin_deleted_flow = (
         manager.dialog_data.get("admin_deleted_flow")
         if manager.dialog_data.get("admin_deleted_flow") is not None
-        else manager.start_data.get("admin_deleted_flow")  # type: ignore
+        else start_data.get("admin_deleted_flow")
     )
     data: dict[str, Any] = {"category": item_id}
     if order_edit_id:

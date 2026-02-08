@@ -21,6 +21,7 @@ class User:
     tg_id: int
     phone: str
     role: UserRole
+    exclusion_reason: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -41,6 +42,7 @@ class CreateUser(ToDictMixin):
     tg_id: int
     phone: str
     role: UserRole
+    exclusion_reason: str | None = None
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -50,3 +52,24 @@ class UpdateUser(ToDictMixin):
     tg_id: int | Unset = UNSET
     phone: str | Unset = UNSET
     role: UserRole | Unset = UNSET
+    exclusion_reason: str | None | Unset = UNSET
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class UserBlacklistListParams(Pagination): ...
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class UserPhoneSearchParams(Pagination):
+    phone: str
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class UserExclusionParams:
+    id: UUID
+    reason: str
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class UserClearExclusionParams:
+    id: UUID

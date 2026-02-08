@@ -20,6 +20,7 @@ class UserTableFactory(
     tg_id = IterUse[int](lambda count: count)
     phone = IterUse[str](lambda count: f"+79999999999{count}")
     role: UserRole = UserRole.USER
+    exclusion_reason = None
 
 
 @pytest.fixture

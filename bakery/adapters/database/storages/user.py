@@ -18,7 +18,9 @@ from bakery.domains.entities.user import (
     CreateUser,
     UpdateUser,
     User,
+    UserBlacklistListParams,
     UserListParams,
+    UserPhoneSearchParams,
     UserRole,
 )
 from bakery.domains.interfaces.storages.user import IUserStorage
@@ -72,11 +74,65 @@ class UserStorage(IUserStorage):
         result = await self.__session.scalars(stmt)
         return [convert_user(result=r) for r in result]
 
+    async def get_blacklist_list(
+        self, *, input_dto: UserBlacklistListParams
+    ) -> Sequence[User]:
+        stmt = (
+            select(UserTable)
+            .where(
+                UserTable.deleted_at.is_(None),
+                UserTable.exclusion_reason.is_not(None),
+            )
+            .order_by(UserTable.name.asc())
+            .limit(input_dto.limit)
+            .offset(input_dto.offset)
+        )
+        result = await self.__session.scalars(stmt)
+        return [convert_user(result=r) for r in result]
+
     async def count(self, *, input_dto: UserListParams) -> int:
         stmt = (
             select(func.count())
             .select_from(UserTable)
             .where(UserTable.deleted_at.is_(None))
+        )
+        return await self.__session.scalar(stmt) or 0
+
+    async def count_blacklist(self, *, input_dto: UserBlacklistListParams) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(UserTable)
+            .where(
+                UserTable.deleted_at.is_(None),
+                UserTable.exclusion_reason.is_not(None),
+            )
+        )
+        return await self.__session.scalar(stmt) or 0
+
+    async def get_list_by_phone(
+        self, *, input_dto: UserPhoneSearchParams
+    ) -> Sequence[User]:
+        stmt = (
+            select(UserTable)
+            .where(
+                UserTable.deleted_at.is_(None),
+                UserTable.phone.ilike(f"%{input_dto.phone}%"),
+            )
+            .order_by(UserTable.phone.asc())
+            .limit(input_dto.limit)
+            .offset(input_dto.offset)
+        )
+        result = await self.__session.scalars(stmt)
+        return [convert_user(result=r) for r in result]
+
+    async def count_by_phone(self, *, input_dto: UserPhoneSearchParams) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(UserTable)
+            .where(
+                UserTable.deleted_at.is_(None),
+                UserTable.phone.ilike(f"%{input_dto.phone}%"),
+            )
         )
         return await self.__session.scalar(stmt) or 0
 

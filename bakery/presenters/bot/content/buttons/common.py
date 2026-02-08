@@ -1,8 +1,11 @@
 from typing import Final
 
 NEXT: Final = "Продолжить ➡️"
+PREV: Final = "⬅️ Назад"
+SEARCH: Final = "🔎 Поиск"
 BACK: Final = "⬅️ Назад"
 ADD: Final = "➕ Добавить"
+REMOVE: Final = "➖ Убрать"
 QUANTITY_DEC: Final = "➖"
 QUANTITY_INC: Final = "➕"
 SHARE: Final = "📤 Поделиться"

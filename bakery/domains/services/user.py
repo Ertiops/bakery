@@ -5,8 +5,12 @@ from bakery.domains.entities.user import (
     CreateUser,
     UpdateUser,
     User,
+    UserBlacklistListParams,
+    UserClearExclusionParams,
+    UserExclusionParams,
     UserList,
     UserListParams,
+    UserPhoneSearchParams,
 )
 from bakery.domains.interfaces.storages.user import IUserStorage
 
@@ -43,10 +47,52 @@ class UserService:
         items = await self.__user_storage.get_list(input_dto=input_dto)
         return UserList(total=total, items=items)
 
+    async def get_blacklist(
+        self, *, input_dto: UserBlacklistListParams, user: User
+    ) -> UserList:
+        _ = user
+        total = await self.__user_storage.count_blacklist(input_dto=input_dto)
+        items = await self.__user_storage.get_blacklist_list(input_dto=input_dto)
+        return UserList(total=total, items=items)
+
+    async def search_by_phone(
+        self, *, input_dto: UserPhoneSearchParams, user: User
+    ) -> UserList:
+        _ = user
+        total = await self.__user_storage.count_by_phone(input_dto=input_dto)
+        items = await self.__user_storage.get_list_by_phone(input_dto=input_dto)
+        return UserList(total=total, items=items)
+
     async def update_by_id(self, *, input_dto: UpdateUser) -> User:
         if not await self.__user_storage.exists_by_id(input_id=input_dto.id):
             raise EntityNotFoundException(entity=User, entity_id=input_dto.id)
         return await self.__user_storage.update_by_id(input_dto=input_dto)
+
+    async def set_exclusion_reason(
+        self, *, input_dto: UserExclusionParams, user: User
+    ) -> User:
+        _ = user
+        if not await self.__user_storage.exists_by_id(input_id=input_dto.id):
+            raise EntityNotFoundException(entity=User, entity_id=input_dto.id)
+        return await self.__user_storage.update_by_id(
+            input_dto=UpdateUser(
+                id=input_dto.id,
+                exclusion_reason=input_dto.reason,
+            )
+        )
+
+    async def clear_exclusion_reason(
+        self, *, input_dto: UserClearExclusionParams, user: User
+    ) -> User:
+        _ = user
+        if not await self.__user_storage.exists_by_id(input_id=input_dto.id):
+            raise EntityNotFoundException(entity=User, entity_id=input_dto.id)
+        return await self.__user_storage.update_by_id(
+            input_dto=UpdateUser(
+                id=input_dto.id,
+                exclusion_reason=None,
+            )
+        )
 
     async def delete_by_id(self, *, input_id: UUID) -> None:
         if not await self.__user_storage.exists_by_id(input_id=input_id):

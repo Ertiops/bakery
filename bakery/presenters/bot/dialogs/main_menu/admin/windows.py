@@ -7,6 +7,7 @@ from bakery.presenters.bot.dialogs.admin_contact.admin.handlers import (
     open_admin_contact,
 )
 from bakery.presenters.bot.dialogs.main_menu.admin.handlers import (
+    enter_blacklist,
     enter_catalog,
     enter_delivery_cost,
     enter_orders,
@@ -46,6 +47,11 @@ def admin_main_menu_window() -> Window:
                 Const(admin_main_menu_msg.ORDERS),
                 id="orders",
                 on_click=enter_orders,
+            ),
+            Button(
+                Const(admin_main_menu_msg.BLACKLIST),
+                id="blacklist",
+                on_click=enter_blacklist,
             ),
             Button(
                 Const(admin_main_menu_msg.ORDER_PAYMENT),

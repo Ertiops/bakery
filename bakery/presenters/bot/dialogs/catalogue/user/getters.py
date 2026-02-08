@@ -24,10 +24,12 @@ async def get_catalogue_context(
     dialog_manager: DialogManager,
     **_kwargs: Any,
 ) -> dict[str, Any]:
-    admin_order_edit = bool(dialog_manager.start_data.get("admin_order_edit"))  # type: ignore[union-attr]
-    admin_deleted_flow = dialog_manager.start_data.get("admin_deleted_flow")  # type: ignore[union-attr]
-    order_edit_id = dialog_manager.start_data.get("order_edit_id")  # type: ignore[union-attr]
-    admin_selected_date = dialog_manager.start_data.get("admin_selected_date")  # type: ignore[union-attr]
+    if not isinstance(dialog_manager.start_data, dict):
+        return {}
+    admin_order_edit = bool(dialog_manager.start_data.get("admin_order_edit"))
+    admin_deleted_flow = dialog_manager.start_data.get("admin_deleted_flow")
+    order_edit_id = dialog_manager.start_data.get("order_edit_id")
+    admin_selected_date = dialog_manager.start_data.get("admin_selected_date")
     if admin_order_edit:
         dialog_manager.dialog_data["admin_order_edit"] = True
     if admin_deleted_flow is not None:
@@ -48,9 +50,12 @@ async def get_products_data(
         AbstractUow
     )
     service: ProductService = await container.get(ProductService)
+    start_data = (
+        dialog_manager.start_data if isinstance(dialog_manager.start_data, dict) else {}
+    )
     category: str = dialog_manager.dialog_data.get(  # type: ignore
         "category"
-    ) or dialog_manager.start_data.get("category")  # type: ignore[union-attr]
+    ) or start_data.get("category")
     if category:
         dialog_manager.dialog_data["category"] = category
     order_edit_id = get_order_edit_id(dialog_manager)
@@ -83,7 +88,10 @@ async def get_selected_product(  # noqa: C901
     cart_service: CartService = await container.get(CartService)
     order_service: OrderService = await container.get(OrderService)
     user: User = dialog_manager.middleware_data["current_user"]
-    product_id: UUID = dialog_manager.start_data.get(  # type: ignore
+    start_data = (
+        dialog_manager.start_data if isinstance(dialog_manager.start_data, dict) else {}
+    )
+    product_id: UUID = start_data.get(  # type: ignore
         "product_id"
     ) or dialog_manager.dialog_data.get("product_id")
     log.info("Fetching product with ID: %s", product_id)

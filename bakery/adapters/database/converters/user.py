@@ -12,6 +12,7 @@ def convert_user(
         tg_id=result.tg_id,
         phone=result.phone,
         role=result.role,
+        exclusion_reason=result.exclusion_reason,
         created_at=result.created_at,
         updated_at=result.updated_at,
     )

@@ -23,20 +23,20 @@ async def to_product_categories(
 async def to_product_list(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
-    category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore
+    start_data = manager.start_data if isinstance(manager.start_data, dict) else {}
+    category = manager.dialog_data.get("category") or start_data.get("category")
     order_edit_id = get_order_edit_id(manager)
     admin_order_edit = bool(
         manager.dialog_data.get("admin_order_edit")
-        or manager.start_data.get("admin_order_edit")  # type: ignore
+        or start_data.get("admin_order_edit")
     )
-    admin_selected_date = (
-        manager.dialog_data.get("admin_selected_date")
-        or manager.start_data.get("admin_selected_date")  # type: ignore
-    )
+    admin_selected_date = manager.dialog_data.get(
+        "admin_selected_date"
+    ) or start_data.get("admin_selected_date")
     admin_deleted_flow = (
         manager.dialog_data.get("admin_deleted_flow")
         if manager.dialog_data.get("admin_deleted_flow") is not None
-        else manager.start_data.get("admin_deleted_flow")  # type: ignore
+        else start_data.get("admin_deleted_flow")
     )
     data = dict(category=category)
     if order_edit_id:
@@ -69,21 +69,21 @@ async def to_order(
     order_id = get_order_edit_id(manager)
     if not order_id:
         return
+    start_data = manager.start_data if isinstance(manager.start_data, dict) else {}
     current_user = manager.middleware_data.get("current_user")
     is_admin = bool(current_user and current_user.role == UserRole.ADMIN)
     manager.dialog_data["selected_order_id"] = order_id
-    admin_selected_date = (
-        manager.dialog_data.get("admin_selected_date")
-        or manager.start_data.get("admin_selected_date")  # type: ignore[union-attr]
-    )
+    admin_selected_date = manager.dialog_data.get(
+        "admin_selected_date"
+    ) or start_data.get("admin_selected_date")
     admin_deleted_flow = (
         manager.dialog_data.get("admin_deleted_flow")
         if manager.dialog_data.get("admin_deleted_flow") is not None
-        else manager.start_data.get("admin_deleted_flow")  # type: ignore[union-attr]
+        else start_data.get("admin_deleted_flow")
     )
     if (
         manager.dialog_data.get("admin_order_edit")
-        or manager.start_data.get("admin_order_edit")  # type: ignore[union-attr]
+        or start_data.get("admin_order_edit")
         or is_admin
     ):
         await manager.start(
@@ -107,20 +107,20 @@ async def to_catalogue_root(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
     order_id = get_order_edit_id(manager)
+    start_data = manager.start_data if isinstance(manager.start_data, dict) else {}
     current_user = manager.middleware_data.get("current_user")
     is_admin = bool(current_user and current_user.role == UserRole.ADMIN)
-    admin_selected_date = (
-        manager.dialog_data.get("admin_selected_date")
-        or manager.start_data.get("admin_selected_date")  # type: ignore[union-attr]
-    )
+    admin_selected_date = manager.dialog_data.get(
+        "admin_selected_date"
+    ) or start_data.get("admin_selected_date")
     admin_deleted_flow = (
         manager.dialog_data.get("admin_deleted_flow")
         if manager.dialog_data.get("admin_deleted_flow") is not None
-        else manager.start_data.get("admin_deleted_flow")  # type: ignore[union-attr]
+        else start_data.get("admin_deleted_flow")
     )
     if (
         manager.dialog_data.get("admin_order_edit")
-        or manager.start_data.get("admin_order_edit")  # type: ignore[union-attr]
+        or start_data.get("admin_order_edit")
         or is_admin
     ) and order_id:
         manager.dialog_data["selected_order_id"] = order_id

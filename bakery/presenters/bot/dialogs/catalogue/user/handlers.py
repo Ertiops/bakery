@@ -29,20 +29,20 @@ async def on_view_product_clicked(
     manager: DialogManager,
     item_id: str,
 ) -> None:
-    category = manager.dialog_data.get("category") or manager.start_data.get("category")  # type: ignore
+    start_data = manager.start_data if isinstance(manager.start_data, dict) else {}
+    category = manager.dialog_data.get("category") or start_data.get("category")
     order_edit_id = get_order_edit_id(manager)
     admin_order_edit = bool(
         manager.dialog_data.get("admin_order_edit")
-        or manager.start_data.get("admin_order_edit")  # type: ignore
+        or start_data.get("admin_order_edit")
     )
-    admin_selected_date = (
-        manager.dialog_data.get("admin_selected_date")
-        or manager.start_data.get("admin_selected_date")  # type: ignore
-    )
+    admin_selected_date = manager.dialog_data.get(
+        "admin_selected_date"
+    ) or start_data.get("admin_selected_date")
     admin_deleted_flow = (
         manager.dialog_data.get("admin_deleted_flow")
         if manager.dialog_data.get("admin_deleted_flow") is not None
-        else manager.start_data.get("admin_deleted_flow")  # type: ignore
+        else start_data.get("admin_deleted_flow")
     )
     manager.dialog_data["product_id"] = item_id
     if category:

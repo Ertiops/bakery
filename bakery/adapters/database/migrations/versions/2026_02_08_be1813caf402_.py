@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 17d44ff770e6
+Revision ID: be1813caf402
 Revises:
-Create Date: 2026-02-04 21:18:46.995334
+Create Date: 2026-02-08 11:49:44.967295
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "17d44ff770e6"
+revision: str = "be1813caf402"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -199,6 +199,7 @@ def upgrade() -> None:
         sa.Column(
             "role", postgresql.ENUM("admin", "user", name="user_role"), nullable=False
         ),
+        sa.Column("exclusion_reason", sa.String(length=255), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
