@@ -5,9 +5,9 @@ from bakery.presenters.bot.content.buttons.main_menu import user as user_menu_bt
 
 USER_HELP: Final = "\n".join(
     [
-        f"<b>{user_menu_btn.MAKE_ORDER}</b> — оформите заказ",
         f"<b>{user_menu_btn.CATALOGUE}</b> — ознакомьтесь с ассортиментом",
-        f"<b>{user_menu_btn.MY_ORDERS}</b> — просмотр текущих заказов",
+        f"<b>{user_menu_btn.CART}</b> — просмотр текущей корзины",
+        f"<b>{user_menu_btn.MY_ORDERS}</b> — ваши заказы",
     ]
 )
 
@@ -15,7 +15,14 @@ ADMIN_HELP: Final = "\n".join(
     [
         f"<b>{admin_menu_btn.CATALOGUE}</b> — редактирование ассортимента",
         f"<b>{admin_menu_btn.ORDERS}</b> — управление заказами",
+        f"<b>{admin_menu_btn.UNPAID_ORDERS}</b> — заказы без оплаты",
+        f"<b>{admin_menu_btn.FAKE_USERS}</b> — пользователи без Telegram",
         f"<b>{admin_menu_btn.ADDRESSES}</b> — ведение адресами доставки",
         f"<b>{admin_menu_btn.CONTACTS}</b> — контакты администратора",
+        f"<b>{admin_menu_btn.BLACKLIST}</b> — черный список пользователей",
+        f"<b>{admin_menu_btn.DELIVERY_COST}</b> — стоимость доставки",
+        f"<b>{admin_menu_btn.ORDER_PAYMENT}</b> — реквизиты оплаты",
+        f"<b>{admin_menu_btn.ORDER_SCHEDULE}</b> — расписание доставки",
+        f"<b>{admin_menu_btn.FEEDBACK_GROUP}</b> — управление отзывами",
     ]
 )

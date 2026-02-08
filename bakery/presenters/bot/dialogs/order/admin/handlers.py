@@ -14,6 +14,7 @@ from bakery.domains.entities.order import (
     DeleteOrderParams,
     OrderListByDateWithProductParams,
     OrderListParams,
+    OrderListWithUsersParams,
     OrderStatus,
     UpdateOrder,
 )
@@ -64,9 +65,28 @@ async def back_to_date_view(
     await manager.switch_to(AdminOrders.view_date)
 
 
+async def back_from_user_order(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    if manager.dialog_data.get("admin_unpaid_flow"):
+        await manager.switch_to(AdminOrders.view_unpaid_orders)
+        return
+    if manager.dialog_data.get("admin_deleted_flow"):
+        await manager.switch_to(AdminOrders.view_deleted_orders)
+        return
+    await manager.switch_to(AdminOrders.view_user_orders)
+
+
 async def on_take_in_work(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
+    await manager.switch_to(AdminOrders.take_in_work_confirm)
+
+
+async def on_take_in_work_confirm(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    _ = button
     date_raw = manager.dialog_data.get("admin_selected_date")
     if not date_raw:
         return
@@ -94,12 +114,36 @@ async def on_take_in_work(
         ]
         if update_items:
             await order_service.update_list(input_dto=update_items)
-    await manager.show()
+    await manager.switch_to(AdminOrders.take_in_work_sent)
 
 
 async def on_start_delivery(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
+    await manager.switch_to(AdminOrders.start_delivery_hours)
+
+
+async def on_start_delivery_hours_input(
+    message: Message,
+    widget: ManagedTextInput[str],
+    manager: DialogManager,
+    text: str,
+) -> None:
+    _ = widget
+    hours_raw = (text or "").strip()
+    if not hours_raw.isdigit():
+        return
+    manager.dialog_data["delivery_hours"] = int(hours_raw)
+    await manager.switch_to(AdminOrders.start_delivery_confirm)
+
+
+async def on_start_delivery_confirm(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    _ = button
+    hours = int(manager.dialog_data.get("delivery_hours") or 0)
+    if hours <= 0:
+        return
     date_raw = manager.dialog_data.get("admin_selected_date")
     if not date_raw:
         return
@@ -110,29 +154,37 @@ async def on_start_delivery(
 
     container = manager.middleware_data["dishka_container"]
     order_service: OrderService = await container.get(OrderService)
-    user_service: UserService = await container.get(UserService)
     uow: AbstractUow = await container.get(AbstractUow)
     current_user = manager.middleware_data.get("current_user")
     if current_user is None:
         return
 
     async with uow:
-        result = await order_service.get_list(
-            input_dto=OrderListParams(
+        items_with_users = await order_service.get_list_with_users_by_date(
+            input_dto=OrderListWithUsersParams(
                 limit=USER_ORDERS_LIMIT_BREAKER,
                 offset=0,
                 delivered_at=selected_date,
-            )
+            ),
+            user=current_user,
         )
-        for order in result.items:
-            if order.status == OrderStatus.IN_PROGRESS:
-                await order_service.update_by_id(
-                    input_dto=UpdateOrder(id=order.id, status=OrderStatus.DELIVERING),
-                    user=current_user,
-                )
-                try:
-                    user = await user_service.get_by_id(input_id=order.user_id)
-                except EntityNotFoundException:
+        items = [
+            item
+            for item in items_with_users
+            if item.order.status == OrderStatus.IN_PROGRESS
+        ]
+        update_items = [
+            UpdateOrder(id=item.order.id, status=OrderStatus.DELIVERING)
+            for item in items
+        ]
+        if update_items:
+            updated_orders = await order_service.update_list(input_dto=update_items)
+            updated_ids = {order.id for order in updated_orders}
+            for item in items:
+                if item.order.id not in updated_ids:
+                    continue
+                user = item.user
+                if user.tg_id is None:
                     continue
                 bot = callback.bot
                 if bot is None:
@@ -141,16 +193,24 @@ async def on_start_delivery(
                     chat_id=user.tg_id,
                     text=user_msg.DELIVERY_STARTED.format(
                         order_number=combine_order_number(
-                            order.delivered_at, order.delivered_at_id
-                        )
+                            item.order.delivered_at, item.order.delivered_at_id
+                        ),
+                        hours=hours,
                     ),
                 )
-    await manager.show()
+    await manager.switch_to(AdminOrders.start_delivery_sent)
 
 
 async def on_finish_delivery(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
+    await manager.switch_to(AdminOrders.finish_delivery_confirm)
+
+
+async def on_finish_delivery_confirm(
+    callback: CallbackQuery, button: Button, manager: DialogManager
+) -> None:
+    _ = button
     date_raw = manager.dialog_data.get("admin_selected_date")
     if not date_raw:
         return
@@ -184,14 +244,20 @@ async def on_finish_delivery(
                     user = await user_service.get_by_id(input_id=order.user_id)
                 except EntityNotFoundException:
                     continue
+                if user.tg_id is None:
+                    continue
                 bot = callback.bot
                 if bot is None:
-                    return
+                    continue
                 await bot.send_message(
                     chat_id=user.tg_id,
-                    text=user_msg.ORDER_DELIVERED,
+                    text=user_msg.ORDER_DELIVERED.format(
+                        order_number=combine_order_number(
+                            order.delivered_at, order.delivered_at_id
+                        )
+                    ),
                 )
-    await manager.show()
+    await manager.switch_to(AdminOrders.finish_delivery_sent)
 
 
 async def on_admin_product_delete_select(
@@ -323,6 +389,7 @@ async def on_view_user_orders(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
     manager.dialog_data["admin_deleted_flow"] = False
+    manager.dialog_data["admin_unpaid_flow"] = False
     await manager.switch_to(AdminOrders.view_user_orders)
 
 
@@ -330,6 +397,7 @@ async def on_view_deleted_orders(
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
     manager.dialog_data["admin_deleted_flow"] = True
+    manager.dialog_data["admin_unpaid_flow"] = False
     await manager.switch_to(AdminOrders.view_deleted_orders)
 
 

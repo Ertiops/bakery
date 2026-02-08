@@ -16,10 +16,13 @@ from bakery.presenters.bot.dialogs.order.admin.getters import (
     get_admin_deleted_orders_data,
     get_admin_order_date_data,
     get_admin_orders_dates_data,
+    get_admin_unpaid_orders_data,
     get_admin_user_order_data,
     get_admin_user_orders_data,
+    get_start_delivery_confirm_data,
 )
 from bakery.presenters.bot.dialogs.order.admin.handlers import (
+    back_from_user_order,
     back_to_categories,
     back_to_date_view,
     back_to_dates,
@@ -34,8 +37,12 @@ from bakery.presenters.bot.dialogs.order.admin.handlers import (
     on_download_delivery_pdf,
     on_download_order_pdf,
     on_finish_delivery,
+    on_finish_delivery_confirm,
     on_start_delivery,
+    on_start_delivery_confirm,
+    on_start_delivery_hours_input,
     on_take_in_work,
+    on_take_in_work_confirm,
     on_user_order_selected,
     on_view_deleted_orders,
     on_view_products,
@@ -192,6 +199,79 @@ def admin_orders_windows() -> list[Window]:
             ),
             state=AdminOrders.view_date,
             getter=get_admin_order_date_data,
+        ),
+        Window(
+            Const(admin_msg.TAKE_IN_WORK_CONFIRM_TITLE),
+            Row(
+                Button(
+                    Const(common_btn.YES),
+                    id="confirm_take_in_work",
+                    on_click=on_take_in_work_confirm,
+                ),
+                Button(
+                    Const(common_btn.BACK),
+                    id="back_to_date_from_take",
+                    on_click=back_to_date_view,
+                ),
+            ),
+            state=AdminOrders.take_in_work_confirm,
+        ),
+        Window(
+            Const(admin_msg.TAKE_IN_WORK_SENT),
+            Row(
+                Button(
+                    Const(admin_btn.BACK_TO_ORDER),
+                    id="back_to_order_after_take",
+                    on_click=back_to_date_view,
+                ),
+            ),
+            state=AdminOrders.take_in_work_sent,
+        ),
+        Window(
+            Const(admin_msg.START_DELIVERY_HOURS_TITLE),
+            TextInput(
+                id="delivery_hours",
+                type_factory=str,
+                on_success=on_start_delivery_hours_input,
+            ),
+            Row(
+                Button(
+                    Const(common_btn.BACK),
+                    id="back_to_date",
+                    on_click=back_to_date_view,
+                ),
+            ),
+            state=AdminOrders.start_delivery_hours,
+        ),
+        Window(
+            Format(admin_msg.START_DELIVERY_CONFIRM_TITLE),
+            Row(
+                Button(
+                    Const(admin_btn.START_DELIVERY),
+                    id="confirm_start_delivery",
+                    on_click=on_start_delivery_confirm,
+                ),
+                Button(
+                    Const(common_btn.BACK),
+                    id="back_to_hours",
+                    on_click=lambda c, b, m: m.switch_to(
+                        AdminOrders.start_delivery_hours
+                    ),
+                ),
+            ),
+            state=AdminOrders.start_delivery_confirm,
+            getter=get_start_delivery_confirm_data,
+        ),
+        Window(
+            Const(admin_msg.START_DELIVERY_SENT),
+            Row(
+                Button(
+                    Const(admin_btn.BACK_TO_ORDER),
+                    id="back_to_order_after_start",
+                    on_click=back_to_date_view,
+                ),
+            ),
+            state=AdminOrders.start_delivery_sent,
         ),
         Window(
             Multi(
@@ -355,6 +435,34 @@ def admin_orders_windows() -> list[Window]:
         ),
         Window(
             Multi(
+                Const(admin_msg.UNPAID_ORDERS_TITLE),
+                Const(admin_msg.NO_ORDERS, when=lambda d, *_: not d.get("has_orders")),
+            ),
+            ScrollingGroup(
+                Select(
+                    Format(admin_msg.USER_ORDER_ITEM),
+                    id="admin_unpaid_orders",
+                    item_id_getter=lambda item: item["id"],
+                    items="orders",
+                    on_click=on_user_order_selected,
+                ),
+                id="admin_unpaid_orders_scroll",
+                width=1,
+                height=6,
+                when=lambda d, *_: d.get("has_orders"),
+            ),
+            Row(
+                Button(
+                    Const(common_btn.MAIN_MENU),
+                    id="back_to_main",
+                    on_click=to_main_menu,
+                ),
+            ),
+            state=AdminOrders.view_unpaid_orders,
+            getter=get_admin_unpaid_orders_data,
+        ),
+        Window(
+            Multi(
                 Format(
                     admin_msg.USER_ORDER_TITLE, when=lambda d, *_: d.get("has_order")
                 ),
@@ -410,10 +518,37 @@ def admin_orders_windows() -> list[Window]:
                 Button(
                     Const(common_btn.BACK),
                     id="back_to_user_orders",
-                    on_click=on_view_deleted_orders,
+                    on_click=back_from_user_order,
                 ),
             ),
             state=AdminOrders.view_user_order,
             getter=get_admin_user_order_data,
+        ),
+        Window(
+            Const(admin_msg.FINISH_DELIVERY_CONFIRM_TITLE),
+            Row(
+                Button(
+                    Const(admin_btn.FINISH_DELIVERY),
+                    id="confirm_finish_delivery",
+                    on_click=on_finish_delivery_confirm,
+                ),
+                Button(
+                    Const(common_btn.BACK),
+                    id="back_to_date_from_finish",
+                    on_click=back_to_date_view,
+                ),
+            ),
+            state=AdminOrders.finish_delivery_confirm,
+        ),
+        Window(
+            Const(admin_msg.FINISH_DELIVERY_SENT),
+            Row(
+                Button(
+                    Const(admin_btn.BACK_TO_ORDER),
+                    id="back_to_order_after_finish",
+                    on_click=back_to_date_view,
+                ),
+            ),
+            state=AdminOrders.finish_delivery_sent,
         ),
     ]

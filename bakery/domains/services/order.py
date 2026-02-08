@@ -18,7 +18,9 @@ from bakery.domains.entities.order import (
     OrderProduct,
     OrderStatus,
     OrderTopProductsParams,
+    OrderUnpaidListParams,
     OrderWithUser,
+    OrderWithUserList,
     UpdateOrder,
 )
 from bakery.domains.entities.order_schedule import OrderSchedule
@@ -112,6 +114,16 @@ class OrderService:
         return await self.__order_storage.get_list_with_users_by_date(
             input_dto=input_dto
         )
+
+    async def get_unpaid_list_with_users(
+        self, *, input_dto: OrderUnpaidListParams, user: User
+    ) -> OrderWithUserList:
+        _ = user
+        total = await self.__order_storage.count_unpaid(input_dto=input_dto)
+        items = await self.__order_storage.get_unpaid_list_with_users(
+            input_dto=input_dto
+        )
+        return OrderWithUserList(total=total, items=items)
 
     async def update_by_id(self, *, input_dto: UpdateOrder, user: User) -> Order:
         normalized_input = self._normalize_update_products(input_dto)

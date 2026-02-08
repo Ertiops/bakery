@@ -21,6 +21,16 @@ class AdminBlacklist(StatesGroup):
     confirm_add = State()
 
 
+class AdminFakeUsers(StatesGroup):
+    view_list = State()
+    input_name = State()
+    input_phone = State()
+    confirm_create = State()
+    search_phone = State()
+    view_search = State()
+    view_user = State()
+
+
 class UserMain(StatesGroup):
     menu = State()
 
@@ -140,11 +150,19 @@ class AdminOrders(StatesGroup):
     view_categories = State()
     view_dates = State()
     view_date = State()
+    take_in_work_confirm = State()
+    take_in_work_sent = State()
+    start_delivery_hours = State()
+    start_delivery_confirm = State()
+    start_delivery_sent = State()
     view_products = State()
     delete_reason = State()
     delete_confirm = State()
     view_user_orders = State()
     view_user_order = State()
     view_deleted_orders = State()
+    view_unpaid_orders = State()
+    finish_delivery_confirm = State()
+    finish_delivery_sent = State()
     delete_order_reason = State()
     delete_order_confirm = State()
