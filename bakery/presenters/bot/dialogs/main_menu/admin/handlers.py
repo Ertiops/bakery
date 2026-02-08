@@ -3,6 +3,7 @@ from aiogram_dialog import DialogManager, StartMode
 from aiogram_dialog.widgets.kbd import Button
 
 from bakery.presenters.bot.dialogs.states import (
+    AdminBlacklist,
     AdminCatalogue,
     AdminDeliveryPrice,
     AdminFeedbackGroup,
@@ -73,3 +74,11 @@ async def enter_orders(
     manager: DialogManager,
 ) -> None:
     await manager.start(state=AdminOrders.view_categories, mode=StartMode.RESET_STACK)
+
+
+async def enter_blacklist(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    await manager.start(state=AdminBlacklist.view_list, mode=StartMode.RESET_STACK)

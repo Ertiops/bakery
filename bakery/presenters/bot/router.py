@@ -12,6 +12,7 @@ from bakery.presenters.bot.dialogs import (
 )
 from bakery.presenters.bot.dialogs.admin_contact import admin as admin_contact
 from bakery.presenters.bot.dialogs.admin_contact import user as user_admin_contact
+from bakery.presenters.bot.dialogs.blacklist import admin as admin_blacklist
 from bakery.presenters.bot.dialogs.cart import user as user_cart
 from bakery.presenters.bot.dialogs.catalogue import admin as admin_catalogue
 from bakery.presenters.bot.dialogs.catalogue import user as user_catalogue
@@ -45,6 +46,7 @@ def register_dialogs(router: Router) -> None:
         admin_order_schedule.admin_order_schedule_dialog,
         admin_feedback_group.admin_feedback_group_dialog,
         admin_order.admin_order_dialog,
+        admin_blacklist.admin_blacklist_dialog,
     )
     dialog_router.include_routers(
         user_main_menu.user_main_menu_dialog,

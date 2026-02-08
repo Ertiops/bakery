@@ -12,6 +12,15 @@ class AdminMain(StatesGroup):
     menu = State()
 
 
+class AdminBlacklist(StatesGroup):
+    view_list = State()
+    search_phone = State()
+    view_search = State()
+    view_user = State()
+    input_reason = State()
+    confirm_add = State()
+
+
 class UserMain(StatesGroup):
     menu = State()
 
