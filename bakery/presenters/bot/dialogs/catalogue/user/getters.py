@@ -10,12 +10,12 @@ from aiogram_dialog.api.protocols import DialogManager
 from bakery.application.exceptions import EntityNotFoundException
 from bakery.domains.entities.cart import GetCartByUserProductIds
 from bakery.domains.entities.product import Product, ProductCategory, ProductListParams
-from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
 from bakery.domains.services.order import OrderService
 from bakery.domains.services.product import ProductService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.utils.order_edit import get_order_edit_id
+from bakery.presenters.bot.dialogs.utils.order_for_user import get_order_for_user_id
 
 log = logging.getLogger(__name__)
 
@@ -30,6 +30,9 @@ async def get_catalogue_context(
     admin_deleted_flow = dialog_manager.start_data.get("admin_deleted_flow")
     order_edit_id = dialog_manager.start_data.get("order_edit_id")
     admin_selected_date = dialog_manager.start_data.get("admin_selected_date")
+    order_for_user_id = dialog_manager.start_data.get("order_for_user_id")
+    admin_fake_user = dialog_manager.start_data.get("admin_fake_user")
+    selected_fake_user_id = dialog_manager.start_data.get("selected_fake_user_id")
     if admin_order_edit:
         dialog_manager.dialog_data["admin_order_edit"] = True
     if admin_deleted_flow is not None:
@@ -38,6 +41,12 @@ async def get_catalogue_context(
         dialog_manager.dialog_data["order_edit_id"] = order_edit_id
     if admin_selected_date:
         dialog_manager.dialog_data["admin_selected_date"] = admin_selected_date
+    if order_for_user_id:
+        dialog_manager.dialog_data["order_for_user_id"] = order_for_user_id
+    if admin_fake_user:
+        dialog_manager.dialog_data["admin_fake_user"] = True
+    if selected_fake_user_id:
+        dialog_manager.dialog_data["selected_fake_user_id"] = selected_fake_user_id
     return {}
 
 
@@ -87,7 +96,6 @@ async def get_selected_product(  # noqa: C901
     product_service: ProductService = await container.get(ProductService)
     cart_service: CartService = await container.get(CartService)
     order_service: OrderService = await container.get(OrderService)
-    user: User = dialog_manager.middleware_data["current_user"]
     start_data = (
         dialog_manager.start_data if isinstance(dialog_manager.start_data, dict) else {}
     )
@@ -121,7 +129,7 @@ async def get_selected_product(  # noqa: C901
             try:
                 cart = await cart_service.get_w_product_by_user_product_ids(
                     input_dto=GetCartByUserProductIds(
-                        user_id=user.id,
+                        user_id=get_order_for_user_id(dialog_manager),
                         product_id=product_id,
                     )
                 )

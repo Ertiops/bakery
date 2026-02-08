@@ -134,6 +134,8 @@ async def on_start_delivery(
                     user = await user_service.get_by_id(input_id=order.user_id)
                 except EntityNotFoundException:
                     continue
+                if user.tg_id is None:
+                    continue
                 bot = callback.bot
                 if bot is None:
                     return
@@ -183,6 +185,8 @@ async def on_finish_delivery(
                 try:
                     user = await user_service.get_by_id(input_id=order.user_id)
                 except EntityNotFoundException:
+                    continue
+                if user.tg_id is None:
                     continue
                 bot = callback.bot
                 if bot is None:
@@ -291,6 +295,8 @@ async def on_admin_delete_confirm(  # noqa: C901
             try:
                 user = await user_service.get_by_id(input_id=order.user_id)
             except EntityNotFoundException:
+                continue
+            if user.tg_id is None:
                 continue
             user_tg_by_id[str(order.user_id)] = user.tg_id
 
@@ -411,6 +417,8 @@ async def on_admin_delete_order_confirm(
         try:
             user = await user_service.get_by_id(input_id=order.user_id)
         except EntityNotFoundException:
+            return
+        if user.tg_id is None:
             return
         await order_service.delete_by_id(
             input_dto=DeleteOrderParams(id=order.id, reason=reason),

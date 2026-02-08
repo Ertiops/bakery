@@ -8,6 +8,7 @@ from bakery.presenters.bot.content.buttons.order import user as user_order_btn
 from bakery.presenters.bot.content.messages.order import user as user_msg
 from bakery.presenters.bot.dialogs.order.user.getters import (
     get_available_order_dates,
+    get_fake_user_finish_data,
     get_order_confirm_data,
     get_pickup_address_data,
     get_user_order_data,
@@ -27,6 +28,7 @@ from bakery.presenters.bot.dialogs.order.user.handlers import (
 from bakery.presenters.bot.dialogs.order.user.redirections import (
     to_cart,
     to_created_order,
+    to_fake_user_card_from_order,
     to_main_menu_from_order,
     to_manual_address,
     to_order_categories,
@@ -196,14 +198,23 @@ def create_order_windows() -> list[Window]:
                     Const(common_btn.MAIN_MENU),
                     id="to_main_menu",
                     on_click=to_main_menu_from_order,
+                    when=lambda d, *_: not d.get("admin_fake_user"),
+                ),
+                Button(
+                    Const("👤 К карточке"),
+                    id="to_fake_user_card",
+                    on_click=to_fake_user_card_from_order,
+                    when=lambda d, *_: d.get("admin_fake_user"),
                 ),
                 Button(
                     Const(user_order_btn.TO_ORDER),
                     id="my_orders",
                     on_click=to_created_order,
+                    when=lambda d, *_: not d.get("admin_fake_user"),
                 ),
             ),
             state=UserOrder.finish,
+            getter=get_fake_user_finish_data,
         ),
         Window(
             Multi(

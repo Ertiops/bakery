@@ -368,7 +368,6 @@ async def get_admin_user_order_data(  # noqa: C901
         total_price=order.total_price,
         user_name=user.name,
         user_phone=user.phone,
-        user_tg=user.tg_id,
         has_payment="есть" if order.payment_file_id else "нет",
         has_deleted_products=has_deleted_products,
         admin_deleted_flow=bool(dialog_manager.dialog_data.get("admin_deleted_flow")),

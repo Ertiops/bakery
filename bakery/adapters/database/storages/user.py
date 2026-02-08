@@ -19,6 +19,8 @@ from bakery.domains.entities.user import (
     UpdateUser,
     User,
     UserBlacklistListParams,
+    UserFakeListParams,
+    UserFakeSearchParams,
     UserListParams,
     UserPhoneSearchParams,
     UserRole,
@@ -105,6 +107,60 @@ class UserStorage(IUserStorage):
             .where(
                 UserTable.deleted_at.is_(None),
                 UserTable.exclusion_reason.is_not(None),
+            )
+        )
+        return await self.__session.scalar(stmt) or 0
+
+    async def get_fake_list(self, *, input_dto: UserFakeListParams) -> Sequence[User]:
+        stmt = (
+            select(UserTable)
+            .where(
+                UserTable.deleted_at.is_(None),
+                UserTable.role == UserRole.FAKE_USER,
+            )
+            .order_by(UserTable.name.asc())
+            .limit(input_dto.limit)
+            .offset(input_dto.offset)
+        )
+        result = await self.__session.scalars(stmt)
+        return [convert_user(result=r) for r in result]
+
+    async def count_fake(self, *, input_dto: UserFakeListParams) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(UserTable)
+            .where(
+                UserTable.deleted_at.is_(None),
+                UserTable.role == UserRole.FAKE_USER,
+            )
+        )
+        return await self.__session.scalar(stmt) or 0
+
+    async def get_fake_list_by_phone(
+        self, *, input_dto: UserFakeSearchParams
+    ) -> Sequence[User]:
+        stmt = (
+            select(UserTable)
+            .where(
+                UserTable.deleted_at.is_(None),
+                UserTable.role == UserRole.FAKE_USER,
+                UserTable.phone.ilike(f"%{input_dto.phone}%"),
+            )
+            .order_by(UserTable.phone.asc())
+            .limit(input_dto.limit)
+            .offset(input_dto.offset)
+        )
+        result = await self.__session.scalars(stmt)
+        return [convert_user(result=r) for r in result]
+
+    async def count_fake_by_phone(self, *, input_dto: UserFakeSearchParams) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(UserTable)
+            .where(
+                UserTable.deleted_at.is_(None),
+                UserTable.role == UserRole.FAKE_USER,
+                UserTable.phone.ilike(f"%{input_dto.phone}%"),
             )
         )
         return await self.__session.scalar(stmt) or 0

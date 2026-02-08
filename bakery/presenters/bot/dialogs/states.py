@@ -21,6 +21,16 @@ class AdminBlacklist(StatesGroup):
     confirm_add = State()
 
 
+class AdminFakeUsers(StatesGroup):
+    view_list = State()
+    input_name = State()
+    input_phone = State()
+    confirm_create = State()
+    search_phone = State()
+    view_search = State()
+    view_user = State()
+
+
 class UserMain(StatesGroup):
     menu = State()
 

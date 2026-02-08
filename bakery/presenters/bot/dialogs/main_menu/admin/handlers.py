@@ -6,6 +6,7 @@ from bakery.presenters.bot.dialogs.states import (
     AdminBlacklist,
     AdminCatalogue,
     AdminDeliveryPrice,
+    AdminFakeUsers,
     AdminFeedbackGroup,
     AdminOrderPayment,
     AdminOrders,
@@ -82,3 +83,11 @@ async def enter_blacklist(
     manager: DialogManager,
 ) -> None:
     await manager.start(state=AdminBlacklist.view_list, mode=StartMode.RESET_STACK)
+
+
+async def enter_fake_users(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    await manager.start(state=AdminFakeUsers.view_list, mode=StartMode.RESET_STACK)
