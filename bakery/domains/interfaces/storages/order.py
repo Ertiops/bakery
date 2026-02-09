@@ -4,6 +4,7 @@ from datetime import date
 from typing import Protocol
 from uuid import UUID
 
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.order import (
     CreateOrder,
     DeleteOrderParams,
@@ -84,4 +85,8 @@ class IOrderStorage(Protocol):
         *,
         input_dto: OrderTopProductsParams,
     ) -> Sequence[Product]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
         raise NotImplementedError

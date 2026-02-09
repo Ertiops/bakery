@@ -1,6 +1,6 @@
 from typing import NoReturn
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +16,7 @@ from bakery.domains.entities.admin_contact import (
     CreateAdminContact,
     UpdateAdminContact,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorage
 
 
@@ -60,6 +61,12 @@ class AdminContactStorage(IAdminContactStorage):
         except IntegrityError as e:
             self.__raise_exception(e)
         return convert_admin_contact(result=result)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        stmt = delete(AdminContactTable)
+        if input_dto.deleted_at is not None:
+            stmt = stmt.where(AdminContactTable.deleted_at <= input_dto.deleted_at)
+        await self.__session.execute(stmt)
 
     def __raise_exception(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name  # type: ignore[union-attr]

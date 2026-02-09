@@ -7,6 +7,7 @@ from sqlalchemy import (
     Integer,
     case,
     cast,
+    delete,
     exists,
     false,
     func,
@@ -31,6 +32,7 @@ from bakery.application.exceptions import (
     ForeignKeyViolationException,
     StorageException,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.order import (
     CreateOrder,
     DeleteOrderParams,
@@ -354,6 +356,12 @@ class OrderStorage(IOrderStorage):
         )
         result = await self.__session.scalars(products_stmt)
         return [convert_product(result=r) for r in result]
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        stmt = delete(OrderTable)
+        if input_dto.deleted_at is not None:
+            stmt = stmt.where(OrderTable.deleted_at <= input_dto.deleted_at)
+        await self.__session.execute(stmt)
 
     def __raise_exception(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name  # type: ignore[union-attr]

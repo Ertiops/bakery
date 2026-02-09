@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from typing import NoReturn
 from uuid import UUID
 
-from sqlalchemy import exists, func, insert, select, update
+from sqlalchemy import delete, exists, func, insert, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +14,7 @@ from bakery.application.exceptions import (
     EntityNotFoundException,
     StorageException,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.product import (
     CreateProduct,
     Product,
@@ -96,6 +97,12 @@ class ProductStorage(IProductStorage):
             .where(ProductTable.id == input_id)
             .values(deleted_at=datetime.now(tz=UTC))
         )
+        await self.__session.execute(stmt)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        stmt = delete(ProductTable)
+        if input_dto.deleted_at is not None:
+            stmt = stmt.where(ProductTable.deleted_at <= input_dto.deleted_at)
         await self.__session.execute(stmt)
 
     def __raise_exception(self, e: DBAPIError) -> NoReturn:

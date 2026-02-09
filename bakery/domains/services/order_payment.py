@@ -1,4 +1,5 @@
 from bakery.application.exceptions import EntityNotFoundException
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.order_payment import (
     CreateOrderPayment,
     OrderPayment,
@@ -24,3 +25,6 @@ class OrderPaymentService:
 
     async def update_by_id(self, *, input_dto: UpdateOrderPayment) -> OrderPayment:
         return await self.__order_payment_storage.update_by_id(input_dto=input_dto)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        await self.__order_payment_storage.hard_delete_list(input_dto=input_dto)
