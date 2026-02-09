@@ -11,9 +11,88 @@ class "UserTable" as UserTable {
     + __tablename__ = "users"
     --
     + name: Mapped[str]
-    + tg_id: Mapped[str]
+    + tg_id: Mapped[int]
     + phone: Mapped[str]
     + role: Mapped[UserRole]
+    + exclusion_reason: Mapped[str | None]
+}
+
+class "AdminContactTable" as AdminContactTable {
+    + __tablename__ = "admin_contacts"
+    --
+    + name: Mapped[str]
+    + tg_username: Mapped[str]
+}
+
+class "DeliveryCostTable" as DeliveryCostTable {
+    + __tablename__ = "delivery_costs"
+    --
+    + price: Mapped[int]
+    + free_delivery_amount: Mapped[int | None]
+}
+
+class "ProductTable" as ProductTable {
+    + __tablename__ = "products"
+    --
+    + name: Mapped[str]
+    + description: Mapped[str]
+    + category: Mapped[ProductCategory]
+    + price: Mapped[int]
+    + photo_file_id: Mapped[str]
+}
+
+class "PickupAddressTable" as PickupAddressTable {
+    + __tablename__ = "pickup_addresses"
+    --
+    + name: Mapped[str]
+}
+
+class "CartTable" as CartTable {
+    + __tablename__ = "carts"
+    --
+    + user_id: Mapped[UUID]
+    + product_id: Mapped[UUID]
+    + quantity: Mapped[int]
+}
+
+class "OrderTable" as OrderTable {
+    + __tablename__ = "orders"
+    --
+    + user_id: Mapped[UUID]
+    + pickup_address_name: Mapped[str]
+    + pickup_address_id: Mapped[UUID | None]
+    + status: Mapped[OrderStatus]
+    + products: Mapped[Sequence[OrderProduct]]
+    + delivered_at: Mapped[date]
+    + total_price: Mapped[int]
+    + delivery_price: Mapped[int]
+    + delivered_at_id: Mapped[int]
+    + payment_file_id: Mapped[str]
+    + rating: Mapped[int | None]
+}
+
+class "OrderScheduleTable" as OrderScheduleTable {
+    + __tablename__ = "order_schedules"
+    --
+    + weekdays: Mapped[Sequence[int]]
+    + min_days_before: Mapped[int]
+    + max_days_in_advance: Mapped[int]
+    + order_open_time: Mapped[time]
+    + order_close_time: Mapped[time]
+}
+
+class "OrderPaymentTable" as OrderPaymentTable {
+    + __tablename__ = "order_payments"
+    --
+    + phone: Mapped[str]
+    + banks: Mapped[Sequence[str]]
+    + addressee: Mapped[str]
+}
+
+class "FeedbackGroupTable" as FeedbackGroupTable {
+    + __tablename__ = "feedback_groups"
+    --
+    + url: Mapped[str]
 }
 
 class "BaseTable" as BaseTable {
@@ -35,18 +114,69 @@ class "UserRole" as UserRole << (E, #FF7700) Enum >> {
     + USER = "user"
 }
 
+class "ProductCategory" as ProductCategory << (E, #FF7700) Enum >> {
+    + BREAD = "bread"
+    + OIL = "oil"
+    + FLOUR = "flour"
+    + DESSERT = "dessert"
+    + NOODLE = "noodle"
+    + OTHER = "other"
+}
+
+class "OrderStatus" as OrderStatus << (E, #FF7700) Enum >> {
+    + CREATED = "created"
+    + CHANGED = "changed"
+    + PAID = "paid"
+    + DONE = "done"
+    + CANCELED = "canceled"
+}
+
 UserTable --|> BaseTable
 UserTable --|> TimestampedMixin
 UserTable --|> IdentifiableMixin
 UserTable --> UserRole : role type
 
-note top of UserTable
-    Columns:
-    - name: String(63), not null
-    - tg_id: Integer, not null, unique
-    - phone: String(16), not null, unique
-    - role: UserRole enum
-end note
+AdminContactTable --|> BaseTable
+AdminContactTable --|> TimestampedMixin
+AdminContactTable --|> IdentifiableMixin
+
+DeliveryCostTable --|> BaseTable
+DeliveryCostTable --|> TimestampedMixin
+DeliveryCostTable --|> IdentifiableMixin
+
+ProductTable --|> BaseTable
+ProductTable --|> TimestampedMixin
+ProductTable --|> IdentifiableMixin
+ProductTable --> ProductCategory : category type
+
+PickupAddressTable --|> BaseTable
+PickupAddressTable --|> TimestampedMixin
+PickupAddressTable --|> IdentifiableMixin
+
+CartTable --|> BaseTable
+CartTable --|> TimestampedMixin
+CartTable --|> IdentifiableMixin
+CartTable --> UserTable : user_id
+CartTable --> ProductTable : product_id
+
+OrderTable --|> BaseTable
+OrderTable --|> TimestampedMixin
+OrderTable --|> IdentifiableMixin
+OrderTable --> UserTable : user_id
+OrderTable --> PickupAddressTable : pickup_address_id
+OrderTable --> OrderStatus : status type
+
+OrderScheduleTable --|> BaseTable
+OrderScheduleTable --|> TimestampedMixin
+OrderScheduleTable --|> IdentifiableMixin
+
+OrderPaymentTable --|> BaseTable
+OrderPaymentTable --|> TimestampedMixin
+OrderPaymentTable --|> IdentifiableMixin
+
+FeedbackGroupTable --|> BaseTable
+FeedbackGroupTable --|> TimestampedMixin
+FeedbackGroupTable --|> IdentifiableMixin
 
 note bottom of TimestampedMixin
     created_at: DateTime(timezone=True)
