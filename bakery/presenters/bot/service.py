@@ -61,6 +61,8 @@ class TelegramBotService(Service):
         return RedisStorage.from_url(
             url=self.config.redis.dsn,
             key_builder=DefaultKeyBuilder(with_destiny=True),
+            state_ttl=self.config.bot.fsm_state_ttl,
+            data_ttl=self.config.bot.fsm_data_ttl,
         )
 
     async def _setup_bot(self) -> None:
