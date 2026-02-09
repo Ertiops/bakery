@@ -10,6 +10,7 @@ from bakery.domains.entities.cart import (
     CreateCart,
     GetCartByUserProductIds,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 
 
 class ICartStorage(Protocol):
@@ -29,4 +30,8 @@ class ICartStorage(Protocol):
 
     @abstractmethod
     async def delete_hard_by_user_id(self, *, input_id: UUID) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
         raise NotImplementedError

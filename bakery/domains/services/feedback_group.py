@@ -1,4 +1,5 @@
 from bakery.application.exceptions import EntityNotFoundException
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.feedback_group import (
     CreateFeedbackGroup,
     FeedbackGroup,
@@ -24,3 +25,6 @@ class FeedbackGroupService:
 
     async def update_by_id(self, *, input_dto: UpdateFeedbackGroup) -> FeedbackGroup:
         return await self.__feedback_group_storage.update_by_id(input_dto=input_dto)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        await self.__feedback_group_storage.hard_delete_list(input_dto=input_dto)

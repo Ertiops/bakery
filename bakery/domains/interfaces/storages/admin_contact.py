@@ -6,6 +6,7 @@ from bakery.domains.entities.admin_contact import (
     CreateAdminContact,
     UpdateAdminContact,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 
 
 class IAdminContactStorage(Protocol):
@@ -19,4 +20,8 @@ class IAdminContactStorage(Protocol):
 
     @abstractmethod
     async def update_by_id(self, *, input_dto: UpdateAdminContact) -> AdminContact:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
         raise NotImplementedError

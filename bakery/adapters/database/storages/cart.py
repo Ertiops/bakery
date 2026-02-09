@@ -25,6 +25,7 @@ from bakery.domains.entities.cart import (
     CreateCart,
     GetCartByUserProductIds,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.interfaces.storages.cart import ICartStorage
 
 
@@ -88,6 +89,12 @@ class CartStorage(ICartStorage):
 
     async def delete_hard_by_user_id(self, *, input_id: UUID) -> None:
         stmt = delete(CartTable).where(CartTable.user_id == input_id)
+        await self.__session.execute(stmt)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        stmt = delete(CartTable)
+        if input_dto.deleted_at is not None:
+            stmt = stmt.where(CartTable.deleted_at <= input_dto.deleted_at)
         await self.__session.execute(stmt)
 
     def __raise_exception(self, e: DBAPIError) -> NoReturn:

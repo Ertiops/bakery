@@ -4,6 +4,7 @@ from bakery.domains.entities.admin_contact import (
     CreateAdminContact,
     UpdateAdminContact,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.interfaces.storages.admin_contact import IAdminContactStorage
 
 
@@ -24,3 +25,6 @@ class AdminContactService:
 
     async def update_by_id(self, *, input_dto: UpdateAdminContact) -> AdminContact:
         return await self.__admin_contact_storage.update_by_id(input_dto=input_dto)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        await self.__admin_contact_storage.hard_delete_list(input_dto=input_dto)

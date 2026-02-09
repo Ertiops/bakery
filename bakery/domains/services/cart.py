@@ -8,6 +8,7 @@ from bakery.domains.entities.cart import (
     CreateCart,
     GetCartByUserProductIds,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.interfaces.storages.cart import ICartStorage
 
 
@@ -35,3 +36,6 @@ class CartService:
 
     async def get_list(self, *, input_dto: CartListParams) -> Sequence[CartWProduct]:
         return await self.__cart_storage.get_list(input_dto=input_dto)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        await self.__cart_storage.hard_delete_list(input_dto=input_dto)

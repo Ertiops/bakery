@@ -1,9 +1,10 @@
-from sqlalchemy import insert, select, update
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bakery.adapters.database.converters.feedback_group import convert_feedback_group
 from bakery.adapters.database.tables import FeedbackGroupTable
 from bakery.application.exceptions import EntityNotFoundException
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.feedback_group import (
     CreateFeedbackGroup,
     FeedbackGroup,
@@ -44,3 +45,9 @@ class FeedbackGroupStorage(IFeedbackGroupStorage):
         if not result:
             raise EntityNotFoundException(entity=FeedbackGroup, entity_id=input_dto.id)
         return convert_feedback_group(result=result)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        stmt = delete(FeedbackGroupTable)
+        if input_dto.deleted_at is not None:
+            stmt = stmt.where(FeedbackGroupTable.deleted_at <= input_dto.deleted_at)
+        await self.__session.execute(stmt)

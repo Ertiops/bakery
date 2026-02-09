@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from bakery.application.exceptions import EntityNotFoundException
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.product import (
     CreateProduct,
     Product,
@@ -40,3 +41,6 @@ class ProductService:
         if not await self.__product_storage.exists_by_id(input_id=input_id):
             raise EntityNotFoundException(entity=Product, entity_id=input_id)
         await self.__product_storage.delete_by_id(input_id=input_id)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        await self.__product_storage.hard_delete_list(input_dto=input_dto)
