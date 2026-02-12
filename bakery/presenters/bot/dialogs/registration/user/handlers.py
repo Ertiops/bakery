@@ -3,8 +3,9 @@ import re
 
 from aiogram.types import (
     Message,
+    ReplyKeyboardRemove,
 )
-from aiogram_dialog import DialogManager
+from aiogram_dialog import DialogManager, StartMode
 from aiogram_dialog.widgets.input import MessageInput
 
 from bakery.domains.entities.user import CreateUser, UserRole
@@ -19,6 +20,7 @@ from bakery.presenters.bot.content.messages.registration import (
 from bakery.presenters.bot.dialogs.registration.user.keyboards import get_share_phone_kb
 from bakery.presenters.bot.dialogs.states import (
     RegistrationMenu,
+    UserMain,
 )
 
 log = logging.getLogger(__name__)
@@ -62,5 +64,7 @@ async def on_phone_input(
                 role=UserRole.USER,
             )
         )
-    await message.answer(main_menu_msg.REGISTRATION_FINISH, reply_markup=None)
-    await dialog_manager.done()
+    await message.answer(
+        main_menu_msg.REGISTRATION_FINISH, reply_markup=ReplyKeyboardRemove()
+    )
+    await dialog_manager.start(UserMain.menu, mode=StartMode.RESET_STACK)
