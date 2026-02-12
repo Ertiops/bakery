@@ -29,6 +29,7 @@ from bakery.domains.services.order import OrderService
 from bakery.domains.services.pickup_address import PickupAddressService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.dialogs.states import UserCatalogue, UserOrder
+from bakery.presenters.bot.dialogs.utils.order_for_user import get_order_for_user_id
 
 USER_ORDERS_PAGE_SIZE = 5
 
@@ -87,7 +88,7 @@ async def on_confirm_order(
         DeliveryCostService
     )
     uow: AbstractUow = await container.get(AbstractUow)
-    user: User = manager.middleware_data["current_user"]
+    user_id = get_order_for_user_id(manager)
 
     order_date_iso = manager.dialog_data.get("order_date")
     if not order_date_iso:
@@ -106,7 +107,7 @@ async def on_confirm_order(
 
     async with uow:
         carts = await cart_service.get_list(
-            input_dto=CartListParams(user_id=user.id, has_non_zero_quantity=True)
+            input_dto=CartListParams(user_id=user_id, has_non_zero_quantity=True)
         )
 
         for cart in carts:
@@ -154,7 +155,7 @@ async def on_confirm_order(
         try:
             order = await order_service.create(
                 input_dto=CreateOrderAsUser(
-                    user_id=user.id,
+                    user_id=user_id,
                     pickup_address_name=pickup_address_name or "",
                     pickup_address_id=pickup_address_uuid,
                     products=products,
@@ -185,13 +186,13 @@ async def on_top_product_add(
     container = manager.middleware_data["dishka_container"]
     cart_service: CartService = await container.get(CartService)
     uow: AbstractUow = await container.get(AbstractUow)
-    user: User = manager.middleware_data["current_user"]
+    user_id = get_order_for_user_id(manager)
 
     async with uow:
         try:
             cart_item = await cart_service.get_w_product_by_user_product_ids(
                 input_dto=GetCartByUserProductIds(
-                    user_id=user.id, product_id=product_id
+                    user_id=user_id, product_id=product_id
                 )
             )
             quantity = cart_item.quantity + 1
@@ -201,7 +202,7 @@ async def on_top_product_add(
         quantity = min(quantity, CART_PRODUCT_MAX)
         await cart_service.create_or_update(
             input_dto=CreateCart(
-                user_id=user.id, product_id=product_id, quantity=quantity
+                user_id=user_id, product_id=product_id, quantity=quantity
             )
         )
 

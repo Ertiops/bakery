@@ -12,13 +12,14 @@ from bakery.domains.entities.common import Pagination, ToDictMixin
 class UserRole(StrEnum):
     ADMIN = "admin"
     USER = "user"
+    FAKE_USER = "fake_user"
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class User:
     id: UUID
     name: str
-    tg_id: int
+    tg_id: int | None
     phone: str
     role: UserRole
     exclusion_reason: str | None = None
@@ -39,17 +40,23 @@ class UserList:
 @dataclass(frozen=True, kw_only=True, slots=True)
 class CreateUser(ToDictMixin):
     name: str
-    tg_id: int
+    tg_id: int | None
     phone: str
     role: UserRole
     exclusion_reason: str | None = None
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class CreateFakeUser:
+    name: str
+    phone: str
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class UpdateUser(ToDictMixin):
     id: UUID
     name: str | Unset = UNSET
-    tg_id: int | Unset = UNSET
+    tg_id: int | None | Unset = UNSET
     phone: str | Unset = UNSET
     role: UserRole | Unset = UNSET
     exclusion_reason: str | None | Unset = UNSET
@@ -61,6 +68,15 @@ class UserBlacklistListParams(Pagination): ...
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class UserPhoneSearchParams(Pagination):
+    phone: str
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class UserFakeListParams(Pagination): ...
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class UserFakeSearchParams(Pagination):
     phone: str
 
 

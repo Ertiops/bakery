@@ -18,7 +18,6 @@ from bakery.domains.entities.order import (
     UserOrderStatus,
 )
 from bakery.domains.entities.pickup_address import PickupAddressListParams
-from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
 from bakery.domains.services.delivery_cost import DeliveryCostService
 from bakery.domains.services.feedback_group import FeedbackGroupService
@@ -32,12 +31,23 @@ from bakery.presenters.bot.dialogs.utils.order import (
     combine_order_number,
     format_order_products,
 )
+from bakery.presenters.bot.dialogs.utils.order_for_user import get_order_for_user_id
 
 
 async def get_pickup_address_data(
     dialog_manager: DialogManager,
     **kwargs: Any,
 ) -> dict[str, Any]:
+    if isinstance(dialog_manager.start_data, dict):
+        order_for_user_id = dialog_manager.start_data.get("order_for_user_id")
+        admin_fake_user = dialog_manager.start_data.get("admin_fake_user")
+        selected_fake_user_id = dialog_manager.start_data.get("selected_fake_user_id")
+        if order_for_user_id:
+            dialog_manager.dialog_data["order_for_user_id"] = order_for_user_id
+        if admin_fake_user:
+            dialog_manager.dialog_data["admin_fake_user"] = True
+        if selected_fake_user_id:
+            dialog_manager.dialog_data["selected_fake_user_id"] = selected_fake_user_id
     container = dialog_manager.middleware_data["dishka_container"]
     pickup_address_service: PickupAddressService = await container.get(
         PickupAddressService
@@ -88,7 +98,7 @@ async def get_order_confirm_data(
     )
     order_service: OrderService = await container.get(OrderService)
 
-    user: User = dialog_manager.middleware_data["current_user"]
+    user_id = get_order_for_user_id(dialog_manager)
     pickup_address_id: str | None = dialog_manager.dialog_data.get("pickup_address_id")
 
     cart_items: list[dict[str, Any]] = []
@@ -101,7 +111,7 @@ async def get_order_confirm_data(
     async with uow:
         carts = await cart_service.get_list(
             input_dto=CartListParams(
-                user_id=user.id,
+                user_id=user_id,
                 has_non_zero_quantity=True,
             )
         )
@@ -132,7 +142,7 @@ async def get_order_confirm_data(
 
         top_products = await order_service.get_top_products_for_user(
             input_dto=OrderTopProductsParams(
-                user_id=user.id,
+                user_id=user_id,
                 limit=3,
                 exclude_product_ids=exclude_product_ids,
             )
@@ -212,7 +222,7 @@ async def get_user_orders_data(
     container = dialog_manager.middleware_data["dishka_container"]
     order_service: OrderService = await container.get(OrderService)
     uow: AbstractUow = await container.get(AbstractUow)
-    user: User = dialog_manager.middleware_data["current_user"]
+    user_id = get_order_for_user_id(dialog_manager)
 
     raw_cat = (
         dialog_manager.dialog_data.get("user_order_status")
@@ -230,7 +240,7 @@ async def get_user_orders_data(
             input_dto=OrderListParams(
                 limit=USER_ORDERS_LIMIT_BREAKER,
                 offset=0,
-                user_id=user.id,
+                user_id=user_id,
                 statuses=statuses,
             )
         )
@@ -319,3 +329,17 @@ async def get_user_order_data(
         feedback_group_url=(feedback_group.url if feedback_group else ""),
         has_feedback_group=bool(feedback_group),
     )
+
+
+async def get_fake_user_finish_data(
+    dialog_manager: DialogManager,
+    **_kwargs: Any,
+) -> dict[str, Any]:
+    start_data = (
+        dialog_manager.start_data if isinstance(dialog_manager.start_data, dict) else {}
+    )
+    admin_fake_user = bool(
+        dialog_manager.dialog_data.get("admin_fake_user")
+        or start_data.get("admin_fake_user")
+    )
+    return dict(admin_fake_user=admin_fake_user)
