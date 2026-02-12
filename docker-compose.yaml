@@ -1,4 +1,15 @@
 services:
+  bakery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bakery_app
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
   db:
     image: postgres:17
     restart: unless-stopped
