@@ -5,6 +5,9 @@ from aiomisc_log import LogFormat, LogLevel, basic_config
 
 from bakery.config import MainConfig
 from bakery.presenters.bot.service import TelegramBotService
+from bakery.presenters.bot.services.database_cleaner_cron import (
+    DatabaseCleanerCronService,
+)
 
 log = logging.getLogger(__name__)
 
@@ -16,6 +19,7 @@ def main() -> None:
 
     services: list[Service] = [
         TelegramBotService(config=config),
+        DatabaseCleanerCronService(config=config),
     ]
 
     with entrypoint(

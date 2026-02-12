@@ -13,6 +13,7 @@ from bakery.domains.entities.order import (
     OrderListParams,
     OrderListWithUsersParams,
     OrderStatus,
+    OrderUnpaidListParams,
 )
 from bakery.domains.services.order import OrderService
 from bakery.domains.services.user import UserService
@@ -402,3 +403,57 @@ async def get_admin_delete_order_confirm_data(
     order_number = dialog_manager.dialog_data.get("selected_order_number") or "—"
     reason = dialog_manager.dialog_data.get("admin_delete_order_reason") or ""
     return dict(order_number=order_number, reason=reason)
+
+
+async def get_start_delivery_confirm_data(
+    dialog_manager: DialogManager,
+    **_kwargs: Any,
+) -> dict[str, Any]:
+    hours = dialog_manager.dialog_data.get("delivery_hours")
+    return dict(hours=hours)
+
+
+async def get_admin_unpaid_orders_data(
+    dialog_manager: DialogManager,
+    **_kwargs: Any,
+) -> dict[str, Any]:
+    container = dialog_manager.middleware_data["dishka_container"]
+    order_service: OrderService = await container.get(OrderService)
+    uow: AbstractUow = await container.get(AbstractUow)
+    current_user = dialog_manager.middleware_data.get("current_user")
+    if current_user is None:
+        return dict(
+            title=admin_msg.UNPAID_ORDERS_TITLE,
+            orders=[],
+            has_orders=False,
+        )
+
+    dialog_manager.dialog_data["admin_unpaid_flow"] = True
+    dialog_manager.dialog_data["admin_deleted_flow"] = False
+
+    async with uow:
+        result = await order_service.get_unpaid_list_with_users(
+            input_dto=OrderUnpaidListParams(
+                limit=USER_ORDERS_LIMIT_BREAKER,
+                offset=0,
+            ),
+            user=current_user,
+        )
+
+    items = [
+        dict(
+            id=str(item.order.id),
+            number=combine_order_number(
+                item.order.delivered_at, item.order.delivered_at_id
+            ),
+            user_name=item.user.name,
+            total=item.order.total_price,
+        )
+        for item in result.items
+    ]
+
+    return dict(
+        title=admin_msg.UNPAID_ORDERS_TITLE,
+        orders=items,
+        has_orders=bool(items),
+    )

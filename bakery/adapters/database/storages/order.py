@@ -7,6 +7,7 @@ from sqlalchemy import (
     Integer,
     case,
     cast,
+    delete,
     exists,
     false,
     func,
@@ -31,6 +32,7 @@ from bakery.application.exceptions import (
     ForeignKeyViolationException,
     StorageException,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.order import (
     CreateOrder,
     DeleteOrderParams,
@@ -38,11 +40,14 @@ from bakery.domains.entities.order import (
     OrderListByDateWithProductParams,
     OrderListParams,
     OrderListWithUsersParams,
+    OrderStatus,
     OrderTopProductsParams,
+    OrderUnpaidListParams,
     OrderWithUser,
     UpdateOrder,
 )
 from bakery.domains.entities.product import Product
+from bakery.domains.entities.user import UserRole
 from bakery.domains.interfaces.storages.order import IOrderStorage
 
 
@@ -134,6 +139,36 @@ class OrderStorage(IOrderStorage):
             for order, user in rows
         ]
 
+    async def get_unpaid_list_with_users(
+        self, *, input_dto: OrderUnpaidListParams
+    ) -> Sequence[OrderWithUser]:
+        stmt = (
+            select(OrderTable, UserTable)
+            .join(UserTable, UserTable.id == OrderTable.user_id)
+            .where(
+                OrderTable.deleted_at.is_(None),
+                UserTable.deleted_at.is_(None),
+                UserTable.role == UserRole.USER,
+                OrderTable.status == OrderStatus.DELIVERED,
+                or_(
+                    OrderTable.payment_file_id.is_(None),
+                    OrderTable.payment_file_id == "",
+                ),
+            )
+            .order_by(OrderTable.created_at.desc())
+            .limit(input_dto.limit)
+            .offset(input_dto.offset)
+        )
+        result = await self.__session.execute(stmt)
+        rows = result.all()
+        return [
+            OrderWithUser(
+                order=convert_order_to_dto(result=order),
+                user=convert_user(result=user),
+            )
+            for order, user in rows
+        ]
+
     async def count(self, *, input_dto: OrderListParams) -> int:
         stmt = (
             select(func.count())
@@ -164,6 +199,24 @@ class OrderStorage(IOrderStorage):
             .select_from(OrderTable)
             .where(
                 OrderTable.delivered_at == input_dto,
+            )
+        )
+        return await self.__session.scalar(stmt) or 0
+
+    async def count_unpaid(self, *, input_dto: OrderUnpaidListParams) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(OrderTable)
+            .join(UserTable, UserTable.id == OrderTable.user_id)
+            .where(
+                OrderTable.deleted_at.is_(None),
+                UserTable.deleted_at.is_(None),
+                UserTable.role == UserRole.USER,
+                OrderTable.status == OrderStatus.DELIVERED,
+                or_(
+                    OrderTable.payment_file_id.is_(None),
+                    OrderTable.payment_file_id == "",
+                ),
             )
         )
         return await self.__session.scalar(stmt) or 0
@@ -303,6 +356,12 @@ class OrderStorage(IOrderStorage):
         )
         result = await self.__session.scalars(products_stmt)
         return [convert_product(result=r) for r in result]
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        stmt = delete(OrderTable)
+        if input_dto.deleted_at is not None:
+            stmt = stmt.where(OrderTable.deleted_at <= input_dto.deleted_at)
+        await self.__session.execute(stmt)
 
     def __raise_exception(self, e: DBAPIError) -> NoReturn:
         constraint = e.__cause__.__cause__.constraint_name  # type: ignore[union-attr]

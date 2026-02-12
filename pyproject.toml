@@ -30,6 +30,7 @@ aiobotocore = "^2.22.0"
 greenlet = "^3.2.4"
 mashumaro = "^3.17"
 reportlab = "^4.2.2"
+croniter = "^6.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -1,6 +1,6 @@
 from typing import NoReturn
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +10,7 @@ from bakery.application.exceptions import (
     EntityNotFoundException,
     StorageException,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.delivery_cost import (
     CreateDeliveryCost,
     DeliveryCost,
@@ -59,6 +60,12 @@ class DeliveryCostStorage(IDeliveryCostStorage):
         except IntegrityError as e:
             self.__raise_exception(e)
         return convert_delivery_cost(result=result)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        stmt = delete(DeliveryCostTable)
+        if input_dto.deleted_at is not None:
+            stmt = stmt.where(DeliveryCostTable.deleted_at <= input_dto.deleted_at)
+        await self.__session.execute(stmt)
 
     def __raise_exception(self, e: DBAPIError) -> NoReturn:
         raise StorageException(self.__class__.__name__) from e

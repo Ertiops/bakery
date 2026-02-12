@@ -1,4 +1,5 @@
 from bakery.application.exceptions import EntityNotFoundException
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.delivery_cost import (
     CreateDeliveryCost,
     DeliveryCost,
@@ -24,3 +25,6 @@ class DeliveryCostService:
 
     async def update_by_id(self, *, input_dto: UpdateDeliveryCost) -> DeliveryCost:
         return await self.__delivery_cost_storage.update_by_id(input_dto=input_dto)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        await self.__delivery_cost_storage.hard_delete_list(input_dto=input_dto)

@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from typing import NoReturn
 from uuid import UUID
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import DBAPIError, IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +14,7 @@ from bakery.application.exceptions import (
     EntityNotFoundException,
     StorageException,
 )
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.order_schedule import (
     CreateOrderSchedule,
     OrderSchedule,
@@ -71,6 +72,12 @@ class OrderScheduleStorage(IOrderScheduleStorage):
             .where(OrderScheduleTable.id == input_id)
             .values(deleted_at=datetime.now(tz=UTC))
         )
+        await self.__session.execute(stmt)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        stmt = delete(OrderScheduleTable)
+        if input_dto.deleted_at is not None:
+            stmt = stmt.where(OrderScheduleTable.deleted_at <= input_dto.deleted_at)
         await self.__session.execute(stmt)
 
     def __raise_exception(self, e: DBAPIError) -> NoReturn:

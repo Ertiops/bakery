@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from typing import Protocol
 from uuid import UUID
 
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.user import (
     CreateUser,
     UpdateUser,
@@ -88,4 +89,8 @@ class IUserStorage(Protocol):
 
     @abstractmethod
     async def delete_by_id(self, *, input_id: UUID) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
         raise NotImplementedError

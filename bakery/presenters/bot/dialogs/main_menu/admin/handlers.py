@@ -91,3 +91,15 @@ async def enter_fake_users(
     manager: DialogManager,
 ) -> None:
     await manager.start(state=AdminFakeUsers.view_list, mode=StartMode.RESET_STACK)
+
+
+async def enter_unpaid_orders(
+    callback: CallbackQuery,
+    button: Button,
+    manager: DialogManager,
+) -> None:
+    await manager.start(
+        state=AdminOrders.view_unpaid_orders,
+        mode=StartMode.RESET_STACK,
+        data={"admin_unpaid_flow": True},
+    )

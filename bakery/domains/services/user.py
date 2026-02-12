@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from bakery.application.exceptions import EntityNotFoundException
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.user import (
     CreateFakeUser,
     CreateUser,
@@ -129,3 +130,6 @@ class UserService:
         if not await self.__user_storage.exists_by_id(input_id=input_id):
             raise EntityNotFoundException(entity=User, entity_id=input_id)
         await self.__user_storage.delete_by_id(input_id=input_id)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        await self.__user_storage.hard_delete_list(input_dto=input_dto)

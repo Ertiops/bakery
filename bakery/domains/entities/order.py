@@ -140,6 +140,16 @@ class OrderListWithUsersParams(Pagination):
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
+class OrderUnpaidListParams(Pagination): ...
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class OrderWithUserList:
+    total: int
+    items: Sequence[OrderWithUser]
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
 class UpdateOrder(ToDictMixin):
     id: UUID
     user_id: UUID | Unset = UNSET

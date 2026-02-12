@@ -13,6 +13,7 @@ from bakery.presenters.bot.dialogs.main_menu.admin.handlers import (
     enter_fake_users,
     enter_orders,
     enter_pickup_address_menu,
+    enter_unpaid_orders,
     to_admin_feedback_group,
     to_admin_order_payment,
     to_admin_order_schedule,
@@ -48,6 +49,11 @@ def admin_main_menu_window() -> Window:
                 Const(admin_main_menu_msg.ORDERS),
                 id="orders",
                 on_click=enter_orders,
+            ),
+            Button(
+                Const(admin_main_menu_msg.UNPAID_ORDERS),
+                id="unpaid_orders",
+                on_click=enter_unpaid_orders,
             ),
             Button(
                 Const(admin_main_menu_msg.BLACKLIST),

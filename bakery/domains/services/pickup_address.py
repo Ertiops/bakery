@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from bakery.application.exceptions import EntityNotFoundException
+from bakery.domains.entities.common import HardDeleteListParams
 from bakery.domains.entities.pickup_address import (
     CreatePickupAddress,
     PickupAddress,
@@ -42,3 +43,6 @@ class PickupAddressService:
         if not await self.__pickup_address_storage.exists_by_id(input_id=input_id):
             raise EntityNotFoundException(entity=PickupAddress, entity_id=input_id)
         await self.__pickup_address_storage.delete_by_id(input_id=input_id)
+
+    async def hard_delete_list(self, *, input_dto: HardDeleteListParams) -> None:
+        await self.__pickup_address_storage.hard_delete_list(input_dto=input_dto)
