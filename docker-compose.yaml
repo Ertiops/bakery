@@ -1,17 +1,6 @@
 services:
-  bakery:
-    image: ertiops/bakery:latest
-    container_name: bakery_app
-    env_file:
-      - .env
-    ports:
-      - "8001:8000"
-    restart: unless-stopped
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-
   db:
-    image: postgres:16
+    image: postgres:17
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -32,13 +21,6 @@ services:
     env_file:
       - .env
 
-  watchtower:
-      image: containrrr/watchtower
-      container_name: watchtower
-      restart: unless-stopped
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
-      command: --cleanup --interval 60 --include-restarting --label-enable
 
 volumes:
   postgres_data:
