@@ -17,6 +17,7 @@ from bakery.presenters.bot.dialogs.cart import user as user_cart
 from bakery.presenters.bot.dialogs.catalogue import admin as admin_catalogue
 from bakery.presenters.bot.dialogs.catalogue import user as user_catalogue
 from bakery.presenters.bot.dialogs.delivery_cost import admin as admin_delivery_cost
+from bakery.presenters.bot.dialogs.fake_users import admin as admin_fake_users
 from bakery.presenters.bot.dialogs.feedback_group import admin as admin_feedback_group
 from bakery.presenters.bot.dialogs.main_menu import admin as admin_main_menu
 from bakery.presenters.bot.dialogs.main_menu import user as user_main_menu
@@ -47,6 +48,7 @@ def register_dialogs(router: Router) -> None:
         admin_feedback_group.admin_feedback_group_dialog,
         admin_order.admin_order_dialog,
         admin_blacklist.admin_blacklist_dialog,
+        admin_fake_users.admin_fake_users_dialog,
     )
     dialog_router.include_routers(
         user_main_menu.user_main_menu_dialog,

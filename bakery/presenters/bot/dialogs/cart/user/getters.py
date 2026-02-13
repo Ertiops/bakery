@@ -3,10 +3,10 @@ from typing import Any
 from aiogram_dialog.api.protocols import DialogManager
 
 from bakery.domains.entities.cart import CartListParams
-from bakery.domains.entities.user import User
 from bakery.domains.services.cart import CartService
 from bakery.domains.uow import AbstractUow
 from bakery.presenters.bot.content.messages.cart import user as user_cart_msg
+from bakery.presenters.bot.dialogs.utils.order_for_user import get_order_for_user_id
 
 
 async def get_cart_data(
@@ -16,11 +16,11 @@ async def get_cart_data(
     container = dialog_manager.middleware_data["dishka_container"]
     cart_service: CartService = await container.get(CartService)
     uow: AbstractUow = await container.get(AbstractUow)
-    user: User = dialog_manager.middleware_data["current_user"]
+    user_id = get_order_for_user_id(dialog_manager)
     async with uow:
         carts = await cart_service.get_list(
             input_dto=CartListParams(
-                user_id=user.id,
+                user_id=user_id,
                 has_non_zero_quantity=True,
             )
         )

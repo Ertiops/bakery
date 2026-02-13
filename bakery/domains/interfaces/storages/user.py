@@ -9,6 +9,8 @@ from bakery.domains.entities.user import (
     UpdateUser,
     User,
     UserBlacklistListParams,
+    UserFakeListParams,
+    UserFakeSearchParams,
     UserListParams,
     UserPhoneSearchParams,
 )
@@ -42,11 +44,29 @@ class IUserStorage(Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    async def get_fake_list(self, *, input_dto: UserFakeListParams) -> Sequence[User]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_fake_list_by_phone(
+        self, *, input_dto: UserFakeSearchParams
+    ) -> Sequence[User]:
+        raise NotImplementedError
+
+    @abstractmethod
     async def count(self, *, input_dto: UserListParams) -> int:
         raise NotImplementedError
 
     @abstractmethod
     async def count_blacklist(self, *, input_dto: UserBlacklistListParams) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def count_fake(self, *, input_dto: UserFakeListParams) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def count_fake_by_phone(self, *, input_dto: UserFakeSearchParams) -> int:
         raise NotImplementedError
 
     @abstractmethod

@@ -137,7 +137,7 @@ async def on_start_delivery_hours_input(
     await manager.switch_to(AdminOrders.start_delivery_confirm)
 
 
-async def on_start_delivery_confirm(
+async def on_start_delivery_confirm(  # noqa: C901
     callback: CallbackQuery, button: Button, manager: DialogManager
 ) -> None:
     _ = button
@@ -184,6 +184,8 @@ async def on_start_delivery_confirm(
                 if item.order.id not in updated_ids:
                     continue
                 user = item.user
+                if user.tg_id is None:
+                    continue
                 if user.tg_id is None:
                     continue
                 bot = callback.bot
@@ -358,6 +360,8 @@ async def on_admin_delete_confirm(  # noqa: C901
                 user = await user_service.get_by_id(input_id=order.user_id)
             except EntityNotFoundException:
                 continue
+            if user.tg_id is None:
+                continue
             user_tg_by_id[str(order.user_id)] = user.tg_id
 
     for order in updated_orders:
@@ -479,6 +483,8 @@ async def on_admin_delete_order_confirm(
         try:
             user = await user_service.get_by_id(input_id=order.user_id)
         except EntityNotFoundException:
+            return
+        if user.tg_id is None:
             return
         await order_service.delete_by_id(
             input_dto=DeleteOrderParams(id=order.id, reason=reason),

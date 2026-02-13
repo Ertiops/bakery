@@ -19,6 +19,7 @@ from bakery.presenters.bot.dialogs.utils.order_edit import (
     get_order_edit_id,
     update_order_products,
 )
+from bakery.presenters.bot.dialogs.utils.order_for_user import get_order_for_user_id
 
 log = logging.getLogger(__name__)
 
@@ -44,6 +45,12 @@ async def on_view_product_clicked(
         if manager.dialog_data.get("admin_deleted_flow") is not None
         else start_data.get("admin_deleted_flow")
     )
+    order_for_user_id = manager.dialog_data.get("order_for_user_id") or start_data.get(
+        "order_for_user_id"
+    )
+    admin_fake_user = bool(
+        manager.dialog_data.get("admin_fake_user") or start_data.get("admin_fake_user")
+    )
     manager.dialog_data["product_id"] = item_id
     if category:
         manager.dialog_data["category"] = category
@@ -57,6 +64,10 @@ async def on_view_product_clicked(
         data["admin_selected_date"] = admin_selected_date
     if admin_deleted_flow is not None:
         data["admin_deleted_flow"] = admin_deleted_flow
+    if order_for_user_id:
+        data["order_for_user_id"] = order_for_user_id
+    if admin_fake_user:
+        data["admin_fake_user"] = True
 
     await manager.start(
         state=UserCatalogue.view_single_product,
@@ -82,7 +93,6 @@ async def update_quantity(
 
     container = manager.middleware_data["dishka_container"]
     service: CartService = await container.get(CartService)
-    user: User = manager.middleware_data["current_user"]
     uow: AbstractUow = await container.get(AbstractUow)
 
     product_id = UUID(manager.dialog_data["product_id"])
@@ -90,10 +100,11 @@ async def update_quantity(
     manager.dialog_data["quantity"] = quantity
     if quantity < 0 or quantity > CART_PRODUCT_MAX:
         return
+    user_id = get_order_for_user_id(manager)
     async with uow:
         await service.create_or_update(
             input_dto=CreateCart(
-                user_id=user.id, product_id=product_id, quantity=quantity
+                user_id=user_id, product_id=product_id, quantity=quantity
             )
         )
     await manager.show()

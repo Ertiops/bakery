@@ -25,6 +25,12 @@ async def on_category_selected(
         if manager.dialog_data.get("admin_deleted_flow") is not None
         else start_data.get("admin_deleted_flow")
     )
+    order_for_user_id = manager.dialog_data.get("order_for_user_id") or start_data.get(
+        "order_for_user_id"
+    )
+    admin_fake_user = bool(
+        manager.dialog_data.get("admin_fake_user") or start_data.get("admin_fake_user")
+    )
     data: dict[str, Any] = {"category": item_id}
     if order_edit_id:
         data["order_edit_id"] = order_edit_id
@@ -34,6 +40,10 @@ async def on_category_selected(
         data["admin_selected_date"] = admin_selected_date
     if admin_deleted_flow is not None:
         data["admin_deleted_flow"] = admin_deleted_flow
+    if order_for_user_id:
+        data["order_for_user_id"] = order_for_user_id
+    if admin_fake_user:
+        data["admin_fake_user"] = True
     await manager.start(
         state=UserCatalogue.view_products,
         data=data,

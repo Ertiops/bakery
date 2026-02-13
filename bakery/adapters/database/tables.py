@@ -34,7 +34,7 @@ class UserTable(BaseTable, TimestampedMixin, IdentifableMixin):
     )
 
     name: Mapped[str] = mapped_column(String(63), nullable=False)
-    tg_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    tg_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     phone: Mapped[str] = mapped_column(String(16), nullable=False)
     role: Mapped[UserRole] = mapped_column(make_pg_enum(UserRole, name="user_role"))
     exclusion_reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
