@@ -35,7 +35,7 @@ def cart_window() -> Window:
                         on_click=None,
                     ),
                     Button(
-                        Const(common_btn.DELETE_REDUCED),
+                        Const(common_btn.DELETE_CART_ITEM),
                         id="cart_item_delete",
                         on_click=on_cart_item_delete,
                     ),
