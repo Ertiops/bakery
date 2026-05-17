@@ -2,8 +2,8 @@ from typing import Final
 
 CREATE_ORDER: Final[str] = (
     "🧾 Выберите адрес доставки.\n"
-    "Вы можете пропустить этот шаг, если вы хотите оформить доставку по городу*.\n"
-    "*Доставка по городу - {delivery_cost} руб.\n"
+    "Вы можете пропустить этот шаг, если вы хотите оформить доставку до дома*.\n"
+    "*Доставка до дома - {delivery_cost} руб.\n"
 )
 FREE_DELIVERY_HINT: Final[str] = "*Бесплатная доставка от {free_delivery_amount} руб.\n"
 MANUAL_ADDRESS_TITLE: Final[str] = "✍️ Введите адрес доставки одним сообщением:"
@@ -19,7 +19,7 @@ CONFIRM_ADDRESS_EMPTY: Final[str] = "Не выбран"
 CONFIRM_DATE_LABEL: Final[str] = "\n\n📅 Дата доставки:"
 CONFIRM_DATE_EMPTY: Final[str] = "Не выбрана"
 CONFIRM_CART_LABEL: Final[str] = "\n\n🧺 Корзина:"
-CONFIRM_DELIVERY_COST: Final[str] = "\n\n🚚 Доставка по городу: {delivery_cost} руб."
+CONFIRM_DELIVERY_COST: Final[str] = "\n\n🚚 Доставка до дома: {delivery_cost} руб."
 CONFIRM_TOTAL: Final[str] = "\n\n💰 Итого: {total}"
 CONFIRM_SUGGESTED_TITLE: Final[str] = "\n\n🧁 Популярное к заказу:"
 CONFIRM_SUGGESTED_ITEM: Final[str] = "{item[name]} — {item[price]}₽"
